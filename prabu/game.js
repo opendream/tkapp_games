@@ -18,15 +18,20 @@ var sceneCenterY = sceneHeight/2;
 
 var cardSize = 132;
 var boardSize = cardSize*3;
+var complete = []
 
+for(i=0; i<9; i++) {
+  complete[i] = false;
+}
 
 // entrypoint
 game.start = function(){
 
 
-  var director = new lime.Director(document.body, sceneWidth, sceneHeight);
+  game.director = new lime.Director(document.body, sceneWidth, sceneHeight);
   var scene1 = new lime.Scene;
   var scene2 = new lime.Scene;
+  var scene3 = new lime.Scene;
 
   //
   // Scene 1
@@ -51,7 +56,7 @@ game.start = function(){
   ).setPosition(sceneCenterX,sceneCenterY+100);;
 
   goog.events.listen(button, 'click', function() {
-    director.replaceScene(scene2);
+    game.director.replaceScene(scene2);
   });
 
   scene1.appendChild(button);
@@ -93,10 +98,10 @@ game.start = function(){
   background2.appendChild(title);
 
   game.addCardNumber(background2);  
-  game.addCardPicture(background2);
+  game.addCardPicture(background2, scene3);
   // set current scene active
-  director.makeMobileWebAppCapable();
-  director.replaceScene(scene1);
+  game.director.makeMobileWebAppCapable();
+  game.director.replaceScene(scene1);
 }
 
 game.addCardNumber = function(layer) {
@@ -115,7 +120,7 @@ game.addCardNumber = function(layer) {
   }
 }
 
-game.addCardPicture = function(layer) {
+game.addCardPicture = function(layer, nextScene) {
   cardNumber = 0;
   var x = [100, 200, 150, 250, 123, 256, 130, 175, 225];
   var y = [120, 300, 500, 400, 203, 450, 450, 350, 250];
@@ -129,7 +134,7 @@ game.addCardPicture = function(layer) {
       card.setPosition(x[cardNumber]+550, y[cardNumber]);
       layer.appendChild(card);
 
-      !function(myX, myY, myCard){
+      !function(myX, myY, myCard, myNumber){
         goog.events.listen(card, ['mousedown', 'touchstart'], function(e) {
           e.startDrag();
 
@@ -137,34 +142,39 @@ game.addCardPicture = function(layer) {
             stopX = myCard.getPosition().x+(cardSize/2);
             stopY = myCard.getPosition().y+(cardSize/2);
 
-            console.log("in if");
-            console.log(cardNumber);
+            if( (stopX > myX && stopX < myX + cardSize) && 
+                (stopY > myY && stopY < myY + cardSize) ){
+              console.log("valid");
+              myCard.setPosition(myX, myY);
+              complete[myNumber] = true;
 
-            console.log("stopX: " + stopX);
-            console.log("stopY: " + stopY);
-
-            console.log("myX  : " + myX);
-            console.log("myX 2: " + myX + cardSize);            
-            console.log("myY  : " + myY);
-            console.log("myY 2: " + myY + cardSize);
-
-            if( stopX > myX && stopX < myX + cardSize){
-              if( stopY > myY && stopY < myY + cardSize) {
-                console.log("valid");
-                myCard.setPosition(myX, myY);
-                countDownToFinish--;
+              if(game.countFinish() == true) {
+                game.director.replaceScene(nextScene);
               }
+
+            } else {
+              complete[myNumber] = false;
             }
-            //var answer = btnIndex+1;
-            // ame = grand_father.answer(answer, game, scene, gameController);
           });
         });
-      }((boardTopX + cardSize*j), (boardTopY + cardSize*i), card);        
-
-
-
+      }((boardTopX + cardSize*j), (boardTopY + cardSize*i), card, cardNumber);        
       cardNumber++;
     }
+  }
+}
+
+game.countFinish = function(){
+  countComplete = 0;
+  for(i=0; i<9; i++) {
+    if(complete[i] === true) {
+      countComplete++;
+    }
+  }
+  console.log("count Complete: " + countComplete);
+  if (countComplete == 9) {
+    return true;
+  } else {
+    return false;
   }
 }
 
