@@ -1,5 +1,5 @@
 //set main namespace
-goog.provide('shell');
+goog.provide('game');
 
 
 //get requirements
@@ -8,68 +8,114 @@ goog.require('lime.Scene');
 goog.require('lime.Layer');
 goog.require('lime.Circle');
 goog.require('lime.Label');
+goog.require('lime.RoundedRect');
+goog.require('lime.Button');
 goog.require('lime.animation.Spawn');
 goog.require('lime.animation.FadeTo');
 goog.require('lime.animation.ScaleTo');
 goog.require('lime.animation.MoveTo');
+goog.require('lime.animation.RotateBy');
+goog.require('lime.animation.Sequence');
+goog.require('lime.animation.Loop');
 
+var sceneWidth = 1024;
+var sceneHeight = 768;
+var sceneCenterX = sceneWidth/2;
+var sceneCenterY = sceneHeight/2;
+
+var pencil = [10, 30, 50];
+var pencilSize = 0;
 
 // entrypoint
-shell.start = function(){
+game.start = function(){
 
-	var director = new lime.Director(document.body,1024,768),
-	    scene = new lime.Scene(),
+  game.director = new lime.Director(document.body,sceneWidth,sceneHeight);
+  game.director.makeMobileWebAppCapable();
+  var scene  = new lime.Scene();
 
-	    target = new lime.Layer().setPosition(512,384),
-        circle = new lime.Circle().setSize(150,150).setFill(255,150,0),
-        lbl = new lime.Label().setSize(160,50).setFontSize(30).setText('TOUCH ME!'),
-        title = new lime.Label().setSize(800,70).setFontSize(60).setText('Now move me around!')
-            .setOpacity(0).setPosition(512,80).setFontColor('#999').setFill(200,100,0,.1);
+  //
+  // Background
+  //
+  var background = new lime.Layer();
+  var backgroundColor = new lime.Sprite();
+  backgroundColor.setSize(sceneWidth, sceneHeight).setPosition(sceneCenterX, sceneCenterY).setFill(85, 174, 233);
+  background.appendChild(backgroundColor);
 
+  var board = new lime.RoundedRect();
+  board.setSize(sceneWidth-400, sceneHeight-200).setPosition(sceneCenterX-150, sceneCenterY).setFill(255, 255, 255).setRadius(20);
+  background.appendChild(board);
 
-    //add circle and label to target object
-    target.appendChild(circle);
-    target.appendChild(lbl);
+  scene.appendChild(background);
 
-    //add target and title to the scene
-    scene.appendChild(target);
-    scene.appendChild(title);
+  //
+  // Foreground
+  //
+  var foreground = new lime.Layer()
+  var titleBackground = new lime.Sprite().setFill("assets/images/bg_logo.png").setPosition(104,117);
+  foreground.appendChild(titleBackground);
 
-	director.makeMobileWebAppCapable();
+  var titleText = new lime.Sprite().setFill("assets/images/game_text.png").setPosition(105+30,78+50);
+  foreground.appendChild(titleText);  
 
-    //add some interaction
-    goog.events.listen(target,['mousedown','touchstart'],function(e){
+  var titleAnimateLoop = new lime.animation.Sequence(
+    new lime.animation.RotateBy(-5).setDuration(0.5),
+    new lime.animation.RotateBy(5).setDuration(0.5));
+  titleText.runAction(new lime.animation.Loop(titleAnimateLoop));
+  scene.appendChild(foreground);
+	
+  var lbl = new lime.Label();
+  lbl.setText("Shell");
+  lbl.setSize(300,100).setFontSize(50).setPosition(sceneCenterX - (board.size_.width/2), sceneCenterY + 250);
+  scene.appendChild(lbl);
 
-        //animate
-        target.runAction(new lime.animation.Spawn(
-            new lime.animation.FadeTo(.5).setDuration(.2),
-            new lime.animation.ScaleTo(1.5).setDuration(.8)
-        ));
+  var leftChar = new lime.Sprite();
+  leftChar.setFill('assets/images/char_1.png').setPosition(sceneCenterX - (board.size_.width/2), sceneCenterY);
+  scene.appendChild(leftChar);
 
-        title.runAction(new lime.animation.FadeTo(1));
+  var rightChar = new lime.Sprite();
+  rightChar.setFill('assets/images/char_2.png').setPosition(sceneCenterX , sceneCenterY);
+  scene.appendChild(rightChar);
 
-        //let target follow the mouse/finger
-        e.startDrag();
+  var colorBoard = new lime.RoundedRect();
+  colorBoard.setSize(300, 300).setPosition(sceneCenterX + (board.size_.width/2) + 25, sceneCenterY - 50).setFill(236, 236, 0).setRadius(20);
+  scene.appendChild(colorBoard);
 
-        //listen for end event
-        e.swallow(['mouseup','touchend'],function(){
-            target.runAction(new lime.animation.Spawn(
-                new lime.animation.FadeTo(1),
-                new lime.animation.ScaleTo(1),
-                new lime.animation.MoveTo(512,384)
-            ));
+  var rubber = new lime.Sprite();
+  rubber.setFill('assets/images/rubber.png');
+  rubber.setPosition(sceneCenterX + (board.size_.width/2) - 50, sceneCenterY - 250);
+  rubber.setScale(1.5, 1.5);
+  scene.appendChild(rubber);
 
-            title.runAction(new lime.animation.FadeTo(0));
-        });
+  var lblRubber = new lime.Label();
+  lblRubber.setText("Rubber");
+  lblRubber.setFontSize(40).setSize(50,50);
+  lblRubber.setPosition(sceneCenterX + (board.size_.width/2) + 50, sceneCenterY - 250);
+  scene.appendChild(lblRubber);
 
+  var drawLayer = new lime.Layer();
+  drawLayer.setSize(sceneWidth-400, sceneHeight-200).setPosition(sceneCenterX-150, sceneCenterY);
 
+  goog.events.listen(rubber, 'click', function() {
+    drawLayer.removeAllChildren();
+  });
+
+  goog.events.listen(board, ['mousedown', 'touchstart'], function(e1) {
+
+    e1.swallow(['mousemove', 'touchmove'], function(e2){
+      var color = new lime.Circle();
+      color.setSize(pencil[pencilSize], pencil[pencilSize]);
+      color.setFill(0, 0, 0);
+      color.setPosition(e2.position.x, e2.position.y);
+      drawLayer.appendChild(color);
     });
+  });
 
+  scene.appendChild(drawLayer);
 	// set current scene active
-	director.replaceScene(scene);
+	game.director.replaceScene(scene);
 
 }
 
 
 //this is required for outside access after code is compiled in ADVANCED_COMPILATIONS mode
-goog.exportSymbol('shell.start', shell.start);
+goog.exportSymbol('game.start', game.start);
