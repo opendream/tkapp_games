@@ -27,6 +27,7 @@ var currentGame = 0;
 // entrypoint
 grand_father.start = function(){
 	var director = new lime.Director(document.body, sceneWidth, sceneHeight);
+  director.makeMobileWebAppCapable();
   var scene = new lime.Scene;
 
   //
