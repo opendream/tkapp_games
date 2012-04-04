@@ -106,7 +106,7 @@ game.start = function(){
   youWin.setFill('assets/images/txt-win.png').setPosition(sceneCenterX , sceneCenterY-50);
   scene3.appendChild(youWin);  
 
-  var completeBtn = game.makeButton(sceneCenterX+220,sceneCenterY+200,2);
+  var completeBtn = game.makeButton(sceneCenterX+220,sceneCenterY+200,1);
   goog.events.listen(completeBtn, 'click', function() {
     game.director.replaceScene(scene1);
   });
@@ -181,8 +181,8 @@ game.gameTimer = function(lbl, loseScene){
 }
 
 game.makeButton = function(x, y, scale){
-  var btn1 = new lime.Sprite().setFill('assets/images/btn_1.png');
-  var btn2 = new lime.Sprite().setFill('assets/images/btn_2.png');
+  var btn1 = new lime.Sprite().setFill('assets/images/btn-start.png');
+  var btn2 = new lime.Sprite().setFill('assets/images/btn-start-hover.png');
 
   var button = new lime.Button(
     btn1,
