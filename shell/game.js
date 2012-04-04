@@ -70,11 +70,10 @@ game.start = function(){
     new lime.animation.RotateBy(5).setDuration(0.5));
   titleText.runAction(new lime.animation.Loop(titleAnimateLoop));
   scene.appendChild(foreground);
-	
-  var lbl = new lime.Label();
-  lbl.setText("Shell");
-  lbl.setSize(300,100).setFontSize(50).setPosition(sceneCenterX - (board.size_.width/2), sceneCenterY + 250);
-  scene.appendChild(lbl);
+
+  var titleName = new lime.Sprite().setFill("assets/images/txt-pra-sung.png");
+  titleName.setPosition(sceneCenterX-160, sceneCenterY + 230);
+  scene.appendChild(titleName);
 
   var leftChar = new lime.Sprite();
   leftChar.setFill('assets/images/char_1.png').setPosition(sceneCenterX - (board.size_.width/2), sceneCenterY);
