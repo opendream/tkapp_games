@@ -18,12 +18,14 @@ var sceneCenterY = sceneHeight/2;
 
 var cardSize = 132;
 var boardSize = cardSize*3;
-var complete = []
+var complete = [];
 var timer = 30;
+var cards = [];
 
-for(i=0; i<9; i++) {
-  complete[i] = false;
-}
+var x = [100, 200, 150, 250, 123, 256, 130, 175, 225];
+var y = [120, 300, 500, 400, 203, 450, 450, 350, 250];
+
+var timerCountDown = 1;
 
 // entrypoint
 game.start = function(){
@@ -74,8 +76,11 @@ game.start = function(){
   lblTimer.setText(timer).setSize(50,50).setFontSize(50).setPosition(sceneCenterX,sceneCenterY+320);
   scene2.appendChild(lblTimer);
 
-  game.addCardNumber(background2);  
-  game.addCardPicture(background2, scene3);
+  game.addCardNumber(background2);
+
+  var boardPicture = new lime.Layer();
+  scene2.appendChild(boardPicture);
+  game.addCardPicture(boardPicture, scene3);
 
   //
   // Scene 3
@@ -97,9 +102,9 @@ game.start = function(){
   background3.appendChild(title);
   game.addFullCardPicture(scene3);
 
-  var lblComplete = new lime.Label();
-  lblComplete.setText("Great!!").setSize(200,100).setFontSize(100).setFontColor("#FF6600").setPosition(sceneCenterX+100,sceneCenterY);
-  scene3.appendChild(lblComplete);
+  var youWin = new lime.Sprite();
+  youWin.setFill('assets/images/txt-win.png').setPosition(sceneCenterX , sceneCenterY-50);
+  scene3.appendChild(youWin);  
 
   var completeBtn = game.makeButton(sceneCenterX+220,sceneCenterY+200,2);
   goog.events.listen(completeBtn, 'click', function() {
@@ -113,13 +118,12 @@ game.start = function(){
   var background4 = new lime.Layer();
   var background4Color = new lime.Sprite().setSize(sceneWidth, sceneHeight)
   background4Color.setPosition(sceneCenterX, sceneCenterY).setFill(229, 0, 146);
-  background4.appendChild(background4Color);  
+  background4.appendChild(background4Color);
   scene4.appendChild(background4);
 
-  var title = new lime.Label().setText("You Lose!!");;
-  title.setFontSize(70).setSize(600,100).setFontColor("#FFE700").setPosition(sceneCenterX, sceneCenterY-50);
-  background3.appendChild(title);
-  scene4.appendChild(title);
+  var youLose = new lime.Sprite();
+  youLose.setFill('assets/images/txt-lose.png').setPosition(sceneCenterX , sceneCenterY-50);
+  scene4.appendChild(youLose);  
 
   var restartBtn = game.makeButton(sceneCenterX,sceneCenterY+100,1);
   goog.events.listen(restartBtn, 'click', function() {
@@ -144,7 +148,12 @@ game.start = function(){
 
   var startBtn = game.makeButton(sceneCenterX, sceneCenterY+100,1);
   goog.events.listen(startBtn, 'click', function() {
+    game.setStart();
+    boardPicture.removeAllChildren();
+    game.addCardPicture(boardPicture, scene3);    
+
     game.director.replaceScene(scene2);
+    timerCountDown = 1;
     game.gameTimer(lblTimer, scene4);
   });
 
@@ -157,15 +166,17 @@ game.start = function(){
 
 game.gameTimer = function(lbl, loseScene){
   lbl.setText(timer);
-  
-  if(timer==0){
-      timer = 30;
+
+  if(timer == 0){
+      timer = 0;
       game.director.replaceScene(loseScene);
   }else{
-    setTimeout(function(){
-      timer--;
-      game.gameTimer(lbl, loseScene);
-    },1000);
+    if (timerCountDown != 0){
+      setTimeout(function(){
+        timer = timer - timerCountDown;
+        game.gameTimer(lbl, loseScene);
+      },1000);
+    }
   }
 }
 
@@ -213,8 +224,6 @@ game.addFullCardPicture = function(layer) {
 
 game.addCardPicture = function(layer, nextScene) {
   cardNumber = 0;
-  var x = [100, 200, 150, 250, 123, 256, 130, 175, 225];
-  var y = [120, 300, 500, 400, 203, 450, 450, 350, 250];
 
   var boardTopX = sceneCenterX - 200 - (boardSize/2) + cardSize/2;
   var boardTopY = sceneCenterY - (boardSize/2) + cardSize/2;  
@@ -235,12 +244,12 @@ game.addCardPicture = function(layer, nextScene) {
 
             if( (stopX > myX && stopX < myX + cardSize) && 
                 (stopY > myY && stopY < myY + cardSize) ){
-              console.log("valid");
               myCard.setPosition(myX, myY);
               complete[myNumber] = true;
 
               if(game.countFinish() == true) {
                 game.director.replaceScene(nextScene);
+                timerCountDown = 0;
               }
 
             } else {
@@ -249,8 +258,24 @@ game.addCardPicture = function(layer, nextScene) {
           });
         });
       }((boardTopX + cardSize*j), (boardTopY + cardSize*i), card, cardNumber);        
+
+      cards[cardNumber] = card;
+
       cardNumber++;
     }
+  }
+}
+
+game.setStart = function(){
+  timer = 30;
+  for(i=0; i<9; i++) {
+    complete[i] = false;
+  }
+}
+
+game.setCardPosition = function() {
+  for(i=0; i<9; i++) {
+    cards[i].setPosition(x[cardNumber]+550, y[cardNumber]);
   }
 }
 
@@ -261,7 +286,6 @@ game.countFinish = function(){
       countComplete++;
     }
   }
-  console.log("count Complete: " + countComplete);
   if (countComplete == 9) {
     return true;
   } else {
