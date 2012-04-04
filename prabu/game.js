@@ -142,7 +142,7 @@ game.start = function(){
 
   scene1.appendChild(background1);
 
-  var startBtn = game.makeButton(sceneCenterX,sceneCenterY+100,1);
+  var startBtn = game.makeButton(sceneCenterX, sceneCenterY+100,1);
   goog.events.listen(startBtn, 'click', function() {
     game.director.replaceScene(scene2);
     game.gameTimer(lblTimer, scene4);
