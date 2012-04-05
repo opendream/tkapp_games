@@ -16,6 +16,7 @@ goog.require('lime.animation.RotateBy');
 goog.require('lime.animation.Sequence');
 goog.require('lime.animation.Loop');
 goog.require('lime.Button');
+goog.require('lime.audio.Audio');
 
 var sceneWidth = 1024;
 var sceneHeight = 768;
@@ -24,11 +25,18 @@ var sceneCenterY = sceneHeight/2;
 var gameAnswer = [2,3,4];
 var currentGame = 0;
 
+var bell;
+var pop;
+
 // entrypoint
 grand_father.start = function(){
-	var director = new lime.Director(document.body, sceneWidth, sceneHeight);
+  
+  var director = new lime.Director(document.body, sceneWidth, sceneHeight);
   director.makeMobileWebAppCapable();
   var scene = new lime.Scene;
+
+  bell = new lime.audio.Audio('assets/sounds/bell.mp3');
+  pop = new lime.audio.Audio('assets/sounds/pop.mp3');
 
   //
   // Background
@@ -67,6 +75,8 @@ grand_father.start = function(){
 
         e.swallow(['mouseup','touchend'], function(e2){
           var answer = btnIndex+1;
+          pop.stop();
+          pop.play();
           game = grand_father.answer(answer, game, scene, gameController);
         });
      });
@@ -281,6 +291,8 @@ grand_father.makeAnswerPage = function(title, btnLabel, scene, gameLayer, contro
   layer.appendChild(button);
 
   goog.events.listen(button, 'click', function() {
+    bell.stop();
+    bell.play();
     scene.removeChild(layer);
     scene.appendChild(gameLayer);
     scene.appendChild(controller);

@@ -10,6 +10,7 @@ goog.require('lime.Circle');
 goog.require('lime.Label');
 goog.require('lime.RoundedRect');
 goog.require('lime.Button');
+goog.require('lime.audio.Audio');
 
 var sceneWidth = 1024;
 var sceneHeight = 768;
@@ -27,9 +28,12 @@ var y = [120, 300, 500, 400, 203, 450, 450, 350, 250];
 
 var timerCountDown = 1;
 
+
+
 // entrypoint
 game.start = function(){
-
+  var bell = new lime.audio.Audio('assets/sounds/bell.mp3');
+  var pop = new lime.audio.Audio('assets/sounds/pop.mp3');
 
   game.director = new lime.Director(document.body, sceneWidth, sceneHeight);
   var scene1 = new lime.Scene;
@@ -74,6 +78,7 @@ game.start = function(){
 
   var lblTimer = new lime.Label();
   lblTimer.setText(timer).setSize(50,50).setFontSize(50).setPosition(sceneCenterX,sceneCenterY+320);
+  lblTimer.setFontColor('#FFFFFF');
   scene2.appendChild(lblTimer);
 
   game.addCardNumber(background2);
@@ -108,6 +113,8 @@ game.start = function(){
 
   var completeBtn = game.makeButton(sceneCenterX+220,sceneCenterY+200,1);
   goog.events.listen(completeBtn, 'click', function() {
+    pop.stop();
+    pop.play();    
     game.director.replaceScene(scene1);
   });
   scene3.appendChild(completeBtn);
@@ -127,6 +134,8 @@ game.start = function(){
 
   var restartBtn = game.makeButton(sceneCenterX,sceneCenterY+100,1);
   goog.events.listen(restartBtn, 'click', function() {
+    pop.stop();
+    pop.play();
     game.director.replaceScene(scene1);
   });
 
@@ -148,6 +157,9 @@ game.start = function(){
 
   var startBtn = game.makeButton(sceneCenterX, sceneCenterY+100,1);
   goog.events.listen(startBtn, 'click', function() {
+    bell.stop();
+    bell.play();
+
     game.setStart();
     boardPicture.removeAllChildren();
     game.addCardPicture(boardPicture, scene3);    
