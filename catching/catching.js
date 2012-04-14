@@ -1,5 +1,5 @@
 (function() {
-  var addCharacter, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth;
+  var addCharacter, nat, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, startTimer;
 
   goog.provide('catching');
 
@@ -35,31 +35,33 @@
 
   sceneCenterY = sceneHeight / 2;
 
+  nat = {};
+
   catching.start = function() {
     var scene;
     catching.director = new lime.Director(document.body, sceneWidth, sceneHeight);
-    scene = catching.intro();
-    return catching.director.replaceScene(scene);
+    return scene = catching.intro();
   };
 
   addCharacter = function(image, opts) {
-    var char, height, posX, posY, width;
-    char = new lime.Sprite();
-    char.setFill("assets/images/" + image);
+    var character, height, posX, posY, width;
+    character = new lime.Sprite;
+    character.setFill("assets/images/" + image);
     posX = sceneCenterX + opts.x;
     posY = sceneCenterY + opts.y;
     width = sceneWidth + opts.w;
     height = sceneHeight + opts.h;
-    if ((opts.x != null) && (opts.y != null)) char.setPosition(posX, posY);
-    if ((opts.w != null) && (opts.h != null)) char.setSize(width, height);
-    opts.at.appendChild(char);
-    return char;
+    if ((opts.x != null) && (opts.y != null)) character.setPosition(posX, posY);
+    if ((opts.w != null) && (opts.h != null)) character.setSize(width, height);
+    opts.at.appendChild(character);
+    if (opts.name != null) character.name = opts.name;
+    return character;
   };
 
   catching.intro = function() {
     var background, btnStart, btnState1, btnState2, scene;
     scene = new lime.Scene;
-    background = new lime.Layer();
+    background = new lime.Layer;
     scene.appendChild(background);
     addCharacter("scene_bg.png", {
       x: 4,
@@ -111,7 +113,104 @@
     btnState2 = new lime.Sprite().setFill('assets/images/btn_start_active.png');
     btnStart = new lime.Button(btnState1, btnState2).setPosition(sceneCenterX + 300, sceneCenterY + 260).setScale(1.3);
     background.appendChild(btnStart);
-    return scene;
+    catching.director.replaceScene(scene);
+    return goog.events.listen(btnStart, 'click', function() {
+      return catching.secondScene();
+    });
+  };
+
+  startTimer = function(opts) {
+    var counter, decreaseBy, delay;
+    if (opts == null) opts = {};
+    counter = opts.limit || 10;
+    delay = opts.delay || 1000;
+    decreaseBy = opts.decreaseBy || 1;
+    if (opts != null) {
+      if (typeof opts.runningCallback === "function") {
+        opts.runningCallback(counter);
+      }
+    }
+    counter = counter - 1;
+    return (function() {
+      nat.scheduleWithDelay = function(dt) {
+        if (!(counter > 0)) {
+          if (counter <= 0) {
+            if (opts != null) {
+              if (typeof opts.timeoutCallback === "function") {
+                opts.timeoutCallback(counter);
+              }
+            }
+          }
+        } else {
+          if (opts != null) {
+            if (typeof opts.runningCallback === "function") {
+              opts.runningCallback(counter);
+            }
+          }
+        }
+        return counter = counter - decreaseBy;
+      };
+      return lime.scheduleManager.scheduleWithDelay(nat.scheduleWithDelay, opts.limeScope || {}, delay);
+    })();
+  };
+
+  catching.secondScene = function() {
+    var background, img1, img2, imgList, scene;
+    scene = new lime.Scene;
+    background = new lime.Layer;
+    scene.appendChild(background);
+    img1 = addCharacter("image_1.png", {
+      x: -sceneCenterX,
+      y: -sceneCenterY,
+      at: background,
+      name: 'Image 1'
+    });
+    img2 = addCharacter("image_2.png", {
+      x: -sceneCenterY + 20,
+      y: -sceneCenterY,
+      at: background,
+      name: 'Image 2'
+    });
+    addCharacter("title_2.png", {
+      x: 0,
+      y: -75,
+      at: background
+    });
+    imgList = [img1, img2];
+    imgList.forEach(function(item) {
+      var velocity;
+      (function(item) {
+        return goog.events.listen(item, 'click', function(e) {
+          return console.log(e.position.x, e.position.y, item, item.name);
+        });
+      })(item);
+      velocity = 0.01;
+      return lime.scheduleManager.schedule(function(dt) {
+        var position;
+        position = this.getPosition();
+        position.y += velocity * dt;
+        return this.setPosition(position);
+      }, item);
+    });
+    catching.lblTimer = new lime.Label();
+    catching.lblTimer.setSize(50, 50).setFontSize(50).setPosition(sceneCenterX, sceneCenterY + 320);
+    catching.lblTimer.setFontColor('#000');
+    scene.appendChild(catching.lblTimer);
+    catching.director.replaceScene(scene);
+    return startTimer({
+      limit: 30,
+      delay: 100,
+      limeScope: nat,
+      runningCallback: function(rt) {
+        return catching.lblTimer.setText(rt);
+      },
+      timeoutCallback: function(rt) {
+        catching.lblTimer.setText("TIME OUT!");
+        console.log("TIME OUT");
+        lime.scheduleManager.unschedule(nat.scheduleWithDelay, nat);
+        return catching.director.setPaused(true);
+      }
+    });
   };
 
   this.catching = catching;
