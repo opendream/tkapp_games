@@ -1,5 +1,5 @@
 (function() {
-  var addCharacter, nat, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, startTimer;
+  var addCharacter, nat, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, startTimer;
 
   goog.provide('catching');
 
@@ -47,15 +47,98 @@
     var character, height, posX, posY, width;
     character = new lime.Sprite;
     character.setFill("assets/images/" + image);
-    posX = sceneCenterX + opts.x;
-    posY = sceneCenterY + opts.y;
-    width = sceneWidth + opts.w;
-    height = sceneHeight + opts.h;
+    if ((opts.absolutePosition != null) === true || (opts.absolute != null) === true) {
+      posX = opts.x;
+      posY = opts.y;
+    } else {
+      posX = sceneCenterX + opts.x;
+      posY = sceneCenterY + opts.y;
+    }
+    if ((opts.absoluteSize != null) === true || (opts.absolute != null) === true) {
+      width = opts.w;
+      height = opts.h;
+    } else {
+      width = sceneWidth + opts.w;
+      height = sceneHeight + opts.h;
+    }
     if ((opts.x != null) && (opts.y != null)) character.setPosition(posX, posY);
     if ((opts.w != null) && (opts.h != null)) character.setSize(width, height);
     opts.at.appendChild(character);
+    if (typeof opts.callback === "function") opts.callback(character);
     if (opts.name != null) character.name = opts.name;
     return character;
+  };
+
+  setUp = function(opts) {
+    var startX;
+    switch (opts.part) {
+      case "gameFrame":
+        addCharacter("scene_bg.png", {
+          x: 4,
+          y: -10,
+          w: -150,
+          h: -130,
+          at: opts.at
+        });
+        addCharacter("game_frame.png", {
+          x: 0,
+          y: 0,
+          w: 40,
+          h: -20,
+          at: opts.at
+        });
+        return addCharacter("game_bg.png", {
+          x: 0,
+          y: 0,
+          w: 0,
+          h: 0,
+          at: opts.at
+        });
+      case "blockPipe":
+        if (opts.by === 3) {
+          startX = 235;
+          addCharacter("block_pipe.png", {
+            x: startX,
+            y: 50,
+            w: 104,
+            h: 122,
+            absolute: true,
+            at: opts.at,
+            callback: function(char) {
+              return char.setAnchorPoint(0, 0);
+            }
+          });
+          addCharacter("block_pipe.png", {
+            x: startX * 2,
+            y: 50,
+            w: 104,
+            h: 122,
+            absolute: true,
+            at: opts.at,
+            callback: function(char) {
+              return char.setAnchorPoint(0, 0);
+            }
+          });
+          addCharacter("block_pipe.png", {
+            x: startX * 3,
+            y: 50,
+            w: 104,
+            h: 122,
+            absolute: true,
+            at: opts.at,
+            callback: function(char) {
+              return char.setAnchorPoint(0, 0);
+            }
+          });
+          return addCharacter("game_frame.png", {
+            x: 0,
+            y: 3,
+            w: 40,
+            h: -20,
+            at: opts.at
+          });
+        }
+    }
   };
 
   catching.intro = function() {
@@ -63,11 +146,8 @@
     scene = new lime.Scene;
     background = new lime.Layer;
     scene.appendChild(background);
-    addCharacter("scene_bg.png", {
-      x: 4,
-      y: -10,
-      w: -150,
-      h: -130,
+    setUp({
+      part: 'gameFrame',
       at: background
     });
     addCharacter("boy.png", {
@@ -83,20 +163,6 @@
     addCharacter("postbox.png", {
       x: 350,
       y: 150,
-      at: background
-    });
-    addCharacter("game_frame.png", {
-      x: 0,
-      y: 0,
-      w: 40,
-      h: -20,
-      at: background
-    });
-    addCharacter("game_bg.png", {
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0,
       at: background
     });
     addCharacter("title_1.png", {
@@ -155,42 +221,18 @@
   };
 
   catching.secondScene = function() {
-    var background, img1, img2, imgList, scene;
+    var background, scene;
     scene = new lime.Scene;
     background = new lime.Layer;
     scene.appendChild(background);
-    img1 = addCharacter("image_1.png", {
-      x: -sceneCenterX,
-      y: -sceneCenterY,
-      at: background,
-      name: 'Image 1'
-    });
-    img2 = addCharacter("image_2.png", {
-      x: -sceneCenterY + 20,
-      y: -sceneCenterY,
-      at: background,
-      name: 'Image 2'
-    });
-    addCharacter("title_2.png", {
-      x: 0,
-      y: -75,
+    setUp({
+      part: 'gameFrame',
       at: background
     });
-    imgList = [img1, img2];
-    imgList.forEach(function(item) {
-      var velocity;
-      (function(item) {
-        return goog.events.listen(item, 'click', function(e) {
-          return console.log(e.position.x, e.position.y, item, item.name);
-        });
-      })(item);
-      velocity = 0.01;
-      return lime.scheduleManager.schedule(function(dt) {
-        var position;
-        position = this.getPosition();
-        position.y += velocity * dt;
-        return this.setPosition(position);
-      }, item);
+    setUp({
+      part: 'blockPipe',
+      by: 3,
+      at: background
     });
     catching.lblTimer = new lime.Label();
     catching.lblTimer.setSize(50, 50).setFontSize(50).setPosition(sceneCenterX, sceneCenterY + 320);
@@ -199,7 +241,7 @@
     catching.director.replaceScene(scene);
     return startTimer({
       limit: 30,
-      delay: 100,
+      delay: 500,
       limeScope: nat,
       runningCallback: function(rt) {
         return catching.lblTimer.setText(rt);

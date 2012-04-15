@@ -37,16 +37,49 @@ catching.start = ->
 addCharacter =  (image, opts) ->
     character = new lime.Sprite
     character.setFill "assets/images/#{image}"
-    posX = sceneCenterX + opts.x
-    posY = sceneCenterY + opts.y
-    width = sceneWidth+opts.w
-    height = sceneHeight+opts.h
+    if opts.absolutePosition? is true or opts.absolute? is true
+        posX = opts.x
+        posY = opts.y
+    else
+        posX = sceneCenterX + opts.x
+        posY = sceneCenterY + opts.y
+
+    if opts.absoluteSize? is true or opts.absolute? is true
+        width=opts.w
+        height=opts.h
+    else
+        width = sceneWidth+opts.w
+        height = sceneHeight+opts.h
 
     character.setPosition posX, posY if opts.x? and opts.y?
     character.setSize width, height if opts.w? and opts.h?
     opts.at.appendChild character
+    opts.callback?(character)
     character.name = opts.name if opts.name?
     return character
+
+setUp = (opts) ->
+    switch opts.part
+        when "gameFrame"
+            addCharacter "scene_bg.png", x: 4, y: -10, w: -150, h: -130, at: opts.at
+            addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: opts.at
+            addCharacter "game_bg.png", x: 0, y: 0, w: 0, h: 0, at: opts.at
+        when "blockPipe"
+            if opts.by is 3
+                startX = 235
+                addCharacter "block_pipe.png",
+                x: startX, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                callback: (char) -> char.setAnchorPoint 0, 0
+
+                addCharacter "block_pipe.png",
+                x: startX * 2, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                callback: (char) -> char.setAnchorPoint 0, 0
+
+                addCharacter "block_pipe.png",
+                x: startX * 3, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                callback: (char) -> char.setAnchorPoint 0, 0
+
+                addCharacter "game_frame.png", x: 0, y: 3, w: 40, h: -20, at: opts.at
 
 catching.intro = ->
     scene = new lime.Scene
@@ -54,12 +87,10 @@ catching.intro = ->
 
     scene.appendChild background
 
-    addCharacter "scene_bg.png", x: 4, y: -10, w: -150, h: -130, at: background
+    setUp part: 'gameFrame', at: background
     addCharacter "boy.png", x: -280, y: 180, at: background
     addCharacter "girl.png", x: -100, y: 200, at: background
     addCharacter "postbox.png", x: 350, y: 150, at: background
-    addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: background
-    addCharacter "game_bg.png", x: 0, y: 0, w: 0, h: 0, at: background
     addCharacter "title_1.png", x: 0, y: -200, at: background
     addCharacter "title_2.png", x: 0, y: -75, at: background
 
@@ -93,28 +124,29 @@ startTimer = (opts = {} ) ->
             counter = counter - decreaseBy
         lime.scheduleManager.scheduleWithDelay(nat.scheduleWithDelay, opts.limeScope or {}, delay)
 
-
-
 catching.secondScene = ->
     scene = new lime.Scene
     background = new lime.Layer
 
     scene.appendChild background
-    img1 = addCharacter "image_1.png", x: -sceneCenterX, y: -sceneCenterY, at: background, name: 'Image 1'
-    img2 = addCharacter "image_2.png", x: -sceneCenterY+20, y: -sceneCenterY, at: background, name: 'Image 2'
-    addCharacter "title_2.png", x: 0, y: -75, at: background
 
-    imgList = [img1, img2]
-    imgList.forEach (item) ->
-        do (item) ->
-            goog.events.listen item, 'click', (e) ->
-                console.log e.position.x, e.position.y, item, item.name
-        velocity = 0.01;
-        lime.scheduleManager.schedule( (dt) ->
-            position = @getPosition()
-            position.y += velocity * dt # if dt is bigger we just move more
-            @setPosition position
-        , item)
+    setUp part: 'gameFrame', at: background
+    setUp part: 'blockPipe', by: 3, at: background
+
+    # img1 = addCharacter "image_1.png", x: -sceneCenterX, y: -sceneCenterY, at: background, name: 'Image 1'
+    # img2 = addCharacter "image_2.png", x: -sceneCenterY+20, y: -sceneCenterY, at: background, name: 'Image 2'
+
+    # imgList = [img1, img2]
+    # imgList.forEach (item) ->
+    #     do (item) ->
+    #         goog.events.listen item, 'click', (e) ->
+    #             console.log e.position.x, e.position.y, item, item.name
+    #     velocity = 0.01;
+    #     lime.scheduleManager.schedule( (dt) ->
+    #         position = @getPosition()
+    #         position.y += velocity * dt # if dt is bigger we just move more
+    #         @setPosition position
+    #     , item)
 
     catching.lblTimer = new lime.Label();
     catching.lblTimer.setSize(50,50).setFontSize(50).setPosition(sceneCenterX,sceneCenterY+320);
@@ -124,7 +156,7 @@ catching.secondScene = ->
 
     startTimer
         limit: 30
-        delay: 100
+        delay: 500
         limeScope: nat
         runningCallback: (rt) ->
             catching.lblTimer.setText(rt)
@@ -132,7 +164,6 @@ catching.secondScene = ->
             catching.lblTimer.setText("TIME OUT!")
             console.log "TIME OUT"
             lime.scheduleManager.unschedule nat.scheduleWithDelay, nat
-            catching.director.setPaused(true)
-
+            catching.director.setPaused true
 
 @catching = catching
