@@ -79,7 +79,7 @@ setUp = (opts) ->
                 x: startX * 3, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
                 callback: (char) -> char.setAnchorPoint 0, 0
 
-                addCharacter "game_frame.png", x: 0, y: 3, w: 40, h: -20, at: opts.at
+                # addCharacter "game_frame.png", x: 0, y: 2, w: 40, h: -20, at: opts.at
 
 catching.intro = ->
     scene = new lime.Scene
@@ -132,6 +132,7 @@ catching.secondScene = ->
 
     setUp part: 'gameFrame', at: background
     setUp part: 'blockPipe', by: 3, at: background
+    clock = addCharacter "clock.png", x: sceneCenterX-100, y: sceneCenterY-140, at: background, name: 'Clock'
 
     # img1 = addCharacter "image_1.png", x: -sceneCenterX, y: -sceneCenterY, at: background, name: 'Image 1'
     # img2 = addCharacter "image_2.png", x: -sceneCenterY+20, y: -sceneCenterY, at: background, name: 'Image 2'
@@ -148,22 +149,23 @@ catching.secondScene = ->
     #         @setPosition position
     #     , item)
 
-    catching.lblTimer = new lime.Label();
-    catching.lblTimer.setSize(50,50).setFontSize(50).setPosition(sceneCenterX,sceneCenterY+320);
-    catching.lblTimer.setFontColor('#000');
-    scene.appendChild(catching.lblTimer);
+    catching.lblTimer = new lime.Label()
+    console.log clock
+    catching.lblTimer.setSize(50, 50).setFontSize(40).setPosition(clock.position_.x-32, clock.position_.y-5)
+    catching.lblTimer.setFontColor '#000'
+    scene.appendChild catching.lblTimer
     catching.director.replaceScene scene
 
     startTimer
         limit: 30
-        delay: 500
+        delay: 1000
         limeScope: nat
         runningCallback: (rt) ->
             catching.lblTimer.setText(rt)
         timeoutCallback: (rt) ->
-            catching.lblTimer.setText("TIME OUT!")
+            catching.lblTimer.setText "0 "
             console.log "TIME OUT"
             lime.scheduleManager.unschedule nat.scheduleWithDelay, nat
-            catching.director.setPaused true
+            # catching.director.setPaused true
 
 @catching = catching
