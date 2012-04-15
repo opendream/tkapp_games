@@ -15,6 +15,8 @@ goog.require 'lime.animation.FadeTo'
 goog.require 'lime.animation.ScaleTo'
 goog.require 'lime.animation.MoveTo'
 
+goog.require 'goog.array'
+
 
 sceneWidth = 1024
 sceneHeight = 768
@@ -23,6 +25,32 @@ sceneCenterY = sceneHeight/2
 
 
 nat = {}
+blockPattern = [
+    [1, 4, 5, 6, 7 ,8],
+    [2, 4, 5, 6, 7, 8],
+    [0, 2, 3, 5, 6, 8]
+    [5, 8],
+    # [0..8]
+]
+
+IconItem =
+    brother: "item-brother.png"
+    buff: "item-buff.png"
+    gamesai: "item-gamesai.png"
+    grandfather: "item-grandfather.png"
+    grandmother: "item-grandmother.png"
+    sister: "item-sister.png"
+    sister2: "item-sister2.png"
+    uncle: "item-uncle.png"
+    wolf: "item-wolf.png"
+
+randomItemManager = () ->
+    size = goog.object.getCount(IconItem)
+    IconItemArray = goog.object.getValues IconItem
+    lastGetIdx = 0
+    goog.array.shuffle IconItemArray
+    return size: size, getItem: ->
+       IconItemArray[lastGetIdx++]
 
 
 catching.start = ->
@@ -124,6 +152,35 @@ startTimer = (opts = {} ) ->
             counter = counter - decreaseBy
         lime.scheduleManager.scheduleWithDelay(nat.scheduleWithDelay, opts.limeScope or {}, delay)
 
+
+buildSetOfAnimation = (col=3) ->
+    imageLayer = new lime.Layer
+    startX = 235
+    goog.array.shuffle blockPattern
+    blockPattern = blockPattern[0]
+    goog.array.shuffle blockPattern
+    correctIdx = blockPattern[0]
+
+    randomManager = do randomItemManager
+
+    if col is 3
+        for x in [0..2]
+            for y in [0..2]
+                flatIdx = x*col+y
+                if -1 is blockPattern.indexOf flatIdx then continue
+                item = addCharacter randomManager.getItem(), x: -sceneCenterX, y: -sceneCenterY, at: imageLayer, Idx: flatIdx, name: "Image #{flatIdx}"
+                positionX = startX*(x+1)+50
+                positionY = 20+y*100
+                item.setPosition positionX, positionY
+                do (item, flatIdx) ->
+                    goog.events.listen item, 'click', (e) ->
+                        if flatIdx is correctIdx
+                            console.log "CORRECT", flatIdx
+                        else
+                            console.log "INCORRECT", flatIdx
+    imageLayer
+
+
 catching.secondScene = ->
     scene = new lime.Scene
     background = new lime.Layer
@@ -134,30 +191,40 @@ catching.secondScene = ->
     setUp part: 'blockPipe', by: 3, at: background
     clock = addCharacter "clock.png", x: sceneCenterX-100, y: sceneCenterY-140, at: background, name: 'Clock'
 
-    # img1 = addCharacter "image_1.png", x: -sceneCenterX, y: -sceneCenterY, at: background, name: 'Image 1'
-    # img2 = addCharacter "image_2.png", x: -sceneCenterY+20, y: -sceneCenterY, at: background, name: 'Image 2'
+    # imageLayer = new lime.Layer
+    imageLayer = do buildSetOfAnimation
+    console.log imageLayer
+
+    # img1 = addCharacter item.brother, x: -sceneCenterX, y: -sceneCenterY, at: imageLayer, name: 'Image 1'
+    # img2 = addCharacter item.buff, x: -sceneCenterY+20, y: -sceneCenterY, at: imageLayer, name: 'Image 2'
+
+
+    scene.appendChild imageLayer
+
 
     # imgList = [img1, img2]
     # imgList.forEach (item) ->
     #     do (item) ->
     #         goog.events.listen item, 'click', (e) ->
     #             console.log e.position.x, e.position.y, item, item.name
-    #     velocity = 0.01;
-    #     lime.scheduleManager.schedule( (dt) ->
-    #         position = @getPosition()
-    #         position.y += velocity * dt # if dt is bigger we just move more
-    #         @setPosition position
-    #     , item)
+
+
+    velocity = 0.05;
+    lime.scheduleManager.schedule( (dt) ->
+        position = @getPosition()
+        position.y += velocity * dt # if dt is bigger we just move more
+        @setPosition position
+    , imageLayer)
 
     catching.lblTimer = new lime.Label()
     console.log clock
-    catching.lblTimer.setSize(50, 50).setFontSize(40).setPosition(clock.position_.x-32, clock.position_.y-5)
+    catching.lblTimer.setSize(50, 50).setFontSize(40).setPosition(clock.position_.x-33, clock.position_.y-5)
     catching.lblTimer.setFontColor '#000'
     scene.appendChild catching.lblTimer
     catching.director.replaceScene scene
 
     startTimer
-        limit: 30
+        limit: 80
         delay: 1000
         limeScope: nat
         runningCallback: (rt) ->

@@ -1,5 +1,5 @@
 (function() {
-  var addCharacter, nat, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, startTimer;
+  var IconItem, addCharacter, blockPattern, buildSetOfAnimation, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, startTimer;
 
   goog.provide('catching');
 
@@ -27,6 +27,8 @@
 
   goog.require('lime.animation.MoveTo');
 
+  goog.require('goog.array');
+
   sceneWidth = 1024;
 
   sceneHeight = 768;
@@ -36,6 +38,34 @@
   sceneCenterY = sceneHeight / 2;
 
   nat = {};
+
+  blockPattern = [[1, 4, 5, 6, 7, 8], [2, 4, 5, 6, 7, 8], [0, 2, 3, 5, 6, 8], [5, 8]];
+
+  IconItem = {
+    brother: "item-brother.png",
+    buff: "item-buff.png",
+    gamesai: "item-gamesai.png",
+    grandfather: "item-grandfather.png",
+    grandmother: "item-grandmother.png",
+    sister: "item-sister.png",
+    sister2: "item-sister2.png",
+    uncle: "item-uncle.png",
+    wolf: "item-wolf.png"
+  };
+
+  randomItemManager = function() {
+    var IconItemArray, lastGetIdx, size;
+    size = goog.object.getCount(IconItem);
+    IconItemArray = goog.object.getValues(IconItem);
+    lastGetIdx = 0;
+    goog.array.shuffle(IconItemArray);
+    return {
+      size: size,
+      getItem: function() {
+        return IconItemArray[lastGetIdx++];
+      }
+    };
+  };
 
   catching.start = function() {
     var scene;
@@ -213,8 +243,49 @@
     })();
   };
 
+  buildSetOfAnimation = function(col) {
+    var correctIdx, flatIdx, imageLayer, item, positionX, positionY, randomManager, startX, x, y, _fn;
+    if (col == null) col = 3;
+    imageLayer = new lime.Layer;
+    startX = 235;
+    goog.array.shuffle(blockPattern);
+    blockPattern = blockPattern[0];
+    goog.array.shuffle(blockPattern);
+    correctIdx = blockPattern[0];
+    randomManager = randomItemManager();
+    if (col === 3) {
+      for (x = 0; x <= 2; x++) {
+        _fn = function(item, flatIdx) {
+          return goog.events.listen(item, 'click', function(e) {
+            if (flatIdx === correctIdx) {
+              return console.log("CORRECT", flatIdx);
+            } else {
+              return console.log("INCORRECT", flatIdx);
+            }
+          });
+        };
+        for (y = 0; y <= 2; y++) {
+          flatIdx = x * col + y;
+          if (-1 === blockPattern.indexOf(flatIdx)) continue;
+          item = addCharacter(randomManager.getItem(), {
+            x: -sceneCenterX,
+            y: -sceneCenterY,
+            at: imageLayer,
+            Idx: flatIdx,
+            name: "Image " + flatIdx
+          });
+          positionX = startX * (x + 1) + 50;
+          positionY = 20 + y * 100;
+          item.setPosition(positionX, positionY);
+          _fn(item, flatIdx);
+        }
+      }
+    }
+    return imageLayer;
+  };
+
   catching.secondScene = function() {
-    var background, clock, scene;
+    var background, clock, imageLayer, scene, velocity;
     scene = new lime.Scene;
     background = new lime.Layer;
     scene.appendChild(background);
@@ -233,14 +304,24 @@
       at: background,
       name: 'Clock'
     });
+    imageLayer = buildSetOfAnimation();
+    console.log(imageLayer);
+    scene.appendChild(imageLayer);
+    velocity = 0.05;
+    lime.scheduleManager.schedule(function(dt) {
+      var position;
+      position = this.getPosition();
+      position.y += velocity * dt;
+      return this.setPosition(position);
+    }, imageLayer);
     catching.lblTimer = new lime.Label();
     console.log(clock);
-    catching.lblTimer.setSize(50, 50).setFontSize(40).setPosition(clock.position_.x - 32, clock.position_.y - 5);
+    catching.lblTimer.setSize(50, 50).setFontSize(40).setPosition(clock.position_.x - 33, clock.position_.y - 5);
     catching.lblTimer.setFontColor('#000');
     scene.appendChild(catching.lblTimer);
     catching.director.replaceScene(scene);
     return startTimer({
-      limit: 30,
+      limit: 80,
       delay: 1000,
       limeScope: nat,
       runningCallback: function(rt) {
