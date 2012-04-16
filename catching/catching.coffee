@@ -2,6 +2,7 @@
 goog.provide 'catching'
 
 #get requirements
+# goog.require 'catching.Button'
 goog.require 'lime.Director'
 goog.require 'lime.Scene'
 goog.require 'lime.Layer'
@@ -14,9 +15,11 @@ goog.require 'lime.animation.Spawn'
 goog.require 'lime.animation.FadeTo'
 goog.require 'lime.animation.ScaleTo'
 goog.require 'lime.animation.MoveTo'
+goog.require 'lime.animation.MoveBy'
+goog.require 'lime.animation.ScaleBy'
 
 goog.require 'goog.array'
-
+goog.require 'lime.GlossyButton'
 
 sceneWidth = 1024
 sceneHeight = 768
@@ -265,14 +268,21 @@ catching.selectLevel = ->
     boy  = addCharacter "boy.png", x: -280, y: 170, at: background
     girl = addCharacter "girl.png", x: -100, y: 200, at: background
     postbox = addCharacter "postbox.png", x: 350, y: 150, at: background
-    addCharacter "title_1.png", x: 0, y: -200, at: background
-    addCharacter "title_2.png", x: 0, y: -75, at: background
     addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: background
+    title1 = addCharacter "title_1.png", x: 0, y: -200, at: background
+    title2 = addCharacter "title_2.png", x: 0, y: -75, at: background
 
     boyAction = new lime.animation.Spawn(
         new lime.animation.MoveTo(boy.position_.x-60, boy.position_.y),
         new lime.animation.FadeTo(100)
     );
+
+
+    moveTitleUp = new lime.animation.MoveBy(0, -80).setDuration(0.8)
+    moveTitleUp.addTarget title1
+    moveTitleUp.addTarget title2
+    moveTitleUp.play()
+
 
     girlAction = new lime.animation.Spawn(
         new lime.animation.MoveTo(girl.position_.x+480, girl.position_.y),
@@ -288,6 +298,38 @@ catching.selectLevel = ->
     postbox.runAction(postboxAction.setDuration(0.6))
     boy.runAction(boyAction.setDuration(0.8))
 
+    buttonLayer = new lime.Layer
+    fadeIn = new lime.animation.FadeTo(100);
+
+    btnEasyState1 = new lime.Sprite().setFill 'assets/images/button.png'
+    btnEasyState2 = new lime.Sprite().setFill 'assets/images/btn_start_active.png'
+    buttonEasy = new lime.Button(btnEasyState1, btnEasyState2).setPosition(sceneCenterX, sceneCenterY-50)
+
+    btnLv2State1 = new lime.Sprite().setFill 'assets/images/button.png'
+    btnLv2State2 = new lime.Sprite().setFill 'assets/images/btn_start_active.png'
+    buttonLv2 = new lime.Button(btnLv2State1, btnLv2State2).setPosition(sceneCenterX, sceneCenterY+50)
+
+    buttonLayer.appendChild buttonEasy
+    buttonLayer.appendChild buttonLv2
+    fadeIn.addTarget(buttonEasy)
+    fadeIn.addTarget(buttonLv2)
+    fadeIn.play()
+
+    scene.appendChild buttonLayer
+
+
+    goog.events.listen buttonEasy, ['click', 'touchstart'], ->
+        do catching.secondScene
+
+    scene.appendChild
+    # Button
+    # btn_levels = new catching.Button('PICK LEVEL').setPosition(0, 480).setSize(250, 100);
+    # goog.events.listen(btn_levels, lime.Button.Event.CLICK, function() {
+    #    contents.runAction(new lime.animation.MoveTo(0, -255).enableOptimizations());
+    # });
+
+    # levels.appendChild(lbl_levels);
+    # scene.appendChild(levels)
 
     catching.director.replaceScene scene
 
@@ -318,6 +360,8 @@ spawnQuestionAndAnswer = (opts) ->
 
     answerAnimationFactory.push animate01
 
+    setUp part: 'blockPipe', by: 3, at: background
+    addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: background
     do (velocity, imageLayer) ->
         lime.scheduleManager.schedule(animate01, imageLayer)
 
@@ -329,7 +373,6 @@ catching.secondScene = ->
     scene.appendChild background
 
     setUp part: 'gameFrame', at: background
-    setUp part: 'blockPipe', by: 3, at: background
     clock = addCharacter "clock.png", x: sceneCenterX-100, y: sceneCenterY-140, at: background, name: 'Clock'
 
     questionLayer = new lime.Layer
@@ -356,5 +399,10 @@ catching.secondScene = ->
             scene = catching.intro()
             # catching.director.replaceScene scene
             # catching.director.setPaused true
+
+
+catching.lastScene = () ->
+    scene = new lime.Scene
+    background = new lime.Layer
 
 @catching = catching

@@ -27,7 +27,13 @@
 
   goog.require('lime.animation.MoveTo');
 
+  goog.require('lime.animation.MoveBy');
+
+  goog.require('lime.animation.ScaleBy');
+
   goog.require('goog.array');
+
+  goog.require('lime.GlossyButton');
 
   sceneWidth = 1024;
 
@@ -360,7 +366,7 @@
   };
 
   catching.selectLevel = function() {
-    var background, boy, boyAction, girl, girlAction, postbox, postboxAction, scene;
+    var background, boy, boyAction, btnEasyState1, btnEasyState2, btnLv2State1, btnLv2State2, buttonEasy, buttonLayer, buttonLv2, fadeIn, girl, girlAction, moveTitleUp, postbox, postboxAction, scene, title1, title2;
     scene = new lime.Scene;
     background = new lime.Layer;
     scene.appendChild(background);
@@ -383,16 +389,6 @@
       y: 150,
       at: background
     });
-    addCharacter("title_1.png", {
-      x: 0,
-      y: -200,
-      at: background
-    });
-    addCharacter("title_2.png", {
-      x: 0,
-      y: -75,
-      at: background
-    });
     addCharacter("game_frame.png", {
       x: 0,
       y: 0,
@@ -400,12 +396,44 @@
       h: -20,
       at: background
     });
+    title1 = addCharacter("title_1.png", {
+      x: 0,
+      y: -200,
+      at: background
+    });
+    title2 = addCharacter("title_2.png", {
+      x: 0,
+      y: -75,
+      at: background
+    });
     boyAction = new lime.animation.Spawn(new lime.animation.MoveTo(boy.position_.x - 60, boy.position_.y), new lime.animation.FadeTo(100));
+    moveTitleUp = new lime.animation.MoveBy(0, -80).setDuration(0.8);
+    moveTitleUp.addTarget(title1);
+    moveTitleUp.addTarget(title2);
+    moveTitleUp.play();
     girlAction = new lime.animation.Spawn(new lime.animation.MoveTo(girl.position_.x + 480, girl.position_.y), new lime.animation.FadeTo(100));
     postboxAction = new lime.animation.Spawn(new lime.animation.FadeTo(100), new lime.animation.FadeTo(0));
     girl.runAction(girlAction.setDuration(0.8));
     postbox.runAction(postboxAction.setDuration(0.6));
     boy.runAction(boyAction.setDuration(0.8));
+    buttonLayer = new lime.Layer;
+    fadeIn = new lime.animation.FadeTo(100);
+    btnEasyState1 = new lime.Sprite().setFill('assets/images/button.png');
+    btnEasyState2 = new lime.Sprite().setFill('assets/images/btn_start_active.png');
+    buttonEasy = new lime.Button(btnEasyState1, btnEasyState2).setPosition(sceneCenterX, sceneCenterY - 50);
+    btnLv2State1 = new lime.Sprite().setFill('assets/images/button.png');
+    btnLv2State2 = new lime.Sprite().setFill('assets/images/btn_start_active.png');
+    buttonLv2 = new lime.Button(btnLv2State1, btnLv2State2).setPosition(sceneCenterX, sceneCenterY + 50);
+    buttonLayer.appendChild(buttonEasy);
+    buttonLayer.appendChild(buttonLv2);
+    fadeIn.addTarget(buttonEasy);
+    fadeIn.addTarget(buttonLv2);
+    fadeIn.play();
+    scene.appendChild(buttonLayer);
+    goog.events.listen(buttonEasy, ['click', 'touchstart'], function() {
+      return catching.secondScene();
+    });
+    scene.appendChild;
     return catching.director.replaceScene(scene);
   };
 
@@ -442,6 +470,18 @@
       return this.setPosition(position);
     };
     answerAnimationFactory.push(animate01);
+    setUp({
+      part: 'blockPipe',
+      by: 3,
+      at: background
+    });
+    addCharacter("game_frame.png", {
+      x: 0,
+      y: 0,
+      w: 40,
+      h: -20,
+      at: background
+    });
     return (function(velocity, imageLayer) {
       return lime.scheduleManager.schedule(animate01, imageLayer);
     })(velocity, imageLayer);
@@ -454,11 +494,6 @@
     scene.appendChild(background);
     setUp({
       part: 'gameFrame',
-      at: background
-    });
-    setUp({
-      part: 'blockPipe',
-      by: 3,
       at: background
     });
     clock = addCharacter("clock.png", {
@@ -493,6 +528,12 @@
         return scene = catching.intro();
       }
     });
+  };
+
+  catching.lastScene = function() {
+    var background, scene;
+    scene = new lime.Scene;
+    return background = new lime.Layer;
   };
 
   this.catching = catching;
