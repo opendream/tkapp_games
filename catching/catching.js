@@ -1,5 +1,5 @@
 (function() {
-  var IconItem, addCharacter, answerAnimationFactory, blockPattern, buildSetOfAnimation, callbackFactory, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, startTimer;
+  var IconItem, addCharacter, animateSetOfAnswer, answerAnimationFactory, blockPattern, buildSetOfAnimation, callbackFactory, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('catching');
 
@@ -71,6 +71,13 @@
       size: size,
       getItem: function() {
         return IconItemArray[lastGetIdx++];
+      },
+      getAll: function() {
+        return IconItemArray;
+      },
+      getAt: function(idx) {
+        console.log("to ret", IconItemArray[idx]);
+        return IconItemArray[0];
       }
     };
   };
@@ -251,17 +258,29 @@
     })();
   };
 
-  buildSetOfAnimation = function(col) {
-    var correctIdx, flatIdx, imageLayer, item, positionX, positionY, randomManager, row, startX, x, y, _fn;
+  buildSetOfAnimation = function(col, opts) {
+    var correctIdx, flatIdx, imageLayer, item, items, local_blockPattern, positionX, positionY, question, randomManager, row, startX, x, y, _fn;
     if (col == null) col = 3;
+    if (opts == null) opts = {};
     imageLayer = new lime.Layer;
     startX = 235;
     goog.array.shuffle(blockPattern);
-    blockPattern = blockPattern[0];
+    local_blockPattern = blockPattern[0];
     goog.array.shuffle(blockPattern);
-    correctIdx = blockPattern[0];
+    correctIdx = local_blockPattern[0];
     randomManager = randomItemManager();
+    console.log(randomManager.getAll());
+    question = addCharacter(randomManager.getAt(correctIdx), {
+      x: 100,
+      y: sceneHeight - 200,
+      at: opts.questionLayer,
+      absolutePosition: true,
+      callback: function(char) {
+        return char.setAnchorPoint(0, 0);
+      }
+    });
     row = 0;
+    items = [];
     if (col === 3) {
       for (x = 0; x <= 2; x++) {
         _fn = function(item, flatIdx) {
@@ -276,22 +295,24 @@
               return that.runAction(zoomout);
             } else {
               position = that.position_;
-              console.log("INCORRECT", flatIdx);
+              console.log("INCORRECT", flatIdx, e, goog.getUid(e.target));
               x = position.x;
               y = position.y;
               return (function(x, y) {
-                zoomout = new lime.animation.Spawn(new lime.animation.MoveTo(x, y - 200), new lime.animation.FadeTo(0));
-                return that.runAction(zoomout);
+                var moveUpOut;
+                moveUpOut = new lime.animation.Spawn(new lime.animation.MoveTo(x, y - 200), new lime.animation.FadeTo(0));
+                return that.runAction(moveUpOut);
               })(x, y);
             }
           });
+          items.push(item);
           return muteMe.push(function() {
             return goog.events.unlistenByKey(listen_key);
           });
         };
         for (y = 0; y <= 2; y++) {
           flatIdx = x * col + y;
-          if (-1 === blockPattern.indexOf(flatIdx)) continue;
+          if (-1 === local_blockPattern.indexOf(flatIdx)) continue;
           item = addCharacter(randomManager.getItem(), {
             x: -sceneCenterX,
             y: -sceneCenterY,
@@ -310,8 +331,44 @@
     return imageLayer;
   };
 
+  animateSetOfAnswer = function(opts) {};
+
+  spawnQuestionAndAnswer = function(opts) {
+    var animate01, background, imageLayer, questionLayer, velocity;
+    background = opts.background;
+    questionLayer = opts.questionLayer;
+    questionLayer.removeAllChildren();
+    imageLayer = buildSetOfAnimation(3, {
+      questionLayer: questionLayer
+    });
+    background.appendChild(imageLayer);
+    background.appendChild(questionLayer);
+    velocity = 0.1;
+    animate01 = function(dt) {
+      var position;
+      position = this.getPosition();
+      position.y += velocity * dt;
+      if (position.y > 700) {
+        console.log("BINGO");
+        goog.array.forEach(muteMe, function(func, i) {
+          return func();
+        });
+        lime.scheduleManager.unschedule(answerAnimationFactory.pop(), imageLayer);
+        spawnQuestionAndAnswer({
+          background: background,
+          questionLayer: questionLayer
+        });
+      }
+      return this.setPosition(position);
+    };
+    answerAnimationFactory.push(animate01);
+    return (function(velocity, imageLayer) {
+      return lime.scheduleManager.schedule(animate01, imageLayer);
+    })(velocity, imageLayer);
+  };
+
   catching.secondScene = function() {
-    var animate01, background, clock, imageLayer, scene, velocity;
+    var background, clock, questionLayer, scene;
     scene = new lime.Scene;
     background = new lime.Layer;
     scene.appendChild(background);
@@ -330,27 +387,12 @@
       at: background,
       name: 'Clock'
     });
-    imageLayer = buildSetOfAnimation();
-    console.log(imageLayer, imageLayer.row_);
-    scene.appendChild(imageLayer);
-    velocity = 0.1;
-    animate01 = function(dt) {
-      var position;
-      position = this.getPosition();
-      position.y += velocity * dt;
-      if (position.y > 500) {
-        console.log("BINGO");
-        goog.array.forEach(muteMe, function(func, i) {
-          return func();
-        });
-        lime.scheduleManager.unschedule(answerAnimationFactory.pop(), imageLayer);
-      }
-      return this.setPosition(position);
-    };
-    answerAnimationFactory.push(animate01);
-    (function(velocity, imageLayer) {
-      return lime.scheduleManager.schedule(animate01, imageLayer);
-    })(velocity, imageLayer);
+    questionLayer = new lime.Layer;
+    background.appendChild(questionLayer);
+    spawnQuestionAndAnswer({
+      background: background,
+      questionLayer: questionLayer
+    });
     catching.lblTimer = new lime.Label();
     console.log(clock);
     catching.lblTimer.setSize(50, 50).setFontSize(40).setPosition(clock.position_.x - 33, clock.position_.y - 5);
@@ -359,7 +401,7 @@
     catching.director.replaceScene(scene);
     return startTimer({
       limit: 80,
-      delay: 100,
+      delay: 1000,
       limeScope: nat,
       runningCallback: function(rt) {
         return catching.lblTimer.setText(rt);

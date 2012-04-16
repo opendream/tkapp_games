@@ -54,8 +54,17 @@ randomItemManager = () ->
     IconItemArray = goog.object.getValues IconItem
     lastGetIdx = 0
     goog.array.shuffle IconItemArray
-    return size: size, getItem: ->
-       IconItemArray[lastGetIdx++]
+    return {
+        size: size
+        getItem: ->
+            IconItemArray[lastGetIdx++]
+        getAll: ->
+            IconItemArray
+        getAt: (idx) ->
+            console.log "to ret", IconItemArray[idx]
+            IconItemArray[0]
+    }
+
 
 
 catching.start = ->
@@ -158,22 +167,29 @@ startTimer = (opts = {} ) ->
         lime.scheduleManager.scheduleWithDelay(callbackFactory.timer, opts.limeScope or callbackFactory, delay)
 
 
-buildSetOfAnimation = (col=3) ->
+buildSetOfAnimation = (col=3, opts = {}) ->
     imageLayer = new lime.Layer
     startX = 235
     goog.array.shuffle blockPattern
-    blockPattern = blockPattern[0]
+    local_blockPattern = blockPattern[0]
     goog.array.shuffle blockPattern
-    correctIdx = blockPattern[0]
-
+    correctIdx = local_blockPattern[0]
     randomManager = do randomItemManager
+    console.log randomManager.getAll()
+    question = addCharacter randomManager.getAt(correctIdx),
+        x: 100
+        y: sceneHeight-200
+        at: opts.questionLayer
+        absolutePosition: true
+        callback: (char) -> char.setAnchorPoint 0, 0
     row = 0
+    items = []
 
     if col is 3
         for x in [0..2]
             for y in [0..2]
                 flatIdx = x*col+y
-                if -1 is blockPattern.indexOf flatIdx then  continue
+                if -1 is local_blockPattern.indexOf flatIdx then  continue
                 item = addCharacter randomManager.getItem(), x: -sceneCenterX, y: -sceneCenterY, at: imageLayer, Idx: flatIdx, name: "Image #{flatIdx}"
                 positionX = startX*(x+1)+50
                 positionY = 20+y*100
@@ -190,24 +206,51 @@ buildSetOfAnimation = (col=3) ->
                                 new lime.animation.FadeTo(0)
                             );
                             that.runAction(zoomout)
-
                         else
                             position = that.position_
-                            console.log "INCORRECT", flatIdx
+                            console.log "INCORRECT", flatIdx, e, goog.getUid(e.target)
                             x = position.x
                             y = position.y
                             do (x, y) ->
-                                zoomout = new lime.animation.Spawn(
+                                moveUpOut = new lime.animation.Spawn(
                                     new lime.animation.MoveTo(x, y-200),
                                     new lime.animation.FadeTo(0)
                                 );
-                                that.runAction(zoomout)
-
+                                that.runAction(moveUpOut)
+                    items.push item
                     muteMe.push ->
                         goog.events.unlistenByKey(listen_key)
 
      imageLayer.row_ = row
      imageLayer
+
+animateSetOfAnswer = (opts) ->
+
+
+spawnQuestionAndAnswer = (opts) ->
+    background = opts.background
+
+    questionLayer = opts.questionLayer
+    questionLayer.removeAllChildren()
+    imageLayer = buildSetOfAnimation 3, questionLayer: questionLayer
+    background.appendChild imageLayer
+    background.appendChild questionLayer
+    # Animate
+    velocity = 0.1;
+    animate01 = (dt) ->
+        position = @getPosition()
+        position.y += velocity * dt # if dt is bigger we just move more
+        if position.y > 700
+            console.log "BINGO"
+            goog.array.forEach muteMe, (func, i) -> do func
+            lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
+            spawnQuestionAndAnswer background: background, questionLayer: questionLayer
+        @setPosition position
+
+    answerAnimationFactory.push animate01
+
+    do (velocity, imageLayer) ->
+        lime.scheduleManager.schedule(animate01, imageLayer)
 
 
 catching.secondScene = ->
@@ -220,27 +263,14 @@ catching.secondScene = ->
     setUp part: 'blockPipe', by: 3, at: background
     clock = addCharacter "clock.png", x: sceneCenterX-100, y: sceneCenterY-140, at: background, name: 'Clock'
 
-    # imageLayer = new lime.Layer
-    imageLayer = do buildSetOfAnimation
-    console.log imageLayer, imageLayer.row_
+    questionLayer = new lime.Layer
+    background.appendChild questionLayer
+    spawnQuestionAndAnswer background: background, questionLayer: questionLayer
+    # imageLayer = buildSetOfAnimation 3, questionLayer: questionLayer
+    # console.log imageLayer, imageLayer.row_
 
-    scene.appendChild imageLayer
-
-    velocity = 0.1;
-    animate01 = (dt) ->
-        position = @getPosition()
-        position.y += velocity * dt # if dt is bigger we just move more
-        if position.y > 500
-            console.log "BINGO"
-            goog.array.forEach muteMe, (func, i) ->
-                do func
-            lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
-        @setPosition position
-
-    answerAnimationFactory.push animate01
-
-    do (velocity, imageLayer) ->
-        lime.scheduleManager.schedule(animate01, imageLayer)
+    # scene.appendChild imageLayer
+    # animateSetOfAnswer imageLayer
 
     catching.lblTimer = new lime.Label()
     console.log clock
@@ -251,7 +281,7 @@ catching.secondScene = ->
 
     startTimer
         limit: 80
-        delay: 100
+        delay: 1000
         limeScope: nat
         runningCallback: (rt) ->
             catching.lblTimer.setText(rt)
