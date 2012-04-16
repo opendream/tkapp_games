@@ -1,5 +1,5 @@
 (function() {
-  var IconItem, addCharacter, animateSetOfAnswer, answerAnimationFactory, blockPattern, buildSetOfAnimation, callbackFactory, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
+  var IconItem, addCharacter, animateSetOfAnswer, answerAnimationFactory, blockPattern, buildSetOfAnimation, callbackFactory, getIdxMap, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('catching');
 
@@ -47,7 +47,17 @@
 
   nat = {};
 
-  blockPattern = [[1, 4, 5, 6, 7, 8], [2, 4, 5, 6, 7, 8], [0, 2, 3, 5, 6, 8], [5, 8]];
+  getIdxMap = function(a) {
+    var map;
+    map = goog.array.map(a, function(e, i) {
+      if (e) return i;
+    });
+    return goog.array.filter(map, function(e, i) {
+      return !!e;
+    });
+  };
+
+  blockPattern = [[0, 1, 0, 0, 1, 1, 0, 0, 0], [0, 0, 1, 0, 1, 1, 1, 1, 1], [1, 0, 1, 1, 0, 1, 1, 0, 1], [0, 0, 0, 0, 0, 1, 0, 0, 1], [0, 0, 0, 1, 0, 1, 1, 1, 1]];
 
   IconItem = {
     brother: "item-brother.png",
@@ -80,38 +90,6 @@
         return IconItemArray[0];
       }
     };
-  };
-
-  catching.start = function() {
-    var scene;
-    catching.director = new lime.Director(document.body, sceneWidth, sceneHeight);
-    return scene = catching.intro();
-  };
-
-  addCharacter = function(image, opts) {
-    var character, height, posX, posY, width;
-    character = new lime.Sprite;
-    character.setFill("assets/images/" + image);
-    if ((opts.absolutePosition != null) === true || (opts.absolute != null) === true) {
-      posX = opts.x;
-      posY = opts.y;
-    } else {
-      posX = sceneCenterX + opts.x;
-      posY = sceneCenterY + opts.y;
-    }
-    if ((opts.absoluteSize != null) === true || (opts.absolute != null) === true) {
-      width = opts.w;
-      height = opts.h;
-    } else {
-      width = sceneWidth + opts.w;
-      height = sceneHeight + opts.h;
-    }
-    if ((opts.x != null) && (opts.y != null)) character.setPosition(posX, posY);
-    if ((opts.w != null) && (opts.h != null)) character.setSize(width, height);
-    opts.at.appendChild(character);
-    if (typeof opts.callback === "function") opts.callback(character);
-    if (opts.name != null) character.name = opts.name;
-    return character;
   };
 
   setUp = function(opts) {
@@ -179,48 +157,30 @@
     }
   };
 
-  catching.intro = function() {
-    var background, btnStart, btnState1, btnState2, scene;
-    scene = new lime.Scene;
-    background = new lime.Layer;
-    scene.appendChild(background);
-    setUp({
-      part: 'gameFrame',
-      at: background
-    });
-    addCharacter("boy.png", {
-      x: -280,
-      y: 180,
-      at: background
-    });
-    addCharacter("girl.png", {
-      x: -100,
-      y: 200,
-      at: background
-    });
-    addCharacter("postbox.png", {
-      x: 350,
-      y: 150,
-      at: background
-    });
-    addCharacter("title_1.png", {
-      x: 0,
-      y: -200,
-      at: background
-    });
-    addCharacter("title_2.png", {
-      x: 0,
-      y: -75,
-      at: background
-    });
-    btnState1 = new lime.Sprite().setFill('assets/images/btn_start_normal.png');
-    btnState2 = new lime.Sprite().setFill('assets/images/btn_start_active.png');
-    btnStart = new lime.Button(btnState1, btnState2).setPosition(sceneCenterX + 300, sceneCenterY + 260).setScale(1.3);
-    background.appendChild(btnStart);
-    catching.director.replaceScene(scene);
-    return goog.events.listen(btnStart, 'click', function() {
-      return catching.secondScene();
-    });
+  addCharacter = function(image, opts) {
+    var character, height, posX, posY, width;
+    character = new lime.Sprite;
+    character.setFill("assets/images/" + image);
+    if ((opts.absolutePosition != null) === true || (opts.absolute != null) === true) {
+      posX = opts.x;
+      posY = opts.y;
+    } else {
+      posX = sceneCenterX + opts.x;
+      posY = sceneCenterY + opts.y;
+    }
+    if ((opts.absoluteSize != null) === true || (opts.absolute != null) === true) {
+      width = opts.w;
+      height = opts.h;
+    } else {
+      width = sceneWidth + opts.w;
+      height = sceneHeight + opts.h;
+    }
+    if ((opts.x != null) && (opts.y != null)) character.setPosition(posX, posY);
+    if ((opts.w != null) && (opts.h != null)) character.setSize(width, height);
+    opts.at.appendChild(character);
+    if (typeof opts.callback === "function") opts.callback(character);
+    if (opts.name != null) character.name = opts.name;
+    return character;
   };
 
   startTimer = function(opts) {
@@ -264,9 +224,9 @@
     if (opts == null) opts = {};
     imageLayer = new lime.Layer;
     startX = 235;
-    goog.array.shuffle(blockPattern);
-    local_blockPattern = blockPattern[0];
-    goog.array.shuffle(blockPattern);
+    goog.array.shuffle(catching.blockPatternIdx);
+    local_blockPattern = catching.blockPatternIdx[0];
+    goog.array.shuffle(catching.blockPatternIdx);
     correctIdx = local_blockPattern[0];
     randomManager = randomItemManager();
     console.log(randomManager.getAll());
@@ -285,13 +245,28 @@
       for (x = 0; x <= 2; x++) {
         _fn = function(item, flatIdx) {
           var listen_key;
-          listen_key = goog.events.listen(item, 'click', function(e) {
-            var position, that, zoomout;
+          listen_key = goog.events.listen(item, ['click', 'touchstart'], function(e) {
+            var position, that, zoomout,
+              _this = this;
             that = this;
             console.log("Click on Object is", that);
             if (flatIdx === correctIdx) {
               console.log("CORRECT", flatIdx);
+              lime.scheduleManager.unschedule(answerAnimationFactory.pop(), imageLayer);
               zoomout = new lime.animation.Spawn(new lime.animation.ScaleTo(5), new lime.animation.FadeTo(0));
+              (function() {
+                var callback;
+                callback = function() {
+                  imageLayer.removeAllChildren();
+                  console.log(opts);
+                  return spawnQuestionAndAnswer({
+                    questionLayer: opts.questionLayer,
+                    background: opts.background
+                  });
+                };
+                setTimeout(callback, 500);
+                return console.log("STH");
+              })();
               return that.runAction(zoomout);
             } else {
               position = that.position_;
@@ -331,6 +306,109 @@
     return imageLayer;
   };
 
+  catching.start = function() {
+    var scene;
+    catching.blockPatternIdx = goog.array.map(blockPattern, function(e, i) {
+      return getIdxMap(e);
+    });
+    catching.director = new lime.Director(document.body, sceneWidth, sceneHeight);
+    return scene = catching.intro();
+  };
+
+  catching.intro = function() {
+    var background, btnStart, btnState1, btnState2, scene;
+    scene = new lime.Scene;
+    background = new lime.Layer;
+    scene.appendChild(background);
+    setUp({
+      part: 'gameFrame',
+      at: background
+    });
+    addCharacter("boy.png", {
+      x: -280,
+      y: 170,
+      at: background
+    });
+    addCharacter("girl.png", {
+      x: -100,
+      y: 200,
+      at: background
+    });
+    addCharacter("postbox.png", {
+      x: 350,
+      y: 150,
+      at: background
+    });
+    addCharacter("title_1.png", {
+      x: 0,
+      y: -200,
+      at: background
+    });
+    addCharacter("title_2.png", {
+      x: 0,
+      y: -75,
+      at: background
+    });
+    btnState1 = new lime.Sprite().setFill('assets/images/btn_start_normal.png');
+    btnState2 = new lime.Sprite().setFill('assets/images/btn_start_active.png');
+    btnStart = new lime.Button(btnState1, btnState2).setPosition(sceneCenterX + 300, sceneCenterY + 260).setScale(1.3);
+    background.appendChild(btnStart);
+    catching.director.replaceScene(scene);
+    return goog.events.listen(btnStart, ['click', 'touchstart'], function() {
+      return catching.selectLevel();
+    });
+  };
+
+  catching.selectLevel = function() {
+    var background, boy, boyAction, girl, girlAction, postbox, postboxAction, scene;
+    scene = new lime.Scene;
+    background = new lime.Layer;
+    scene.appendChild(background);
+    setUp({
+      part: 'gameFrame',
+      at: background
+    });
+    boy = addCharacter("boy.png", {
+      x: -280,
+      y: 170,
+      at: background
+    });
+    girl = addCharacter("girl.png", {
+      x: -100,
+      y: 200,
+      at: background
+    });
+    postbox = addCharacter("postbox.png", {
+      x: 350,
+      y: 150,
+      at: background
+    });
+    addCharacter("title_1.png", {
+      x: 0,
+      y: -200,
+      at: background
+    });
+    addCharacter("title_2.png", {
+      x: 0,
+      y: -75,
+      at: background
+    });
+    addCharacter("game_frame.png", {
+      x: 0,
+      y: 0,
+      w: 40,
+      h: -20,
+      at: background
+    });
+    boyAction = new lime.animation.Spawn(new lime.animation.MoveTo(boy.position_.x - 60, boy.position_.y), new lime.animation.FadeTo(100));
+    girlAction = new lime.animation.Spawn(new lime.animation.MoveTo(girl.position_.x + 480, girl.position_.y), new lime.animation.FadeTo(100));
+    postboxAction = new lime.animation.Spawn(new lime.animation.FadeTo(100), new lime.animation.FadeTo(0));
+    girl.runAction(girlAction.setDuration(0.8));
+    postbox.runAction(postboxAction.setDuration(0.6));
+    boy.runAction(boyAction.setDuration(0.8));
+    return catching.director.replaceScene(scene);
+  };
+
   animateSetOfAnswer = function(opts) {};
 
   spawnQuestionAndAnswer = function(opts) {
@@ -339,7 +417,8 @@
     questionLayer = opts.questionLayer;
     questionLayer.removeAllChildren();
     imageLayer = buildSetOfAnimation(3, {
-      questionLayer: questionLayer
+      questionLayer: questionLayer,
+      background: background
     });
     background.appendChild(imageLayer);
     background.appendChild(questionLayer);
@@ -354,6 +433,7 @@
           return func();
         });
         lime.scheduleManager.unschedule(answerAnimationFactory.pop(), imageLayer);
+        imageLayer.removeAllChildren();
         spawnQuestionAndAnswer({
           background: background,
           questionLayer: questionLayer
@@ -409,7 +489,8 @@
       timeoutCallback: function(rt) {
         catching.lblTimer.setText("0 ");
         console.log("TIME OUT");
-        return lime.scheduleManager.unschedule(nat.scheduleWithDelay, nat);
+        lime.scheduleManager.unschedule(nat.scheduleWithDelay, nat);
+        return scene = catching.intro();
       }
     });
   };

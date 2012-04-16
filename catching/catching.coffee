@@ -30,13 +30,34 @@ callbackFactory =
 
 answerAnimationFactory = []
 nat = {}
-blockPattern = [
-    [1, 4, 5, 6, 7 ,8],
-    [2, 4, 5, 6, 7, 8],
-    [0, 2, 3, 5, 6, 8]
-    [5, 8],
-    # [0..8]
-]
+
+getIdxMap = (a) ->
+  map = goog.array.map a, (e, i) -> i if e
+  goog.array.filter map, (e, i) ->  !!e
+
+
+# goog.array.map(a, function(e, i, arr) { return getIdxMap(e) })
+blockPattern = [[
+        0, 1, 0
+        0, 1, 1
+        0, 0, 0 ], [
+
+        0, 0, 1
+        0, 1, 1
+        1, 1, 1 ], [
+
+        1, 0, 1
+        1, 0, 1
+        1, 0, 1 ], [
+
+        0, 0, 0
+        0, 0, 1
+        0, 0, 1 ], [
+
+        0, 0, 0,
+        1, 0, 1
+        1, 1, 1
+    ]]
 
 IconItem =
     brother: "item-brother.png"
@@ -49,6 +70,7 @@ IconItem =
     uncle: "item-uncle.png"
     wolf: "item-wolf.png"
 
+# Helper
 randomItemManager = () ->
     size = goog.object.getCount(IconItem)
     IconItemArray = goog.object.getValues IconItem
@@ -65,16 +87,28 @@ randomItemManager = () ->
             IconItemArray[0]
     }
 
+setUp = (opts) ->
+    switch opts.part
+        when "gameFrame"
+            addCharacter "scene_bg.png", x: 4, y: -10, w: -150, h: -130, at: opts.at
+            addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: opts.at
+            addCharacter "game_bg.png", x: 0, y: 0, w: 0, h: 0, at: opts.at
+        when "blockPipe"
+            if opts.by is 3
+                startX = 235
+                addCharacter "block_pipe.png",
+                x: startX, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                callback: (char) -> char.setAnchorPoint 0, 0
 
+                addCharacter "block_pipe.png",
+                x: startX * 2, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                callback: (char) -> char.setAnchorPoint 0, 0
 
-catching.start = ->
-    catching.director = new lime.Director document.body, sceneWidth, sceneHeight
-    #var introScene = new lime.Scene
-    #var modeScene = new lime.Scene
-    #var gameScene = new lime.Scene
-    #var summaryScene = new lime.Scene
-    scene = catching.intro()
-    # set current scene active
+                addCharacter "block_pipe.png",
+                x: startX * 3, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                callback: (char) -> char.setAnchorPoint 0, 0
+
+                # addCharacter "game_frame.png", x: 0, y: 2, w: 40, h: -20, at: opts.at
 
 addCharacter =  (image, opts) ->
     character = new lime.Sprite
@@ -100,55 +134,6 @@ addCharacter =  (image, opts) ->
     character.name = opts.name if opts.name?
     return character
 
-setUp = (opts) ->
-    switch opts.part
-        when "gameFrame"
-            addCharacter "scene_bg.png", x: 4, y: -10, w: -150, h: -130, at: opts.at
-            addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: opts.at
-            addCharacter "game_bg.png", x: 0, y: 0, w: 0, h: 0, at: opts.at
-        when "blockPipe"
-            if opts.by is 3
-                startX = 235
-                addCharacter "block_pipe.png",
-                x: startX, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
-                callback: (char) -> char.setAnchorPoint 0, 0
-
-                addCharacter "block_pipe.png",
-                x: startX * 2, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
-                callback: (char) -> char.setAnchorPoint 0, 0
-
-                addCharacter "block_pipe.png",
-                x: startX * 3, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
-                callback: (char) -> char.setAnchorPoint 0, 0
-
-                # addCharacter "game_frame.png", x: 0, y: 2, w: 40, h: -20, at: opts.at
-
-catching.intro = ->
-    scene = new lime.Scene
-    background = new lime.Layer
-
-    scene.appendChild background
-
-    setUp part: 'gameFrame', at: background
-    addCharacter "boy.png", x: -280, y: 180, at: background
-    addCharacter "girl.png", x: -100, y: 200, at: background
-    addCharacter "postbox.png", x: 350, y: 150, at: background
-    addCharacter "title_1.png", x: 0, y: -200, at: background
-    addCharacter "title_2.png", x: 0, y: -75, at: background
-
-
-    btnState1 = new lime.Sprite().setFill 'assets/images/btn_start_normal.png'
-    btnState2 = new lime.Sprite().setFill 'assets/images/btn_start_active.png'
-
-
-    btnStart = new lime.Button(btnState1, btnState2).setPosition(sceneCenterX + 300, sceneCenterY + 260).setScale 1.3
-
-    background.appendChild btnStart
-    catching.director.replaceScene scene
-
-    goog.events.listen btnStart, 'click', ->
-        do catching.secondScene
-
 
 startTimer = (opts = {} ) ->
     counter = opts.limit or 10
@@ -170,9 +155,9 @@ startTimer = (opts = {} ) ->
 buildSetOfAnimation = (col=3, opts = {}) ->
     imageLayer = new lime.Layer
     startX = 235
-    goog.array.shuffle blockPattern
-    local_blockPattern = blockPattern[0]
-    goog.array.shuffle blockPattern
+    goog.array.shuffle catching.blockPatternIdx
+    local_blockPattern = catching.blockPatternIdx[0]
+    goog.array.shuffle catching.blockPatternIdx
     correctIdx = local_blockPattern[0]
     randomManager = do randomItemManager
     console.log randomManager.getAll()
@@ -196,15 +181,23 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                 item.setPosition positionX, positionY
                 do (item, flatIdx) ->
                     # item.fill_.image_.style.cursor = "hand"
-                    listen_key = goog.events.listen item, 'click', (e) ->
+                    listen_key = goog.events.listen item, ['click', 'touchstart'], (e) ->
                         that = this
                         console.log "Click on Object is", that
                         if flatIdx is correctIdx
                             console.log "CORRECT", flatIdx
+                            lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
                             zoomout = new lime.animation.Spawn(
                                 new lime.animation.ScaleTo(5),
                                 new lime.animation.FadeTo(0)
                             );
+                            do =>
+                                callback = ->
+                                    imageLayer.removeAllChildren()
+                                    console.log opts
+                                    spawnQuestionAndAnswer questionLayer: opts.questionLayer, background: opts.background
+                                setTimeout callback, 500
+                                console.log "STH"
                             that.runAction(zoomout)
                         else
                             position = that.position_
@@ -224,6 +217,81 @@ buildSetOfAnimation = (col=3, opts = {}) ->
      imageLayer.row_ = row
      imageLayer
 
+
+#catching
+catching.start = ->
+    catching.blockPatternIdx = goog.array.map blockPattern, (e, i) -> getIdxMap e
+    catching.director = new lime.Director document.body, sceneWidth, sceneHeight
+    #var introScene = new lime.Scene
+    #var modeScene = new lime.Scene
+    #var gameScene = new lime.Scene
+    #var summaryScene = new lime.Scene
+    scene = catching.intro()
+    # set current scene active
+
+
+catching.intro = ->
+    scene = new lime.Scene
+    background = new lime.Layer
+
+    scene.appendChild background
+
+    setUp part: 'gameFrame', at: background
+    addCharacter "boy.png", x: -280, y: 170, at: background
+    addCharacter "girl.png", x: -100, y: 200, at: background
+    addCharacter "postbox.png", x: 350, y: 150, at: background
+    addCharacter "title_1.png", x: 0, y: -200, at: background
+    addCharacter "title_2.png", x: 0, y: -75, at: background
+
+
+    btnState1 = new lime.Sprite().setFill 'assets/images/btn_start_normal.png'
+    btnState2 = new lime.Sprite().setFill 'assets/images/btn_start_active.png'
+
+
+    btnStart = new lime.Button(btnState1, btnState2).setPosition(sceneCenterX + 300, sceneCenterY + 260).setScale 1.3
+
+    background.appendChild btnStart
+    catching.director.replaceScene scene
+
+    goog.events.listen btnStart, ['click', 'touchstart'], ->
+        do catching.selectLevel
+
+catching.selectLevel = ->
+    scene = new lime.Scene
+    background = new lime.Layer
+    scene.appendChild background
+
+    setUp part: 'gameFrame', at: background
+    boy  = addCharacter "boy.png", x: -280, y: 170, at: background
+    girl = addCharacter "girl.png", x: -100, y: 200, at: background
+    postbox = addCharacter "postbox.png", x: 350, y: 150, at: background
+    addCharacter "title_1.png", x: 0, y: -200, at: background
+    addCharacter "title_2.png", x: 0, y: -75, at: background
+    addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: background
+
+    boyAction = new lime.animation.Spawn(
+        new lime.animation.MoveTo(boy.position_.x-60, boy.position_.y),
+        new lime.animation.FadeTo(100)
+    );
+
+    girlAction = new lime.animation.Spawn(
+        new lime.animation.MoveTo(girl.position_.x+480, girl.position_.y),
+        new lime.animation.FadeTo(100)
+    );
+
+    postboxAction = new lime.animation.Spawn(
+        new lime.animation.FadeTo(100)
+        new lime.animation.FadeTo(0)
+    );
+
+    girl.runAction(girlAction.setDuration(0.8))
+    postbox.runAction(postboxAction.setDuration(0.6))
+    boy.runAction(boyAction.setDuration(0.8))
+
+
+    catching.director.replaceScene scene
+
+
 animateSetOfAnswer = (opts) ->
 
 
@@ -232,7 +300,7 @@ spawnQuestionAndAnswer = (opts) ->
 
     questionLayer = opts.questionLayer
     questionLayer.removeAllChildren()
-    imageLayer = buildSetOfAnimation 3, questionLayer: questionLayer
+    imageLayer = buildSetOfAnimation 3, questionLayer: questionLayer, background: background
     background.appendChild imageLayer
     background.appendChild questionLayer
     # Animate
@@ -244,6 +312,7 @@ spawnQuestionAndAnswer = (opts) ->
             console.log "BINGO"
             goog.array.forEach muteMe, (func, i) -> do func
             lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
+            imageLayer.removeAllChildren()
             spawnQuestionAndAnswer background: background, questionLayer: questionLayer
         @setPosition position
 
@@ -266,11 +335,6 @@ catching.secondScene = ->
     questionLayer = new lime.Layer
     background.appendChild questionLayer
     spawnQuestionAndAnswer background: background, questionLayer: questionLayer
-    # imageLayer = buildSetOfAnimation 3, questionLayer: questionLayer
-    # console.log imageLayer, imageLayer.row_
-
-    # scene.appendChild imageLayer
-    # animateSetOfAnswer imageLayer
 
     catching.lblTimer = new lime.Label()
     console.log clock
@@ -289,6 +353,8 @@ catching.secondScene = ->
             catching.lblTimer.setText "0 "
             console.log "TIME OUT"
             lime.scheduleManager.unschedule nat.scheduleWithDelay, nat
+            scene = catching.intro()
+            # catching.director.replaceScene scene
             # catching.director.setPaused true
 
 @catching = catching
