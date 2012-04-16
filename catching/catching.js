@@ -1,5 +1,5 @@
 (function() {
-  var IconItem, addCharacter, blockPattern, buildSetOfAnimation, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, startTimer;
+  var IconItem, addCharacter, answerAnimationFactory, blockPattern, buildSetOfAnimation, callbackFactory, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, startTimer;
 
   goog.provide('catching');
 
@@ -36,6 +36,14 @@
   sceneCenterX = sceneWidth / 2;
 
   sceneCenterY = sceneHeight / 2;
+
+  callbackFactory = {
+    timer: function() {}
+  };
+
+  this.muteMe = [];
+
+  answerAnimationFactory = [];
 
   nat = {};
 
@@ -221,7 +229,7 @@
     }
     counter = counter - 1;
     return (function() {
-      nat.scheduleWithDelay = function(dt) {
+      callbackFactory.timer = function(dt) {
         if (!(counter > 0)) {
           if (counter <= 0) {
             if (opts != null) {
@@ -239,12 +247,12 @@
         }
         return counter = counter - decreaseBy;
       };
-      return lime.scheduleManager.scheduleWithDelay(nat.scheduleWithDelay, opts.limeScope || {}, delay);
+      return lime.scheduleManager.scheduleWithDelay(callbackFactory.timer, opts.limeScope || callbackFactory, delay);
     })();
   };
 
   buildSetOfAnimation = function(col) {
-    var correctIdx, flatIdx, imageLayer, item, positionX, positionY, randomManager, startX, x, y, _fn;
+    var correctIdx, flatIdx, imageLayer, item, positionX, positionY, randomManager, row, startX, x, y, _fn;
     if (col == null) col = 3;
     imageLayer = new lime.Layer;
     startX = 235;
@@ -253,15 +261,32 @@
     goog.array.shuffle(blockPattern);
     correctIdx = blockPattern[0];
     randomManager = randomItemManager();
+    row = 0;
     if (col === 3) {
       for (x = 0; x <= 2; x++) {
         _fn = function(item, flatIdx) {
-          return goog.events.listen(item, 'click', function(e) {
+          var listen_key;
+          listen_key = goog.events.listen(item, 'click', function(e) {
+            var position, that, zoomout;
+            that = this;
+            console.log("Click on Object is", that);
             if (flatIdx === correctIdx) {
-              return console.log("CORRECT", flatIdx);
+              console.log("CORRECT", flatIdx);
+              zoomout = new lime.animation.Spawn(new lime.animation.ScaleTo(5), new lime.animation.FadeTo(0));
+              return that.runAction(zoomout);
             } else {
-              return console.log("INCORRECT", flatIdx);
+              position = that.position_;
+              console.log("INCORRECT", flatIdx);
+              x = position.x;
+              y = position.y;
+              return (function(x, y) {
+                zoomout = new lime.animation.Spawn(new lime.animation.MoveTo(x, y - 200), new lime.animation.FadeTo(0));
+                return that.runAction(zoomout);
+              })(x, y);
             }
+          });
+          return muteMe.push(function() {
+            return goog.events.unlistenByKey(listen_key);
           });
         };
         for (y = 0; y <= 2; y++) {
@@ -281,11 +306,12 @@
         }
       }
     }
+    imageLayer.row_ = row;
     return imageLayer;
   };
 
   catching.secondScene = function() {
-    var background, clock, imageLayer, scene, velocity;
+    var animate01, background, clock, imageLayer, scene, velocity;
     scene = new lime.Scene;
     background = new lime.Layer;
     scene.appendChild(background);
@@ -305,15 +331,26 @@
       name: 'Clock'
     });
     imageLayer = buildSetOfAnimation();
-    console.log(imageLayer);
+    console.log(imageLayer, imageLayer.row_);
     scene.appendChild(imageLayer);
-    velocity = 0.05;
-    lime.scheduleManager.schedule(function(dt) {
+    velocity = 0.1;
+    animate01 = function(dt) {
       var position;
       position = this.getPosition();
       position.y += velocity * dt;
+      if (position.y > 500) {
+        console.log("BINGO");
+        goog.array.forEach(muteMe, function(func, i) {
+          return func();
+        });
+        lime.scheduleManager.unschedule(answerAnimationFactory.pop(), imageLayer);
+      }
       return this.setPosition(position);
-    }, imageLayer);
+    };
+    answerAnimationFactory.push(animate01);
+    (function(velocity, imageLayer) {
+      return lime.scheduleManager.schedule(animate01, imageLayer);
+    })(velocity, imageLayer);
     catching.lblTimer = new lime.Label();
     console.log(clock);
     catching.lblTimer.setSize(50, 50).setFontSize(40).setPosition(clock.position_.x - 33, clock.position_.y - 5);
@@ -322,7 +359,7 @@
     catching.director.replaceScene(scene);
     return startTimer({
       limit: 80,
-      delay: 1000,
+      delay: 100,
       limeScope: nat,
       runningCallback: function(rt) {
         return catching.lblTimer.setText(rt);

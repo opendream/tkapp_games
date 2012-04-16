@@ -23,7 +23,12 @@ sceneHeight = 768
 sceneCenterX = sceneWidth/2
 sceneCenterY = sceneHeight/2
 
+callbackFactory =
+    timer: ->
 
+@muteMe = []
+
+answerAnimationFactory = []
 nat = {}
 blockPattern = [
     [1, 4, 5, 6, 7 ,8],
@@ -144,13 +149,13 @@ startTimer = (opts = {} ) ->
     counter = counter - 1
 
     do ->
-        nat.scheduleWithDelay = (dt) ->
+        callbackFactory.timer = (dt) ->
             unless counter > 0
                 opts?.timeoutCallback?(counter) if counter <= 0
             else
                 opts?.runningCallback?(counter)
             counter = counter - decreaseBy
-        lime.scheduleManager.scheduleWithDelay(nat.scheduleWithDelay, opts.limeScope or {}, delay)
+        lime.scheduleManager.scheduleWithDelay(callbackFactory.timer, opts.limeScope or callbackFactory, delay)
 
 
 buildSetOfAnimation = (col=3) ->
@@ -162,23 +167,47 @@ buildSetOfAnimation = (col=3) ->
     correctIdx = blockPattern[0]
 
     randomManager = do randomItemManager
+    row = 0
 
     if col is 3
         for x in [0..2]
             for y in [0..2]
                 flatIdx = x*col+y
-                if -1 is blockPattern.indexOf flatIdx then continue
+                if -1 is blockPattern.indexOf flatIdx then  continue
                 item = addCharacter randomManager.getItem(), x: -sceneCenterX, y: -sceneCenterY, at: imageLayer, Idx: flatIdx, name: "Image #{flatIdx}"
                 positionX = startX*(x+1)+50
                 positionY = 20+y*100
                 item.setPosition positionX, positionY
                 do (item, flatIdx) ->
-                    goog.events.listen item, 'click', (e) ->
+                    # item.fill_.image_.style.cursor = "hand"
+                    listen_key = goog.events.listen item, 'click', (e) ->
+                        that = this
+                        console.log "Click on Object is", that
                         if flatIdx is correctIdx
                             console.log "CORRECT", flatIdx
+                            zoomout = new lime.animation.Spawn(
+                                new lime.animation.ScaleTo(5),
+                                new lime.animation.FadeTo(0)
+                            );
+                            that.runAction(zoomout)
+
                         else
+                            position = that.position_
                             console.log "INCORRECT", flatIdx
-    imageLayer
+                            x = position.x
+                            y = position.y
+                            do (x, y) ->
+                                zoomout = new lime.animation.Spawn(
+                                    new lime.animation.MoveTo(x, y-200),
+                                    new lime.animation.FadeTo(0)
+                                );
+                                that.runAction(zoomout)
+
+                    muteMe.push ->
+                        goog.events.unlistenByKey(listen_key)
+
+     imageLayer.row_ = row
+     imageLayer
 
 
 catching.secondScene = ->
@@ -193,28 +222,25 @@ catching.secondScene = ->
 
     # imageLayer = new lime.Layer
     imageLayer = do buildSetOfAnimation
-    console.log imageLayer
-
-    # img1 = addCharacter item.brother, x: -sceneCenterX, y: -sceneCenterY, at: imageLayer, name: 'Image 1'
-    # img2 = addCharacter item.buff, x: -sceneCenterY+20, y: -sceneCenterY, at: imageLayer, name: 'Image 2'
-
+    console.log imageLayer, imageLayer.row_
 
     scene.appendChild imageLayer
 
-
-    # imgList = [img1, img2]
-    # imgList.forEach (item) ->
-    #     do (item) ->
-    #         goog.events.listen item, 'click', (e) ->
-    #             console.log e.position.x, e.position.y, item, item.name
-
-
-    velocity = 0.05;
-    lime.scheduleManager.schedule( (dt) ->
+    velocity = 0.1;
+    animate01 = (dt) ->
         position = @getPosition()
         position.y += velocity * dt # if dt is bigger we just move more
+        if position.y > 500
+            console.log "BINGO"
+            goog.array.forEach muteMe, (func, i) ->
+                do func
+            lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
         @setPosition position
-    , imageLayer)
+
+    answerAnimationFactory.push animate01
+
+    do (velocity, imageLayer) ->
+        lime.scheduleManager.schedule(animate01, imageLayer)
 
     catching.lblTimer = new lime.Label()
     console.log clock
@@ -225,7 +251,7 @@ catching.secondScene = ->
 
     startTimer
         limit: 80
-        delay: 1000
+        delay: 100
         limeScope: nat
         runningCallback: (rt) ->
             catching.lblTimer.setText(rt)
