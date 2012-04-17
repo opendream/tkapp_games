@@ -22,10 +22,18 @@ Kamsai.start = function() {
     var director = new lime.Director(document.body, 800, 600),
         sceneIntro = new lime.Scene(),
         sceneChoice = new lime.Scene(),
+		sceneScore = new lime.Scene(),
+		no = 0,
+		score = 0,
         text = {
             arrowText: "เริ่มทำแบบทดสอบ",
             boardText: "แบบทดสอบมีทั้งหมด 10 ข้อ",
-            nextQuestion: "ข้อถัดไป"
+            nextQuestion: "ข้อถัดไป",
+			sumScore: "รวมคะแนนทั้งหมด",
+			maxScore: "คะแนนเต็ม 10 คะแนน",
+			getScoreText: "ทำได้",
+			getScoreText2: "คะแนน",
+			exitText: "ออก"
         },
         background = function () {
             var background = {};
@@ -34,6 +42,16 @@ Kamsai.start = function() {
                 .setAnchorPoint(0, 0)
                 .setPosition(0, 0)
                 .setFill("assets/bg1.jpg");
+			
+			background.correct = new lime.Sprite()
+				.setAnchorPoint(0, 0)
+				.setPosition(0, 0)
+				.setFill("assets/bg2.jpg");
+			
+			background.incorrect = new lime.Sprite()
+				.setAnchorPoint(0, 0)
+				.setPosition(0, 0)
+				.setFill("assets/bg3.jpg");
 
             return background;
         },
@@ -44,8 +62,130 @@ Kamsai.start = function() {
                 .setFill("assets/doctor.png")
                 .setPosition(678, 425);
 
+			doctor.correct = new lime.Sprite()
+				.setFill("assets/doctor-correct.png")
+				.setPosition(678, 425);
+				
+			doctor.incorrect = new lime.Sprite()
+				.setFill("assets/doctor-wrong.png")
+				.setPosition(678, 425);
+
             return doctor;
         },
+		// scoreManager = function (score) {
+		// 			var medal;
+		// 			if (score >= 0 && score < 4)
+		// 				medal = "assets/bronze-prize.png";
+		// 			else if (score >= 4 && score < 7)
+		// 				medal = "assets/silver-prize.png";
+		// 			else
+		// 				medal = "assets/gold-prize.png";
+		// 				
+		// 			return medal;
+		// 		},
+		setupScore = function (scene){
+			var arrow = new lime.Sprite(),
+				arrowText = new lime.Label(),
+				bird = new lime.Sprite(),
+				doctor = new lime.Sprite(),
+				board = new lime.Sprite(),
+				boardText = new lime.Label(),
+				boardText2 = new lime.Label(),
+				boardText3 = new lime.Label(),
+				boardText4 = new lime.Label(),
+				scoreText = new lime.Label(),
+				medal = new lime.Sprite(),
+				arrowLayer = new lime.Layer();
+				
+				//set medal
+				var getMedal;
+				if (score >= 0 && score < 4)
+					getMedal = "assets/bronze-prize.png";
+				else if (score >= 4 && score < 7)
+					getMedal = "assets/silver-prize.png";
+				else if (score >= 7 && score <= 10)
+					getMedal = "assets/gold-prize.png";
+					
+				console.log(getMedal);
+				
+				medal
+					.setFill(getMedal)
+					.setPosition(270,285);
+				
+				// set board
+	            board
+	                .setFill("assets/board.png")
+	                .setPosition(408, 358);
+
+	            boardText
+	                .setText(text.sumScore)
+	                .setFontSize(35)
+	                .setFontColor('#FFF')
+	                .setPosition(400, 160);
+				
+				boardText2
+					.setText(text.maxScore)
+					.setFontSize(30)
+					.setFontColor('#FFF')
+					.setPosition(400, 335);
+					
+				boardText3
+					.setText(text.getScoreText)
+					.setFontSize(30)
+					.setFontColor('#FFF')
+					.setPosition(300,385);
+				
+				boardText4
+					.setText(text.getScoreText2)
+					.setFontSize(30)
+					.setFontColor('#FFF')
+					.setPosition(410,385)
+						
+				scoreText
+					.setText(score)
+					.setFontSize(30)
+					.setFontColor('#FFF')
+					.setPosition(350,385);
+
+				// set doctor
+				doctor
+					.setFill("assets/doctor-write.png")
+					.setPosition(675,395);
+				
+	            arrowLayer
+	                .setSize(225, 99)
+	                .setPosition(530, 475);
+
+	            // set arrow
+	            arrow
+	                .setPosition(10, 43)
+	                .setFill("assets/arrow2.png");
+	            // set label
+	            arrowText
+	                .setText(text.exitText)
+	                .setFontSize(24)
+	                .setFontColor('#FFF')
+	                .setPosition(10, 48);
+
+	            // add both to layer
+	            arrowLayer.domClassName = goog.getCssName('lime-button');
+	            arrowLayer
+	                .appendChild(arrow)
+	                .appendChild(arrowText);
+
+	            scene
+	                .appendChild(background().normal)
+	                .appendChild(board)
+	                .appendChild(boardText)
+					.appendChild(boardText2)
+					.appendChild(boardText3)
+					.appendChild(boardText4)
+					.appendChild(scoreText)
+	                .appendChild(doctor)
+	                .appendChild(arrowLayer)
+					.appendChild(medal)
+	                .appendChild(bird);
+		},
         setupIntro = function (scene) {
             var arrow = new lime.Sprite(),
                 arrowText = new lime.Label(),
@@ -135,7 +275,11 @@ Kamsai.start = function() {
         setupChoice = function (scene) {
             var board = new lime.Sprite(),
                 backgroundNormal = background().normal,
+				backgroundCorrect = background().correct,
+				backgroundIncorrect = background().incorrect,
                 doctorNormal = doctor().normal,
+				doctorCorrect = doctor().correct,
+				doctorIncorrect = doctor().incorrect,
                 nextButton = function () {
                     var layer = new lime.Layer(),
                         arrow = new lime.Sprite(),
@@ -157,18 +301,136 @@ Kamsai.start = function() {
                         .appendChild(arrowText)
                         .setSize(180, 80)
                         .setPosition(122, 452);
+					
+					goog.events.listen(layer, 'mousedown', function (e) {
+				         e.swallow('mouseup', function () {
+							console.log("nextButton Clicked");
+							scene.removeChild(choiceLabel);
+							no = no + 1;
+							if(no < 10){
+								choiceLabel = buildChoice(choice[no]);
+								scene.appendChild(choiceLabel);
+								scene.removeChild(nextButton);
+								
+								if(scene.getChildIndex(backgroundCorrect) !== false){
+									scene.removeChild(backgroundCorrect);
+								}
+								if(scene.getChildIndex(backgroundIncorrect) !== false){
+									scene.removeChild(backgroundIncorrect);
+								}
+								scene.appendChild(backgroundNormal,0);
+								
+								if(scene.getChildIndex(doctorCorrect) !== false){
+									scene.removeChild(doctorCorrect);
+								}
+								if(scene.getChildIndex(doctorIncorrect) !== false){
+									scene.removeChild(doctorIncorrect);
+								}
+								scene.appendChild(doctorNormal);
+							}else{
+								console.log("ended game");
+								//set up Score Layer
+								//var medal = scoreManager(score);
+								setupScore(sceneScore);
+								director.replaceScene(sceneScore);
+							}        
+						});
+				    });
 
                     return layer;
                 } (),
-                choice = {
-                    question: "1. ผู้คนเมืองพอดีมีนิสัยอย่างไร",
+                choice = [
+				{
+					question: "1. ผู้คนเมืองพอดีมีนิสัยอย่างไร",
                     choices: [
                         "ซื่อสัตย์",
                         "มีวินัย",
                         "ช่วยเหลือกัน"
                     ],
                     correct: 3
-                },
+				},
+				{
+					question: "2. ชาวเมืองพอดีประกอบอาชีพอะไร",
+                    choices: [
+                        "ทำนา",
+                        "เลี้ยงสัตว์",
+                        "ปลูกผัก"
+                    ],
+                    correct: 3
+				},
+				{
+					question: "3. ทำไมชาวบ้านจึงซื้อสินค้าเกินพอดี",
+                    choices: [
+                        "ถูกหมาป่าหลอก",
+                        "ของถูกและน่าซื้อ",
+                        "อยากได้อยากมี"
+                    ],
+                    correct: 3
+				},
+				{
+					question: "4. ทำไมสวนผักจึงเหี่ยวเฉา",
+                    choices: [
+                        "ชาวบ้านไม่มีน้ำรดผัก",
+                        "ชาวบ้านไม่สนใจดูแล",
+                        "ชาวบ้านย้ายออกจากเมือง"
+                    ],
+                    correct: 2
+				},
+				{
+					question: "5. ชาวบ้านขอบคุณเด็กหญิงแก้มใสอย่างไร",
+                    choices: [
+                        "ให้ผักสด",
+                        "สร้างบ้านใหม่",
+                        "ซื้อเสื้อผ้าใหม่"
+                    ],
+                    correct: 1
+				},
+				{
+					question: "6. การใช้ชีวิตแบบพอเพียงช่วยชาวเมืองได้อย่างไร",
+                    choices: [
+                        "มีเสื้อผ้าสีสันสดใสใส่",
+                        "มีความสุขทั้งกายและใจ",
+                        "มีทรัพย์สินเงินทองมากขึ้น"
+                    ],
+                    correct: 2
+				},
+				{
+					question: "7. หมาป่าควรทำอย่างไรเมื่อชาวเมืองหยุดซื้อสินค้าฟุ่มเฟือย",
+                    choices: [
+                        "ย้ายไปอยู่อีกเมือง",
+                        "ประกอบอาชีพสุจริต",
+                        "หาของแปลก ๆ มาขาย"
+                    ],
+                    correct: 2
+				},
+				{
+					question: "8. ข้อใดคือประโยชน์ของการกินผัก",
+                    choices: [
+                        "ท้องผูก",
+                        "วิ่งเร็วขึ้น",
+                        "ร่างกายแข็งแรง"
+                    ],
+                    correct: 3
+				},
+				{
+					question: "9.เราสามารถใช้ชีวิตพอเพียงได้อย่างไรบ้าง",
+                    choices: [
+                        "มองโลกในแง่ดี",
+                        "มีน้ำใจต่อกัน",
+                        "ประหยัดอดออม"
+                    ],
+                    correct: 3
+				},
+				{
+					question: "10. ถ้าเราอยากได้ของเล่น เราควรทำอย่างไร",
+                    choices: [
+                        "เก็บเงินซื้อเอง",
+                        "ขอเงินพ่อแม",
+                        "บอกให้เพื่อนซื้อ"
+                    ],
+                    correct: 1
+				},
+                ],
                 buildChoice = function (choice) {
                     var buildChoiceAnswer = function (text, isCorrect) {
                         var normalColor = '#990000',
@@ -209,12 +471,28 @@ Kamsai.start = function() {
                             });
                         });
 
-                        goog.events.listen(list, 'mousedown', function (e) {
-                            console.log(isCorrect);
-                            if (isCorrect) {
-                                scene.appendChild(nextButton);
-                            }
-                        });
+						!function(localList) {
+							 goog.events.listen(localList, 'mousedown', function (e) {
+									goog.array.forEach(localList.getParent().children_, function(e, i, arr) {
+									  goog.events.removeAll(e)
+									});
+									scene.removeChild(doctorNormal);
+									scene.removeChild(backgroundNormal);
+		                            if (isCorrect) {
+										console.log("CORRECT")
+		                                scene.appendChild(nextButton);
+										scene.appendChild(doctorCorrect);
+										scene.appendChild(backgroundCorrect,0);
+										score = score + 1;
+		                            }else {
+										console.log("INCORRECT")		
+										scene.appendChild(nextButton);
+										scene.appendChild(doctorIncorrect);
+										scene.appendChild(backgroundIncorrect,0);
+									}
+		                        });							
+						}(list)
+                       
 
                         return list;
                     };
@@ -239,24 +517,22 @@ Kamsai.start = function() {
 
                         choiceLabel.appendChild(answer);
                     }
-
+					
                     return choiceLabel;
-                }
-            ;
+                };
 
             board
                 .setFill("assets/board2.png")
                 .setPosition(300, 300);
 
-            choiceLabel = buildChoice(choice);
-
+			choiceLabel = buildChoice(choice[no]);
+            
             scene
                 .appendChild(backgroundNormal)
                 .appendChild(board)
                 .appendChild(doctorNormal)
                 .appendChild(choiceLabel);
-        }
-    ;
+        };
     
     // set up intro layer
     setupIntro(sceneIntro);
@@ -265,7 +541,7 @@ Kamsai.start = function() {
     setupChoice(sceneChoice);
 
 	// set current scene active
-	director.replaceScene(sceneIntro);
+	director.replaceScene(sceneIntro); //sceneIntro
 }
 
 
