@@ -74,6 +74,7 @@ IconItem =
     uncle: "item-uncle.png"
     wolf: "item-wolf.png"
 
+
 # Helper
 randomItemManager = () ->
     size = goog.object.getCount(IconItem)
@@ -89,6 +90,17 @@ randomItemManager = () ->
         getAt: (idx) ->
             IconItemArray[0]
     }
+
+
+# score
+@score = do ->
+    _score = 0
+    add = () ->
+        _score++
+        @
+    reset = () -> _score = 0
+    getScore = -> _score
+    { getScore, add, reset }
 
 setUp = (opts) ->
     switch opts.part
@@ -188,9 +200,9 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                         console.log "Click on Object is", that
                         if flatIdx is correctIdx
                             goog.array.forEach muteMe, (e, i) ->
-                                console.log "Corrected REMOVE"
                                 goog.events.removeAll e
                             lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
+                            score.add()
                             zoomout = new lime.animation.Spawn(
                                 new lime.animation.ScaleTo(5),
                                 new lime.animation.FadeTo(0)
@@ -229,7 +241,6 @@ catching.start = ->
     #var summaryScene = new lime.Scene
     scene = catching.intro()
     # set current scene active
-
 
 catching.intro = ->
     scene = new lime.Scene
@@ -299,12 +310,12 @@ catching.selectLevel = ->
     buttonLayer = new lime.Layer
     fadeIn = new lime.animation.FadeTo(100);
 
-    btnEasyState1 = new lime.Sprite().setFill 'assets/images/button.png'
-    btnEasyState2 = new lime.Sprite().setFill 'assets/images/btn_start_active.png'
+    btnEasyState1 = new lime.Sprite().setFill 'assets/images/btn-lv1.png'
+    btnEasyState2 = new lime.Sprite().setFill 'assets/images/btn-lv1-hover.png'
     buttonEasy = new lime.Button(btnEasyState1, btnEasyState2).setPosition(sceneCenterX, sceneCenterY-50)
 
-    btnLv2State1 = new lime.Sprite().setFill 'assets/images/button.png'
-    btnLv2State2 = new lime.Sprite().setFill 'assets/images/btn_start_active.png'
+    btnLv2State1 = new lime.Sprite().setFill 'assets/images/btn-lv2.png'
+    btnLv2State2 = new lime.Sprite().setFill 'assets/images/btn-lv2-hover.png'
     buttonLv2 = new lime.Button(btnLv2State1, btnLv2State2).setPosition(sceneCenterX, sceneCenterY+50)
 
     buttonLayer.appendChild buttonEasy
@@ -317,6 +328,7 @@ catching.selectLevel = ->
 
 
     goog.events.listen buttonEasy, ['click', 'touchstart'], ->
+        score.reset()
         do catching.secondScene
 
     scene.appendChild
@@ -382,7 +394,7 @@ catching.secondScene = ->
 
     startTimer
         limit: 80
-        delay: 1000
+        delay: 1
         limeScope: nat
         runningCallback: (rt) ->
             catching.lblTimer.setText(rt)
@@ -390,13 +402,36 @@ catching.secondScene = ->
             catching.lblTimer.setText "0 "
             console.log "TIME OUT"
             lime.scheduleManager.unschedule nat.scheduleWithDelay, nat
-            scene = catching.intro()
-            # catching.director.replaceScene scene
+            scene = catching.lastScene()
+
+            catching.director.replaceScene scene
+
             # catching.director.setPaused true
 
 
 catching.lastScene = () ->
     scene = new lime.Scene
     background = new lime.Layer
+    setUp part: 'gameFrame', at: background
+    menu = addCharacter "list.png", x: -295, y: -170, at: background
+    menu.setScale 1.2
+    title1 = addCharacter "title_1.png", x: -295, y: -310, at: background
+    title1.setScale 0.5
+    menu1 = addCharacter "menu-story.png", x: -295, y: -230, at: background
+    menu1.setScale 1.3
+    menu2 = addCharacter "menu-replay.png", x: -295, y: -156, at: background
+    menu2.setScale 1.3
+    boy  = addCharacter "boy.png", x: -280, y: 170, at: background
+    girl = addCharacter "girl.png", x: -100, y: 200, at: background
+    bubble = addCharacter "bubble-point.png", x: 180, y: -80, at: background
+    bubble.setScale 1.4
+    scoreLabel = new lime.Label
+
+    scoreLabel.setText(score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48)
+
+    scene.appendChild background
+    scene.appendChild scoreLabel
+
+    return  scene
 
 @catching = catching
