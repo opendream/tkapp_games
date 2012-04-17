@@ -30,6 +30,7 @@ callbackFactory =
     timer: ->
 
 @muteMe = []
+@muteMeNum = []
 
 answerAnimationFactory = []
 nat = {}
@@ -41,9 +42,9 @@ getIdxMap = (a) ->
 
 # goog.array.map(a, function(e, i, arr) { return getIdxMap(e) })
 blockPattern = [[
-        0, 1, 0
+        0, 0, 0
         0, 1, 1
-        0, 0, 0 ], [
+        1, 1, 0 ], [
 
         0, 0, 1
         0, 1, 1
@@ -86,7 +87,6 @@ randomItemManager = () ->
         getAll: ->
             IconItemArray
         getAt: (idx) ->
-            console.log "to ret", IconItemArray[idx]
             IconItemArray[0]
     }
 
@@ -163,7 +163,6 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     goog.array.shuffle catching.blockPatternIdx
     correctIdx = local_blockPattern[0]
     randomManager = do randomItemManager
-    console.log randomManager.getAll()
     question = addCharacter randomManager.getAt(correctIdx),
         x: 100
         y: sceneHeight-200
@@ -171,7 +170,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
         absolutePosition: true
         callback: (char) -> char.setAnchorPoint 0, 0
     row = 0
-    items = []
+    @items = []
 
     if col is 3
         for x in [0..2]
@@ -188,13 +187,15 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                         that = this
                         console.log "Click on Object is", that
                         if flatIdx is correctIdx
-                            console.log "CORRECT", flatIdx
+                            goog.array.forEach muteMe, (e, i) ->
+                                console.log "Corrected REMOVE"
+                                goog.events.removeAll e
                             lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
                             zoomout = new lime.animation.Spawn(
                                 new lime.animation.ScaleTo(5),
                                 new lime.animation.FadeTo(0)
                             );
-                            do =>
+                            do ->
                                 callback = ->
                                     imageLayer.removeAllChildren()
                                     console.log opts
@@ -203,22 +204,19 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                                 console.log "STH"
                             that.runAction(zoomout)
                         else
+                            goog.events.removeAll that
                             position = that.position_
                             console.log "INCORRECT", flatIdx, e, goog.getUid(e.target)
                             x = position.x
                             y = position.y
-                            do (x, y) ->
-                                moveUpOut = new lime.animation.Spawn(
-                                    new lime.animation.MoveTo(x, y-200),
-                                    new lime.animation.FadeTo(0)
-                                );
-                                that.runAction(moveUpOut)
+                            moveUpOut = new lime.animation.Spawn(new lime.animation.MoveTo(x, y-200), new lime.animation.FadeTo(0))
+                            that.runAction(moveUpOut)
                     items.push item
                     muteMe.push ->
                         goog.events.unlistenByKey(listen_key)
 
-     imageLayer.row_ = row
-     imageLayer
+    imageLayer.row_ = row
+    imageLayer
 
 
 #catching
@@ -322,14 +320,7 @@ catching.selectLevel = ->
         do catching.secondScene
 
     scene.appendChild
-    # Button
-    # btn_levels = new catching.Button('PICK LEVEL').setPosition(0, 480).setSize(250, 100);
-    # goog.events.listen(btn_levels, lime.Button.Event.CLICK, function() {
-    #    contents.runAction(new lime.animation.MoveTo(0, -255).enableOptimizations());
-    # });
 
-    # levels.appendChild(lbl_levels);
-    # scene.appendChild(levels)
 
     catching.director.replaceScene scene
 
@@ -352,7 +343,9 @@ spawnQuestionAndAnswer = (opts) ->
         position.y += velocity * dt # if dt is bigger we just move more
         if position.y > 700
             console.log "BINGO"
-            goog.array.forEach muteMe, (func, i) -> do func
+            goog.array.forEach muteMe, (e) ->
+                console.log "REMOVED"
+                goog.events.removeAll e
             lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
             imageLayer.removeAllChildren()
             spawnQuestionAndAnswer background: background, questionLayer: questionLayer
@@ -377,6 +370,7 @@ catching.secondScene = ->
 
     questionLayer = new lime.Layer
     background.appendChild questionLayer
+
     spawnQuestionAndAnswer background: background, questionLayer: questionLayer
 
     catching.lblTimer = new lime.Label()
