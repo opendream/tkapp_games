@@ -15,7 +15,7 @@ goog.require('lime.animation.ScaleTo');
 goog.require('lime.animation.MoveBy');
 goog.require('lime.animation.MoveTo');
 goog.require('lime.animation.Easing');
-
+goog.require('lime.animation.KeyframeAnimation');
 
 // entrypoint
 Kamsai.start = function() {
@@ -25,6 +25,7 @@ Kamsai.start = function() {
 		sceneScore = new lime.Scene(),
 		no = 0,
 		score = 0,
+		sprite = new lime.Sprite(),
         text = {
             arrowText: "เริ่มทำแบบทดสอบ",
             boardText: "แบบทดสอบมีทั้งหมด 10 ข้อ",
@@ -311,6 +312,7 @@ Kamsai.start = function() {
 								choiceLabel = buildChoice(choice[no]);
 								scene.appendChild(choiceLabel);
 								scene.removeChild(nextButton);
+								scene.removeChild(sprite);
 								
 								if(scene.getChildIndex(backgroundCorrect) !== false){
 									scene.removeChild(backgroundCorrect);
@@ -484,6 +486,21 @@ Kamsai.start = function() {
 										scene.appendChild(doctorCorrect);
 										scene.appendChild(backgroundCorrect,0);
 										score = score + 1;
+										
+										sprite
+											.setAnchorPoint(0.5, 1)
+											.setPosition(400, 600)
+											.setFill("assets/bg-correct1.png")
+											.setScale(1.0),
+										scene.appendChild(sprite,1);
+										
+										var animation = new lime.animation.KeyframeAnimation();
+										animation.setDelay(0.03);
+										for (var i=1; i<=6; ++i){
+											if(i !== 5)
+												animation.addFrame("assets/bg-correct" + i + ".png");
+										}
+										sprite.runAction(animation);
 		                            }else {
 										console.log("INCORRECT")		
 										scene.appendChild(nextButton);
