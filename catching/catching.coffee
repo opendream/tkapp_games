@@ -31,7 +31,9 @@ callbackFactory =
 
 @muteMe = []
 
-answerAnimationFactory = []
+@allScenes = []
+
+@answerAnimationFactory = []
 nat = {}
 
 getIdxMap = (a) ->
@@ -213,7 +215,6 @@ startTimer = (opts = {} ) ->
 buildSetOfAnimation = (col=3, opts = {}) ->
     imageLayer = new lime.Layer
     startX = 235
-    console.log catching.blockPatternIdx
     goog.array.shuffle catching.blockPatternIdx
     local_blockPattern = catching.blockPatternIdx[0]
     goog.array.shuffle catching.blockPatternIdx
@@ -227,12 +228,10 @@ buildSetOfAnimation = (col=3, opts = {}) ->
         callback: (char) -> char.setAnchorPoint 0, 0
     row = 0
     @items = []
-    console.log "COL IS ", col, [0...col]
     row = 3
     for x in [0...col]
         for y in [0...row]
             flatIdx = x*row+y
-            console.log flatIdx
             if -1 is local_blockPattern.indexOf flatIdx then  continue
             item = addCharacter randomManager.getItem(), x: -sceneCenterX, y: -sceneCenterY, at: imageLayer, Idx: flatIdx, name: "Image #{flatIdx}"
             if col is 3
@@ -244,7 +243,6 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                 positionX = startX + (x * margin)
                 positionY = 20+y*100
 
-            console.log positionX, positionY
             item.setPosition positionX, positionY
             do (item, flatIdx) ->
                 # item.fill_.image_.style.cursor = "hand"
@@ -253,7 +251,8 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                     if flatIdx is correctIdx
                         goog.array.forEach muteMe, (e, i) ->
                             goog.events.removeAll e
-                        lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
+                        objFromFactory = answerAnimationFactory.pop()
+                        lime.scheduleManager.unschedule objFromFactory.callback, objFromFactory.scope
                         score.add()
                         moveUp = new lime.animation.MoveBy(0, -120).setDuration(0.4)
                         correctArrow = addCharacter "correct.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer
@@ -286,7 +285,6 @@ spawnQuestionAndAnswer = (opts) ->
     background = opts.background
 
     col = if catching.level is 'hard' then 4 else 3;
-    console.log col
     questionLayer = opts.questionLayer
     questionLayer.removeAllChildren()
     imageLayer = buildSetOfAnimation col, questionLayer: questionLayer, background: background
@@ -294,22 +292,26 @@ spawnQuestionAndAnswer = (opts) ->
     background.appendChild questionLayer
     # Animate
     velocity = 0.1;
+    ORDER = 0
     animate01 = (dt) ->
-        position = @getPosition()
+        console.log "ANIMATE ORDER", ORDER
+        position = this.getPosition()
         position.y += velocity * dt # if dt is bigger we just move more
         if position.y > 700
             goog.array.forEach muteMe, (e) ->
                 goog.events.removeAll e
-            lime.scheduleManager.unschedule answerAnimationFactory.pop(), imageLayer
+            objFromFactory = answerAnimationFactory.pop()
+            lime.scheduleManager.unschedule objFromFactory.callback, objFromFactory.scope
             imageLayer.removeAllChildren()
             spawnQuestionAndAnswer background: background, questionLayer: questionLayer
         @setPosition position
 
-    answerAnimationFactory.push animate01
+    answerAnimationFactory.push callback: animate01, scope: imageLayer
 
     setUp part: 'blockPipe', by: col, at: background
     addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: background
     do (velocity, imageLayer) ->
+        ORDER++
         lime.scheduleManager.schedule(animate01, imageLayer)
 
 
@@ -326,6 +328,7 @@ catching.start = ->
 
 catching.intro = ->
     scene = new lime.Scene
+    allScenes.push scene
     background = new lime.Layer
 
     smoke = [
@@ -364,6 +367,7 @@ catching.intro = ->
 
 catching.selectLevel = ->
     scene = new lime.Scene
+    allScenes.push scene
     background = new lime.Layer
     scene.appendChild background
 
@@ -425,14 +429,12 @@ catching.selectLevel = ->
         score.reset()
         catching.level = 'easy'
         catching.blockPatternIdx = goog.array.map blockPattern, (e, i) -> getIdxMap e
-        console.log catching.blockPatternIdx
         do catching.secondScene
 
     goog.events.listen buttonHard, ['click', 'touchstart'], ->
         score.reset()
         catching.level = 'hard'
         catching.blockPatternIdx = goog.array.map blockPatternHard, (e, i) -> getIdxMap e
-        console.log catching.blockPatternIdx
         do catching.secondScene
 
 
@@ -441,6 +443,7 @@ catching.selectLevel = ->
 
 catching.secondScene = ->
     scene = new lime.Scene
+    allScenes.push scene
     background = new lime.Layer
 
     scene.appendChild background
@@ -461,13 +464,15 @@ catching.secondScene = ->
 
     startTimer
         limit: if catching.level is 'hard' then 70 else 80
-        delay: 1000
-        limeScope: nat
+        delay: 10
+        limeScope: callbackFactory
         runningCallback: (rt) ->
             catching.lblTimer.setText(rt)
         timeoutCallback: (rt) ->
             catching.lblTimer.setText "0 "
-            lime.scheduleManager.unschedule nat.scheduleWithDelay, nat
+            objFromFactory = answerAnimationFactory.pop()
+            lime.scheduleManager.unschedule objFromFactory.callback, objFromFactory.scope
+            lime.scheduleManager.unschedule callbackFactory.timer, callbackFactory
             scene = catching.lastScene()
 
             catching.director.replaceScene scene
@@ -477,6 +482,7 @@ catching.secondScene = ->
 
 catching.lastScene = () ->
     scene = new lime.Scene
+    allScenes.push scene
     background = new lime.Layer
     setUp part: 'gameFrame', at: background
     menu = addCharacter "list.png", x: -295, y: -170, at: background

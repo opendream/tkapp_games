@@ -1,5 +1,5 @@
 (function() {
-  var IconItem, addCharacter, answerAnimationFactory, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
+  var IconItem, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('catching');
 
@@ -49,7 +49,9 @@
 
   this.muteMe = [];
 
-  answerAnimationFactory = [];
+  this.allScenes = [];
+
+  this.answerAnimationFactory = [];
 
   nat = {};
 
@@ -292,12 +294,11 @@
   };
 
   buildSetOfAnimation = function(col, opts) {
-    var correctIdx, flatIdx, imageLayer, item, local_blockPattern, margin, positionX, positionY, question, randomManager, row, startX, x, y, _fn, _i, _results;
+    var correctIdx, flatIdx, imageLayer, item, local_blockPattern, margin, positionX, positionY, question, randomManager, row, startX, x, y, _fn;
     if (col == null) col = 3;
     if (opts == null) opts = {};
     imageLayer = new lime.Layer;
     startX = 235;
-    console.log(catching.blockPatternIdx);
     goog.array.shuffle(catching.blockPatternIdx);
     local_blockPattern = catching.blockPatternIdx[0];
     goog.array.shuffle(catching.blockPatternIdx);
@@ -314,23 +315,19 @@
     });
     row = 0;
     this.items = [];
-    console.log("COL IS ", col, (function() {
-      _results = [];
-      for (var _i = 0; 0 <= col ? _i < col : _i > col; 0 <= col ? _i++ : _i--){ _results.push(_i); }
-      return _results;
-    }).apply(this));
     row = 3;
     for (x = 0; 0 <= col ? x < col : x > col; 0 <= col ? x++ : x--) {
       _fn = function(item, flatIdx) {
         var listen_key;
         listen_key = goog.events.listen(item, ['click', 'touchstart'], function(e) {
-          var correctArrow, moveUp, moveUpOut, position, that, wrongArrow;
+          var correctArrow, moveUp, moveUpOut, objFromFactory, position, that, wrongArrow;
           that = this;
           if (flatIdx === correctIdx) {
             goog.array.forEach(muteMe, function(e, i) {
               return goog.events.removeAll(e);
             });
-            lime.scheduleManager.unschedule(answerAnimationFactory.pop(), imageLayer);
+            objFromFactory = answerAnimationFactory.pop();
+            lime.scheduleManager.unschedule(objFromFactory.callback, objFromFactory.scope);
             score.add();
             moveUp = new lime.animation.MoveBy(0, -120).setDuration(0.4);
             correctArrow = addCharacter("correct.png", {
@@ -373,7 +370,6 @@
       };
       for (y = 0; 0 <= row ? y < row : y > row; 0 <= row ? y++ : y--) {
         flatIdx = x * row + y;
-        console.log(flatIdx);
         if (-1 === local_blockPattern.indexOf(flatIdx)) continue;
         item = addCharacter(randomManager.getItem(), {
           x: -sceneCenterX,
@@ -391,7 +387,6 @@
           positionX = startX + (x * margin);
           positionY = 20 + y * 100;
         }
-        console.log(positionX, positionY);
         item.setPosition(positionX, positionY);
         _fn(item, flatIdx);
       }
@@ -401,10 +396,9 @@
   };
 
   spawnQuestionAndAnswer = function(opts) {
-    var animate01, background, col, imageLayer, questionLayer, velocity;
+    var ORDER, animate01, background, col, imageLayer, questionLayer, velocity;
     background = opts.background;
     col = catching.level === 'hard' ? 4 : 3;
-    console.log(col);
     questionLayer = opts.questionLayer;
     questionLayer.removeAllChildren();
     imageLayer = buildSetOfAnimation(col, {
@@ -414,15 +408,18 @@
     background.appendChild(imageLayer);
     background.appendChild(questionLayer);
     velocity = 0.1;
+    ORDER = 0;
     animate01 = function(dt) {
-      var position;
+      var objFromFactory, position;
+      console.log("ANIMATE ORDER", ORDER);
       position = this.getPosition();
       position.y += velocity * dt;
       if (position.y > 700) {
         goog.array.forEach(muteMe, function(e) {
           return goog.events.removeAll(e);
         });
-        lime.scheduleManager.unschedule(answerAnimationFactory.pop(), imageLayer);
+        objFromFactory = answerAnimationFactory.pop();
+        lime.scheduleManager.unschedule(objFromFactory.callback, objFromFactory.scope);
         imageLayer.removeAllChildren();
         spawnQuestionAndAnswer({
           background: background,
@@ -431,7 +428,10 @@
       }
       return this.setPosition(position);
     };
-    answerAnimationFactory.push(animate01);
+    answerAnimationFactory.push({
+      callback: animate01,
+      scope: imageLayer
+    });
     setUp({
       part: 'blockPipe',
       by: col,
@@ -445,6 +445,7 @@
       at: background
     });
     return (function(velocity, imageLayer) {
+      ORDER++;
       return lime.scheduleManager.schedule(animate01, imageLayer);
     })(velocity, imageLayer);
   };
@@ -458,6 +459,7 @@
   catching.intro = function() {
     var background, btnStart, btnState1, btnState2, scene, smoke;
     scene = new lime.Scene;
+    allScenes.push(scene);
     background = new lime.Layer;
     smoke = [new lime.Sprite().setFill('assets/images/smoke-1.png'), new lime.Sprite().setFill('assets/images/smoke-2.png'), new lime.Sprite().setFill('assets/images/smoke-3.png'), new lime.Sprite().setFill('assets/images/smoke-4.png')];
     scene.appendChild(background);
@@ -503,6 +505,7 @@
   catching.selectLevel = function() {
     var background, boy, boyAction, btnEasyState1, btnEasyState2, btnLv2State1, btnLv2State2, buttonEasy, buttonHard, buttonLayer, fadeIn, girl, girlAction, moveTitleUp, postbox, postboxAction, scene, title1, title2;
     scene = new lime.Scene;
+    allScenes.push(scene);
     background = new lime.Layer;
     scene.appendChild(background);
     setUp({
@@ -571,7 +574,6 @@
       catching.blockPatternIdx = goog.array.map(blockPattern, function(e, i) {
         return getIdxMap(e);
       });
-      console.log(catching.blockPatternIdx);
       return catching.secondScene();
     });
     goog.events.listen(buttonHard, ['click', 'touchstart'], function() {
@@ -580,7 +582,6 @@
       catching.blockPatternIdx = goog.array.map(blockPatternHard, function(e, i) {
         return getIdxMap(e);
       });
-      console.log(catching.blockPatternIdx);
       return catching.secondScene();
     });
     return catching.director.replaceScene(scene);
@@ -589,6 +590,7 @@
   catching.secondScene = function() {
     var background, clock, questionLayer, scene;
     scene = new lime.Scene;
+    allScenes.push(scene);
     background = new lime.Layer;
     scene.appendChild(background);
     setUp({
@@ -614,14 +616,17 @@
     catching.director.replaceScene(scene);
     return startTimer({
       limit: catching.level === 'hard' ? 70 : 80,
-      delay: 1000,
-      limeScope: nat,
+      delay: 10,
+      limeScope: callbackFactory,
       runningCallback: function(rt) {
         return catching.lblTimer.setText(rt);
       },
       timeoutCallback: function(rt) {
+        var objFromFactory;
         catching.lblTimer.setText("0 ");
-        lime.scheduleManager.unschedule(nat.scheduleWithDelay, nat);
+        objFromFactory = answerAnimationFactory.pop();
+        lime.scheduleManager.unschedule(objFromFactory.callback, objFromFactory.scope);
+        lime.scheduleManager.unschedule(callbackFactory.timer, callbackFactory);
         scene = catching.lastScene();
         return catching.director.replaceScene(scene);
       }
@@ -631,6 +636,7 @@
   catching.lastScene = function() {
     var background, boy, bubble, girl, menu, menu1, menu2, scene, scoreLabel, title1;
     scene = new lime.Scene;
+    allScenes.push(scene);
     background = new lime.Layer;
     setUp({
       part: 'gameFrame',
