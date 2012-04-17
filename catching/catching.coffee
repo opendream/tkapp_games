@@ -30,11 +30,9 @@ callbackFactory =
     timer: ->
 
 @muteMe = []
-
 @allScenes = []
 
 @answerAnimationFactory = []
-nat = {}
 
 getIdxMap = (a) ->
   map = goog.array.map a, (e, i) -> i if e
@@ -242,7 +240,6 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                 margin = 245
                 positionX = startX + (x * margin)
                 positionY = 20+y*100
-
             item.setPosition positionX, positionY
             do (item, flatIdx) ->
                 # item.fill_.image_.style.cursor = "hand"
@@ -251,8 +248,8 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                     if flatIdx is correctIdx
                         goog.array.forEach muteMe, (e, i) ->
                             goog.events.removeAll e
-                        objFromFactory = answerAnimationFactory.pop()
-                        lime.scheduleManager.unschedule objFromFactory.callback, objFromFactory.scope
+                        runningSchedule = answerAnimationFactory.pop()
+                        lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
                         score.add()
                         moveUp = new lime.animation.MoveBy(0, -120).setDuration(0.4)
                         correctArrow = addCharacter "correct.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer
@@ -300,8 +297,8 @@ spawnQuestionAndAnswer = (opts) ->
         if position.y > 700
             goog.array.forEach muteMe, (e) ->
                 goog.events.removeAll e
-            objFromFactory = answerAnimationFactory.pop()
-            lime.scheduleManager.unschedule objFromFactory.callback, objFromFactory.scope
+            runningSchedule = answerAnimationFactory.pop()
+            lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
             imageLayer.removeAllChildren()
             spawnQuestionAndAnswer background: background, questionLayer: questionLayer
         @setPosition position
@@ -470,8 +467,8 @@ catching.secondScene = ->
             catching.lblTimer.setText(rt)
         timeoutCallback: (rt) ->
             catching.lblTimer.setText "0 "
-            objFromFactory = answerAnimationFactory.pop()
-            lime.scheduleManager.unschedule objFromFactory.callback, objFromFactory.scope
+            runningSchedule = answerAnimationFactory.pop()
+            lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
             lime.scheduleManager.unschedule callbackFactory.timer, callbackFactory
             scene = catching.lastScene()
 

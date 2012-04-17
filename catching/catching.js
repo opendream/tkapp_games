@@ -1,5 +1,5 @@
 (function() {
-  var IconItem, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, nat, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
+  var IconItem, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('catching');
 
@@ -52,8 +52,6 @@
   this.allScenes = [];
 
   this.answerAnimationFactory = [];
-
-  nat = {};
 
   getIdxMap = function(a) {
     var map;
@@ -320,14 +318,14 @@
       _fn = function(item, flatIdx) {
         var listen_key;
         listen_key = goog.events.listen(item, ['click', 'touchstart'], function(e) {
-          var correctArrow, moveUp, moveUpOut, objFromFactory, position, that, wrongArrow;
+          var correctArrow, moveUp, moveUpOut, position, runningSchedule, that, wrongArrow;
           that = this;
           if (flatIdx === correctIdx) {
             goog.array.forEach(muteMe, function(e, i) {
               return goog.events.removeAll(e);
             });
-            objFromFactory = answerAnimationFactory.pop();
-            lime.scheduleManager.unschedule(objFromFactory.callback, objFromFactory.scope);
+            runningSchedule = answerAnimationFactory.pop();
+            lime.scheduleManager.unschedule(runningSchedule.callback, runningSchedule.scope);
             score.add();
             moveUp = new lime.animation.MoveBy(0, -120).setDuration(0.4);
             correctArrow = addCharacter("correct.png", {
@@ -410,7 +408,7 @@
     velocity = 0.1;
     ORDER = 0;
     animate01 = function(dt) {
-      var objFromFactory, position;
+      var position, runningSchedule;
       console.log("ANIMATE ORDER", ORDER);
       position = this.getPosition();
       position.y += velocity * dt;
@@ -418,8 +416,8 @@
         goog.array.forEach(muteMe, function(e) {
           return goog.events.removeAll(e);
         });
-        objFromFactory = answerAnimationFactory.pop();
-        lime.scheduleManager.unschedule(objFromFactory.callback, objFromFactory.scope);
+        runningSchedule = answerAnimationFactory.pop();
+        lime.scheduleManager.unschedule(runningSchedule.callback, runningSchedule.scope);
         imageLayer.removeAllChildren();
         spawnQuestionAndAnswer({
           background: background,
@@ -622,10 +620,10 @@
         return catching.lblTimer.setText(rt);
       },
       timeoutCallback: function(rt) {
-        var objFromFactory;
+        var runningSchedule;
         catching.lblTimer.setText("0 ");
-        objFromFactory = answerAnimationFactory.pop();
-        lime.scheduleManager.unschedule(objFromFactory.callback, objFromFactory.scope);
+        runningSchedule = answerAnimationFactory.pop();
+        lime.scheduleManager.unschedule(runningSchedule.callback, runningSchedule.scope);
         lime.scheduleManager.unschedule(callbackFactory.timer, callbackFactory);
         scene = catching.lastScene();
         return catching.director.replaceScene(scene);
