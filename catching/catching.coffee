@@ -30,6 +30,7 @@ callbackFactory =
     timer: ->
 
 @muteMe = []
+
 @allScenes = []
 
 @answerAnimationFactory = []
@@ -240,6 +241,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                 margin = 245
                 positionX = startX + (x * margin)
                 positionY = 20+y*100
+
             item.setPosition positionX, positionY
             do (item, flatIdx) ->
                 # item.fill_.image_.style.cursor = "hand"
@@ -324,6 +326,7 @@ catching.start = ->
     # set current scene active
 
 catching.intro = ->
+    @allScenes = []
     scene = new lime.Scene
     allScenes.push scene
     background = new lime.Layer

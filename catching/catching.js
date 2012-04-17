@@ -456,6 +456,7 @@
 
   catching.intro = function() {
     var background, btnStart, btnState1, btnState2, scene, smoke;
+    this.allScenes = [];
     scene = new lime.Scene;
     allScenes.push(scene);
     background = new lime.Layer;
