@@ -35,7 +35,7 @@ game.start = function(){
   var bell = new lime.audio.Audio('assets/sounds/bell.mp3');
   var pop = new lime.audio.Audio('assets/sounds/pop.mp3');
 
-  game.director = new lime.Director(document.body, sceneWidth, sceneHeight);
+  game.director = new lime.Director(document.getElementById('game5'), sceneWidth, sceneHeight);
   var scene1 = new lime.Scene;
   var scene2 = new lime.Scene;
   var scene3 = new lime.Scene;
@@ -178,18 +178,19 @@ game.start = function(){
 
 game.gameTimer = function(lbl, loseScene){
   lbl.setText(timer);
-
-  if(timer == 0){
+  var scope = {};
+  scope.timer = function(){
+    timer = timer - timerCountDown;
+    lbl.setText(timer);
+    if(timer == 0) {
       timer = 0;
+      lime.scheduleManager.unschedule(scope.timer, scope);
       game.director.replaceScene(loseScene);
-  }else{
-    if (timerCountDown != 0){
-      setTimeout(function(){
-        timer = timer - timerCountDown;
-        game.gameTimer(lbl, loseScene);
-      },1000);
-    }
+    }    
   }
+  
+  lime.scheduleManager.scheduleWithDelay(scope.timer, scope, 1000);
+
 }
 
 game.makeButton = function(x, y, scale){
@@ -239,6 +240,8 @@ game.addCardPicture = function(layer, nextScene) {
 
   var boardTopX = sceneCenterX - 200 - (boardSize/2) + cardSize/2;
   var boardTopY = sceneCenterY - (boardSize/2) + cardSize/2;  
+  
+  var draged = false;
 
   for(i=0; i<3; i++) {
     for(j=0; j<3; j++) {    
@@ -248,8 +251,13 @@ game.addCardPicture = function(layer, nextScene) {
 
       !function(myX, myY, myCard, myNumber){
         goog.events.listen(card, ['mousedown', 'touchstart'], function(e) {
+          if (draged) {
+            return false;
+          }
+          draged = true;
+          
           e.startDrag();
-
+          
           e.swallow(['mouseup','touchend'], function(e2){
             stopX = myCard.getPosition().x+(cardSize/2);
             stopY = myCard.getPosition().y+(cardSize/2);
@@ -267,6 +275,7 @@ game.addCardPicture = function(layer, nextScene) {
             } else {
               complete[myNumber] = false;
             }
+            draged = false;
           });
         });
       }((boardTopX + cardSize*j), (boardTopY + cardSize*i), card, cardNumber);        

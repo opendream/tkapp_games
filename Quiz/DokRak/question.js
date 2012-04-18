@@ -277,8 +277,9 @@ question.start = function() {
                         .setSize(180, 80)
                         .setPosition(122, 452);
 					
+					layer.domClassName = goog.getCssName('lime-button');
+                    
 					goog.events.listen(layer, 'click', function (e) {
-							console.log("nextButton Clicked");
 							scene.removeChild(choiceLabel);
 							no = no + 1;
 							if(no < 10){
@@ -311,7 +312,6 @@ question.start = function() {
 									incorrectSound.stop();
 								}
 							}else{
-								console.log("ended game");
 								//set up Score Layer
 								//var medal = scoreManager(score);
 								if (bgSound.isPlaying()){
@@ -425,7 +425,7 @@ question.start = function() {
 						"แม้จะโดนดุบ่อยๆ แต่ดอกรักก็ยังรักยายละไม"
                     ],
                     correct: 4
-				},
+				}
                 ],
                 buildChoice = function (choice) {
                     var buildChoiceAnswer = function (text, isCorrect) {
@@ -479,7 +479,6 @@ question.start = function() {
 									scene.removeChild(doctorNormal);
 									scene.removeChild(backgroundNormal);
 		                            if (isCorrect) {
-										console.log("CORRECT")
 		                                scene.appendChild(nextButton);
 										scene.appendChild(doctorCorrect);
 										scene.appendChild(backgroundCorrect,0);
@@ -507,7 +506,6 @@ question.start = function() {
 										sprite.runAction(animation);
 										
 		                            }else {
-										console.log("INCORRECT")
 										incorrectSound.play();		
 										scene.appendChild(nextButton);
 										scene.appendChild(doctorIncorrect);
