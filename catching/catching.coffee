@@ -100,6 +100,28 @@ IconItem =
     uncle: "item-uncle.png"
     wolf: "item-wolf.png"
 
+IconText =
+    "item-brother.png": "พี่ชาย"
+    "item-buff.png": "ควาย"
+    "item-gamesai.png": "แก้มใส"
+    "item-grandfather.png": "คุณตา"
+    "item-grandmother.png": "คุณยาย"
+    "item-sister.png": "พี่สาว"
+    "item-sister2.png": "น้องสาว"
+    "item-uncle.png": "คุณลุง"
+    "item-wolf.png": "หมาป่า"
+
+IconAudio =
+    "item-brother.png": "item-brother.mp3"
+    "item-buff.png": "item-buff.mp3"
+    "item-gamesai.png": "item-gamesai.mp3"
+    "item-grandfather.png": "item-grandfather.mp3"
+    "item-grandmother.png": "item-grandmother.mp3"
+    "item-sister.png": "item-sister.mp3"
+    "item-sister2.png": "item-sister2.mp3"
+    "item-uncle.png": "item-uncle.mp3"
+    "item-wolf.png": "item-wolf.mp3"
+
 # Helper
 randomItemManager = () ->
     size = goog.object.getCount(IconItem)
@@ -230,24 +252,53 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     goog.array.shuffle catching.blockPatternIdx
     correctIdx = local_blockPattern[0]
     randomManager = do randomItemManager
-    question = addCharacter randomManager.getAt(correctIdx),
-        x: 80
-        y: sceneHeight-100
+
+    file = randomManager.getAt(correctIdx)
+
+    questionBalloon = addCharacter "bubble-big-blue.png"
+        x: -80
+        y: 100
         at: opts.questionLayer
         absolutePosition: true
-        callback: (char) ->
-            char.setAnchorPoint 0, 1
-            char.setOpacity(0)
 
-    FirstSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(1.5), new lime.animation.FadeTo(1))
-    DelaySpawn = new lime.animation.Delay().setDuration(0.6)
+    questionText = new lime.Label().setText(IconText[file]).setPosition(10,30).setFontSize(21).setFontColor('#FFF').setOpacity(0)
+    opts.questionLayer.appendChild questionText
+
+    questionImage = addCharacter file,
+        x: 10,
+        y: -20,
+        at: opts.questionLayer
+        absolutePosition: true
+    questionImage.setOpacity(0)
+
+    opts.questionLayer.setAnchorPoint(0,1).setPosition(150,450)
+    console.log opts.questionLayer
+
+    characterSound = new lime.audio.Audio("assets/sound/#{IconAudio[file]}")
+
+    # Fade in and fade out
+    Delay1 = new lime.animation.Delay().setDuration(1.0)
+    FadeIn = new lime.animation.FadeTo(1).setDuration(0.3)
+    Delay2 = new lime.animation.Delay().setDuration(1.5)
+    FadeOut = new lime.animation.FadeTo(0).setDuration(0.1)
+
+    FadeInOut = new lime.animation.Sequence(Delay1, FadeIn, Delay2, FadeOut)
+    FadeInOut.addTarget questionText
+    FadeInOut.addTarget questionImage
+
+    # Move Up and Fade out
+    FirstSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(1), new lime.animation.FadeTo(1))
+    DelaySpawn = new lime.animation.Delay().setDuration(1.9)
     SecondSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(0), new lime.animation.FadeTo(0).setDuration(1))
 
-
     moveUpOut = new lime.animation.Sequence(FirstSpawn, DelaySpawn, SecondSpawn)
-    console.log moveUpOut.getDuration()
+    questionBalloon.setScale(0).setAnchorPoint(0,1)
+    moveUpOut.addTarget questionBalloon
 
-    question.runAction(moveUpOut)
+
+    lime.scheduleManager.scheduleWithDelay characterSound.play, characterSound, 600
+    FadeInOut.play()
+    moveUpOut.play()
 
     row = 0
     @items = []
@@ -339,7 +390,7 @@ spawnQuestionAndAnswer = (opts) ->
         do (velocity, imageLayer) ->
             lime.scheduleManager.schedule(animate01, imageLayer)
 
-    lime.scheduleManager.scheduleWithDelay(delayFunc, imageLayer, 1000, 1)
+    lime.scheduleManager.scheduleWithDelay(delayFunc, imageLayer, 2000, 1)
 
 #catching
 catching.start = ->
@@ -525,16 +576,41 @@ catching.secondScene = ->
             catching.lblTimer.setText "0 "
             catching.isGameEnded = true
             lime.scheduleManager.unschedule callbackFactory.timer, callbackFactory
-            scene = catching.lastScene()
+            scene = catching.timeoutScene()
             catching.director.replaceScene scene
 
-catching.lastScene = () ->
+catching.timeoutScene = () ->
     scene = new lime.Scene
     allScenes.push scene
     background = new lime.Layer
 
     @theme.stop()
 
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
+    addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
+
+    # Show timeout text
+    addCharacter "gameover.png", x: 0, y: 0, at: background, callback: (char) ->
+        char.setScale 0
+        char.runAction new lime.animation.ScaleTo 1.0
+
+    scene.appendChild background
+
+    changeScene = () -> catching.director.replaceScene catching.lastScene()
+    lime.scheduleManager.scheduleWithDelay changeScene, catching, 1500, 1
+
+    return scene
+
+
+catching.lastScene = () ->
+    scene = new lime.Scene
+    allScenes.push scene
+    background = new lime.Layer
+
+    # Show timeout text
+
+    @theme.stop()
 
     addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
     addCharacter "boy.png", x: -230, y: 170, at: background, callback: (char) -> char.setScale(0.8)
