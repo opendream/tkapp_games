@@ -21,8 +21,8 @@ goog.require 'lime.animation.ScaleBy'
 goog.require 'goog.array'
 goog.require 'lime.GlossyButton'
 
-sceneWidth = 1024
-sceneHeight = 768
+sceneWidth = 800
+sceneHeight = 600
 sceneCenterX = sceneWidth/2
 sceneCenterY = sceneHeight/2
 
@@ -55,7 +55,7 @@ blockPattern = [[
 
         0, 0, 0
         0, 0, 1
-        0, 0, 1 ], [
+        1, 0, 1 ], [
 
         0, 0, 0,
         1, 0, 1
@@ -77,7 +77,7 @@ blockPatternHard = [[
 
         0, 0, 0, 1
         1, 0, 1, 1
-        0, 1, 1, 1 ], [
+        1, 1, 1, 1 ], [
 
         0, 0, 0, 0,
         1, 0, 1, 1,
@@ -96,7 +96,6 @@ IconItem =
     uncle: "item-uncle.png"
     wolf: "item-wolf.png"
 
-
 # Helper
 randomItemManager = () ->
     size = goog.object.getCount(IconItem)
@@ -113,7 +112,6 @@ randomItemManager = () ->
             IconItemArray[0]
     }
 
-
 # score
 @score = do ->
     _score = 0
@@ -129,41 +127,44 @@ randomItemManager = () ->
 setUp = (opts) ->
     switch opts.part
         when "gameFrame"
-            addCharacter "scene_bg.png", x: 4, y: -10, w: -150, h: -130, at: opts.at
-            addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: opts.at
-            addCharacter "game_bg.png", x: 0, y: 0, w: 0, h: 0, at: opts.at
+            console.log "gameFrame"
+            # b3 = addCharacter "game_frame.png", x: 0, y: 5, at: opts.at, w: sceneWidth - 5, h: sceneHeight - 20, weight: 20
+            # b2 = addCharacter "game_bg.png", x: 0, y: 0, at: opts.at, w: sceneWidth weight: 30
+            # b2.setScale 1.0
+            # b1 = addCharacter "scene_bg.png", x: 4, y: -10, at: opts.at, w: sceneWidth, h: sceneHeight, weight: 100
         when "blockPipe"
             if opts.by is 3
-                startX = 235
+                startX = 120
+                margin = 225
                 addCharacter "block_pipe.png",
-                x: startX, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                x: startX, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
                 callback: (char) -> char.setAnchorPoint 0, 0
 
                 addCharacter "block_pipe.png",
-                x: startX * 2, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                x: startX + margin, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
                 callback: (char) -> char.setAnchorPoint 0, 0
 
                 addCharacter "block_pipe.png",
-                x: startX * 3, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                x: startX + 2*margin, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
                 callback: (char) -> char.setAnchorPoint 0, 0
             else
-                startX = 100
-                margin = 245
+                startX = 80
+                margin = 180
                 return [
                     addCharacter "block_pipe.png",
-                    x: startX, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                    x: startX, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
                     callback: (char) -> char.setAnchorPoint 0, 0
 
                     addCharacter "block_pipe.png",
-                    x: startX + margin, y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                    x: startX + margin, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
                     callback: (char) -> char.setAnchorPoint 0, 0
 
                     addCharacter "block_pipe.png",
-                    x: startX + (2 * margin), y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                    x: startX + (2 * margin), y: 45, w: 104, h: 122, absolute: true, at: opts.at,
                     callback: (char) -> char.setAnchorPoint 0, 0
 
                     addCharacter "block_pipe.png",
-                    x: startX + (3 * margin), y: 50, w: 104, h: 122, absolute: true, at: opts.at,
+                    x: startX + (3 * margin), y: 45, w: 104, h: 122, absolute: true, at: opts.at,
                     callback: (char) -> char.setAnchorPoint 0, 0
                 ]
 
@@ -179,18 +180,25 @@ addCharacter =  (image, opts) ->
         posX = sceneCenterX + opts.x
         posY = sceneCenterY + opts.y
 
-    if opts.absoluteSize? is true or opts.absolute? is true
-        width=opts.w
-        height=opts.h
-    else
-        width = sceneWidth+opts.w
-        height = sceneHeight+opts.h
+    # if opts.absoluteSize? is true or opts.absolute? is true
+    #     width=opts.w
+    #     height=opts.h
+    # else
+    #     width = sceneWidth+opts.w
+    #     height = sceneHeight+opts.h
+    if opts.w?
+        width = opts.w
+    if opts.h?
+        height = opts.h
+
+    weight = weight || 100
 
     character.setPosition posX, posY if opts.x? and opts.y?
     character.setSize width, height if opts.w? and opts.h?
-    opts.at.appendChild character
+    opts.at.appendChild character, weight
     opts.callback?(character)
     character.name = opts.name if opts.name?
+
     return character
 
 
@@ -213,7 +221,6 @@ startTimer = (opts = {} ) ->
 
 buildSetOfAnimation = (col=3, opts = {}) ->
     imageLayer = new lime.Layer
-    startX = 235
     goog.array.shuffle catching.blockPatternIdx
     local_blockPattern = catching.blockPatternIdx[0]
     goog.array.shuffle catching.blockPatternIdx
@@ -234,17 +241,22 @@ buildSetOfAnimation = (col=3, opts = {}) ->
             if -1 is local_blockPattern.indexOf flatIdx then  continue
             item = addCharacter randomManager.getItem(), x: -sceneCenterX, y: -sceneCenterY, at: imageLayer, Idx: flatIdx, name: "Image #{flatIdx}"
             if col is 3
-                positionX = startX*(x+1)+55
+                startX = 175
+                margin = 225
+                positionX = startX + (x*margin)
                 positionY = 20+y*100
             else
-                startX = 155
-                margin = 245
+                startX = 135
+                margin = 180
+
                 positionX = startX + (x * margin)
                 positionY = 20+y*100
 
             item.setPosition positionX, positionY
             do (item, flatIdx) ->
                 # item.fill_.image_.style.cursor = "hand"
+                item.domClassName = goog.getCssName('lime-button');
+
                 listen_key = goog.events.listen item, ['click', 'touchstart'], (e) ->
                     that = this
                     if flatIdx is correctIdx
@@ -254,7 +266,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                         lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
                         score.add()
                         moveUp = new lime.animation.MoveBy(0, -120).setDuration(0.4)
-                        correctArrow = addCharacter "correct.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer
+                        correctArrow = addCharacter "correct.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (char) -> char.setScale(0.7)
                         moveUp.addTarget(correctArrow).play()
                         do ->
                             callback = ->
@@ -262,7 +274,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                                 spawnQuestionAndAnswer questionLayer: opts.questionLayer, background: opts.background
                             setTimeout callback, 500
                     else
-                        wrongArrow = addCharacter "wrong.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer
+                        wrongArrow = addCharacter "wrong.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (char) -> char.setScale(0.7)
                         moveUp = new lime.animation.MoveBy(0, -100).setDuration(0.8)
                         # moveUp.addTarget(wrongArrow).play()
 
@@ -282,18 +294,17 @@ buildSetOfAnimation = (col=3, opts = {}) ->
 
 spawnQuestionAndAnswer = (opts) ->
     background = opts.background
-
     col = if catching.level is 'hard' then 4 else 3;
     questionLayer = opts.questionLayer
     questionLayer.removeAllChildren()
     imageLayer = buildSetOfAnimation col, questionLayer: questionLayer, background: background
-    background.appendChild imageLayer
+    background.appendChild imageLayer, 1
     background.appendChild questionLayer
+
     # Animate
     velocity = 0.1;
     ORDER = 0
     animate01 = (dt) ->
-        console.log "ANIMATE ORDER", ORDER
         position = this.getPosition()
         position.y += velocity * dt # if dt is bigger we just move more
         if position.y > 700
@@ -307,13 +318,8 @@ spawnQuestionAndAnswer = (opts) ->
 
     answerAnimationFactory.push callback: animate01, scope: imageLayer
 
-    setUp part: 'blockPipe', by: col, at: background
-    addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: background
     do (velocity, imageLayer) ->
-        ORDER++
         lime.scheduleManager.schedule(animate01, imageLayer)
-
-
 
 #catching
 catching.start = ->
@@ -345,19 +351,21 @@ catching.intro = ->
     # new lime.animation.FadeTo(0).addTarget(smoke[2]).play()
     # new lime.animation.FadeTo(0).addTarget(smoke[3]).play()
 
-    setUp part: 'gameFrame', at: background
-    addCharacter "boy.png", x: -280, y: 170, at: background
-    addCharacter "girl.png", x: -100, y: 200, at: background
-    addCharacter "postbox.png", x: 350, y: 150, at: background
-    addCharacter "title_1.png", x: 0, y: -200, at: background
-    addCharacter "title_2.png", x: 0, y: -75, at: background
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
+    addCharacter "boy.png", x: -230, y: 170, at: background, callback: (char) -> char.setScale(0.8)
+    addCharacter "girl.png", x: -60, y: 150, at: background, callback: (char) -> char.setScale(0.8)
+    addCharacter "postbox.png", x: 250, y: 100, at: background, callback: (char) -> char.setScale(0.9)
+    addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
+    addCharacter "title_1.png", x: 0, y: -180, at: background, callback: (char) -> char.setScale (0.9)
+    addCharacter "title_2.png", x: 0, y: -75, at: background, callback: (char) -> char.setScale (0.9)
 
 
     btnState1 = new lime.Sprite().setFill 'assets/images/btn_start_normal.png'
     btnState2 = new lime.Sprite().setFill 'assets/images/btn_start_active.png'
 
 
-    btnStart = new lime.Button(btnState1, btnState2).setPosition(sceneCenterX + 300, sceneCenterY + 260).setScale 1.3
+    btnStart = new lime.Button(btnState1, btnState2).setPosition(sceneCenterX + 235, sceneCenterY + 200).setScale(0.9)
 
     background.appendChild btnStart
     catching.director.replaceScene scene
@@ -371,34 +379,44 @@ catching.selectLevel = ->
     background = new lime.Layer
     scene.appendChild background
 
-    setUp part: 'gameFrame', at: background
-    boy  = addCharacter "boy.png", x: -280, y: 170, at: background
-    girl = addCharacter "girl.png", x: -100, y: 200, at: background
-    postbox = addCharacter "postbox.png", x: 350, y: 150, at: background
-    addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: background
-    title1 = addCharacter "title_1.png", x: 0, y: -200, at: background
-    title2 = addCharacter "title_2.png", x: 0, y: -75, at: background
+    # setUp part: 'gameFrame', at: background
+    # boy  = addCharacter "boy.png", x: -280, y: 170, at: background
+    # girl = addCharacter "girl.png", x: -100, y: 200, at: background
+    # postbox = addCharacter "postbox.png", x: 350, y: 150, at: background
+    # addCharacter "game_frame.png", x: 0, y: 0, w: 40, h: -20, at: background
+    # title1 = addCharacter "title_1.png", x: 0, y: -200, at: background
+    # title2 = addCharacter "title_2.png", x: 0, y: -75, at: background
+
+
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
+    boy = addCharacter "boy.png", x: -230, y: 170, at: background, callback: (char) -> char.setScale(0.8)
+    girl = addCharacter "girl.png", x: -60, y: 150, at: background, callback: (char) -> char.setScale(0.8)
+    postbox = addCharacter "postbox.png", x: 250, y: 100, at: background, callback: (char) -> char.setScale(0.9)
+    addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
+    title1 = addCharacter "title_1.png", x: 0, y: -180, at: background, callback: (char) -> char.setScale (0.9)
+    title2 = addCharacter "title_2.png", x: 0, y: -75, at: background, callback: (char) -> char.setScale (0.9)
 
     boyAction = new lime.animation.Spawn(
-        new lime.animation.MoveTo(boy.position_.x-60, boy.position_.y),
-        new lime.animation.FadeTo(100)
+        new lime.animation.MoveBy(-40, 0).enableOptimizations(),
+        new lime.animation.FadeTo(100).enableOptimizations()
     );
 
 
-    moveTitleUp = new lime.animation.MoveBy(0, -80).setDuration(0.8)
+    moveTitleUp = new lime.animation.MoveBy(0, -30).setDuration(0.8).enableOptimizations()
     moveTitleUp.addTarget title1
     moveTitleUp.addTarget title2
     moveTitleUp.play()
 
 
     girlAction = new lime.animation.Spawn(
-        new lime.animation.MoveTo(girl.position_.x+480, girl.position_.y),
-        new lime.animation.FadeTo(100)
+        new lime.animation.MoveBy(300, 0).enableOptimizations(),
+        new lime.animation.FadeTo(100).enableOptimizations()
     );
 
     postboxAction = new lime.animation.Spawn(
-        new lime.animation.FadeTo(100)
-        new lime.animation.FadeTo(0)
+        new lime.animation.FadeTo(100).enableOptimizations()
+        new lime.animation.FadeTo(0).enableOptimizations()
     );
 
     girl.runAction(girlAction.setDuration(0.8))
@@ -410,11 +428,11 @@ catching.selectLevel = ->
 
     btnEasyState1 = new lime.Sprite().setFill 'assets/images/btn-lv1.png'
     btnEasyState2 = new lime.Sprite().setFill 'assets/images/btn-lv1-hover.png'
-    buttonEasy = new lime.Button(btnEasyState1, btnEasyState2).setPosition(sceneCenterX, sceneCenterY-50)
+    buttonEasy = new lime.Button(btnEasyState1, btnEasyState2).setPosition(sceneCenterX, sceneCenterY)
 
     btnLv2State1 = new lime.Sprite().setFill 'assets/images/btn-lv2.png'
     btnLv2State2 = new lime.Sprite().setFill 'assets/images/btn-lv2-hover.png'
-    buttonHard = new lime.Button(btnLv2State1, btnLv2State2).setPosition(sceneCenterX, sceneCenterY+50)
+    buttonHard = new lime.Button(btnLv2State1, btnLv2State2).setPosition(sceneCenterX, sceneCenterY+100)
 
     buttonLayer.appendChild buttonEasy
     buttonLayer.appendChild buttonHard
@@ -448,8 +466,14 @@ catching.secondScene = ->
 
     scene.appendChild background
 
-    setUp part: 'gameFrame', at: background
-    clock = addCharacter "clock.png", x: sceneCenterX-100, y: sceneCenterY-140, at: background, name: 'Clock'
+    col = if catching.level is 'easy' then 3 else 4
+
+
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
+    addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
+    setUp part: 'blockPipe', by: col, at: background
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
+    clock = addCharacter "clock.png", x: sceneCenterX-85, y: sceneCenterY-120, at: background, name: 'Clock'
 
     questionLayer = new lime.Layer
     background.appendChild questionLayer
@@ -464,7 +488,7 @@ catching.secondScene = ->
 
     startTimer
         limit: if catching.level is 'hard' then 70 else 80
-        delay: 10
+        delay: 1000
         limeScope: callbackFactory
         runningCallback: (rt) ->
             catching.lblTimer.setText(rt)
@@ -500,6 +524,13 @@ catching.lastScene = () ->
     scoreLabel = new lime.Label
 
     scoreLabel.setText(score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48)
+    menu2.domClassName = goog.getCssName('lime-button');
+
+
+    goog.events.listen menu2, ['click', 'touchstart'], ->
+        catching.intro()
+
+
 
     scene.appendChild background
     scene.appendChild scoreLabel
