@@ -111,7 +111,16 @@ IconText =
     "item-uncle.png": "คุณลุง"
     "item-wolf.png": "หมาป่า"
 
-
+IconAudio =
+    "item-brother.png": "item-brother.mp3"
+    "item-buff.png": "item-buff.mp3"
+    "item-gamesai.png": "item-gamesai.mp3"
+    "item-grandfather.png": "item-grandfather.mp3"
+    "item-grandmother.png": "item-grandmother.mp3"
+    "item-sister.png": "item-sister.mp3"
+    "item-sister2.png": "item-sister2.mp3"
+    "item-uncle.png": "item-uncle.mp3"
+    "item-wolf.png": "item-wolf.mp3"
 
 # Helper
 randomItemManager = () ->
@@ -265,6 +274,8 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     opts.questionLayer.setAnchorPoint(0,1).setPosition(150,450)
     console.log opts.questionLayer
 
+    characterSound = new lime.audio.Audio("assets/sound/#{IconAudio[file]}")
+
     # Fade in and fade out
     Delay1 = new lime.animation.Delay().setDuration(1.0)
     FadeIn = new lime.animation.FadeTo(1).setDuration(0.3)
@@ -283,6 +294,9 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     moveUpOut = new lime.animation.Sequence(FirstSpawn, DelaySpawn, SecondSpawn)
     questionBalloon.setScale(0).setAnchorPoint(0,1)
     moveUpOut.addTarget questionBalloon
+
+
+    lime.scheduleManager.scheduleWithDelay characterSound.play, characterSound, 600
     FadeInOut.play()
     moveUpOut.play()
 

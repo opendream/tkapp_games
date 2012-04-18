@@ -1,5 +1,5 @@
 (function() {
-  var IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
+  var IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('catching');
 
@@ -95,6 +95,18 @@
     "item-sister2.png": "น้องสาว",
     "item-uncle.png": "คุณลุง",
     "item-wolf.png": "หมาป่า"
+  };
+
+  IconAudio = {
+    "item-brother.png": "item-brother.mp3",
+    "item-buff.png": "item-buff.mp3",
+    "item-gamesai.png": "item-gamesai.mp3",
+    "item-grandfather.png": "item-grandfather.mp3",
+    "item-grandmother.png": "item-grandmother.mp3",
+    "item-sister.png": "item-sister.mp3",
+    "item-sister2.png": "item-sister2.mp3",
+    "item-uncle.png": "item-uncle.mp3",
+    "item-wolf.png": "item-wolf.mp3"
   };
 
   randomItemManager = function() {
@@ -287,7 +299,7 @@
   };
 
   buildSetOfAnimation = function(col, opts) {
-    var Delay1, Delay2, DelaySpawn, FadeIn, FadeInOut, FadeOut, FirstSpawn, SecondSpawn, correctIdx, file, flatIdx, imageLayer, item, local_blockPattern, margin, moveUpOut, positionX, positionY, questionBalloon, questionImage, questionText, randomManager, row, startX, x, y, _fn;
+    var Delay1, Delay2, DelaySpawn, FadeIn, FadeInOut, FadeOut, FirstSpawn, SecondSpawn, characterSound, correctIdx, file, flatIdx, imageLayer, item, local_blockPattern, margin, moveUpOut, positionX, positionY, questionBalloon, questionImage, questionText, randomManager, row, startX, x, y, _fn;
     if (col == null) col = 3;
     if (opts == null) opts = {};
     imageLayer = new lime.Layer;
@@ -314,6 +326,7 @@
     questionImage.setOpacity(0);
     opts.questionLayer.setAnchorPoint(0, 1).setPosition(150, 450);
     console.log(opts.questionLayer);
+    characterSound = new lime.audio.Audio("assets/sound/" + IconAudio[file]);
     Delay1 = new lime.animation.Delay().setDuration(1.0);
     FadeIn = new lime.animation.FadeTo(1).setDuration(0.3);
     Delay2 = new lime.animation.Delay().setDuration(1.5);
@@ -327,6 +340,7 @@
     moveUpOut = new lime.animation.Sequence(FirstSpawn, DelaySpawn, SecondSpawn);
     questionBalloon.setScale(0).setAnchorPoint(0, 1);
     moveUpOut.addTarget(questionBalloon);
+    lime.scheduleManager.scheduleWithDelay(characterSound.play, characterSound, 600);
     FadeInOut.play();
     moveUpOut.play();
     row = 0;
