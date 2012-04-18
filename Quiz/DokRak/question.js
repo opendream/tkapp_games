@@ -452,9 +452,9 @@ question.start = function() {
                         answer
                             .setText(text)
                             .setAlign('left')
-                            .setFontSize(26)
+                            .setFontSize(20)
                             .setSize(250, 50)
-                            .setPosition(5, 0)
+                            .setPosition(5, 5)
                             .setFontColor(normalColor);
 
                         goog.events.listen(answer, ['mouseover', 'mousemove'], function (e) {
