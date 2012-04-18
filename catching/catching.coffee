@@ -100,6 +100,19 @@ IconItem =
     uncle: "item-uncle.png"
     wolf: "item-wolf.png"
 
+IconText =
+    "item-brother.png": "พี่ชาย"
+    "item-buff.png": "ควาย"
+    "item-gamesai.png": "แก้มใส"
+    "item-grandfather.png": "คุณตา"
+    "item-grandmother.png": "คุณยาย"
+    "item-sister.png": "พี่สาว"
+    "item-sister2.png": "น้องสาว"
+    "item-uncle.png": "คุณลุง"
+    "item-wolf.png": "หมาป่า"
+
+
+
 # Helper
 randomItemManager = () ->
     size = goog.object.getCount(IconItem)
@@ -230,24 +243,48 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     goog.array.shuffle catching.blockPatternIdx
     correctIdx = local_blockPattern[0]
     randomManager = do randomItemManager
-    question = addCharacter randomManager.getAt(correctIdx),
-        x: 80
-        y: sceneHeight-100
+
+    file = randomManager.getAt(correctIdx)
+
+    questionBalloon = addCharacter "bubble-big-blue.png"
+        x: -80
+        y: 100
         at: opts.questionLayer
         absolutePosition: true
-        callback: (char) ->
-            char.setAnchorPoint 0, 1
-            char.setOpacity(0)
 
-    FirstSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(1.5), new lime.animation.FadeTo(1))
-    DelaySpawn = new lime.animation.Delay().setDuration(0.6)
+    questionText = new lime.Label().setText(IconText[file]).setPosition(10,30).setFontSize(21).setFontColor('#FFF').setOpacity(0)
+    opts.questionLayer.appendChild questionText
+
+    questionImage = addCharacter file,
+        x: 10,
+        y: -20,
+        at: opts.questionLayer
+        absolutePosition: true
+    questionImage.setOpacity(0)
+
+    opts.questionLayer.setAnchorPoint(0,1).setPosition(150,450)
+    console.log opts.questionLayer
+
+    # Fade in and fade out
+    Delay1 = new lime.animation.Delay().setDuration(1.0)
+    FadeIn = new lime.animation.FadeTo(1).setDuration(0.3)
+    Delay2 = new lime.animation.Delay().setDuration(1.5)
+    FadeOut = new lime.animation.FadeTo(0).setDuration(0.1)
+
+    FadeInOut = new lime.animation.Sequence(Delay1, FadeIn, Delay2, FadeOut)
+    FadeInOut.addTarget questionText
+    FadeInOut.addTarget questionImage
+
+    # Move Up and Fade out
+    FirstSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(1), new lime.animation.FadeTo(1))
+    DelaySpawn = new lime.animation.Delay().setDuration(1.9)
     SecondSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(0), new lime.animation.FadeTo(0).setDuration(1))
 
-
     moveUpOut = new lime.animation.Sequence(FirstSpawn, DelaySpawn, SecondSpawn)
-    console.log moveUpOut.getDuration()
-
-    question.runAction(moveUpOut)
+    questionBalloon.setScale(0).setAnchorPoint(0,1)
+    moveUpOut.addTarget questionBalloon
+    FadeInOut.play()
+    moveUpOut.play()
 
     row = 0
     @items = []
@@ -339,7 +376,7 @@ spawnQuestionAndAnswer = (opts) ->
         do (velocity, imageLayer) ->
             lime.scheduleManager.schedule(animate01, imageLayer)
 
-    lime.scheduleManager.scheduleWithDelay(delayFunc, imageLayer, 1000, 1)
+    lime.scheduleManager.scheduleWithDelay(delayFunc, imageLayer, 2000, 1)
 
 #catching
 catching.start = ->

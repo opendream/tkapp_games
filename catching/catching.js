@@ -1,5 +1,5 @@
 (function() {
-  var IconItem, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
+  var IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('catching');
 
@@ -83,6 +83,18 @@
     sister2: "item-sister2.png",
     uncle: "item-uncle.png",
     wolf: "item-wolf.png"
+  };
+
+  IconText = {
+    "item-brother.png": "พี่ชาย",
+    "item-buff.png": "ควาย",
+    "item-gamesai.png": "แก้มใส",
+    "item-grandfather.png": "คุณตา",
+    "item-grandmother.png": "คุณยาย",
+    "item-sister.png": "พี่สาว",
+    "item-sister2.png": "น้องสาว",
+    "item-uncle.png": "คุณลุง",
+    "item-wolf.png": "หมาป่า"
   };
 
   randomItemManager = function() {
@@ -275,7 +287,7 @@
   };
 
   buildSetOfAnimation = function(col, opts) {
-    var DelaySpawn, FirstSpawn, SecondSpawn, correctIdx, flatIdx, imageLayer, item, local_blockPattern, margin, moveUpOut, positionX, positionY, question, randomManager, row, startX, x, y, _fn;
+    var Delay1, Delay2, DelaySpawn, FadeIn, FadeInOut, FadeOut, FirstSpawn, SecondSpawn, correctIdx, file, flatIdx, imageLayer, item, local_blockPattern, margin, moveUpOut, positionX, positionY, questionBalloon, questionImage, questionText, randomManager, row, startX, x, y, _fn;
     if (col == null) col = 3;
     if (opts == null) opts = {};
     imageLayer = new lime.Layer;
@@ -284,22 +296,39 @@
     goog.array.shuffle(catching.blockPatternIdx);
     correctIdx = local_blockPattern[0];
     randomManager = randomItemManager();
-    question = addCharacter(randomManager.getAt(correctIdx), {
-      x: 80,
-      y: sceneHeight - 100,
+    file = randomManager.getAt(correctIdx);
+    questionBalloon = addCharacter("bubble-big-blue.png", {
+      x: -80,
+      y: 100,
       at: opts.questionLayer,
-      absolutePosition: true,
-      callback: function(char) {
-        char.setAnchorPoint(0, 1);
-        return char.setOpacity(0);
-      }
+      absolutePosition: true
     });
-    FirstSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(1.5), new lime.animation.FadeTo(1));
-    DelaySpawn = new lime.animation.Delay().setDuration(0.6);
+    questionText = new lime.Label().setText(IconText[file]).setPosition(10, 30).setFontSize(21).setFontColor('#FFF').setOpacity(0);
+    opts.questionLayer.appendChild(questionText);
+    questionImage = addCharacter(file, {
+      x: 10,
+      y: -20,
+      at: opts.questionLayer,
+      absolutePosition: true
+    });
+    questionImage.setOpacity(0);
+    opts.questionLayer.setAnchorPoint(0, 1).setPosition(150, 450);
+    console.log(opts.questionLayer);
+    Delay1 = new lime.animation.Delay().setDuration(1.0);
+    FadeIn = new lime.animation.FadeTo(1).setDuration(0.3);
+    Delay2 = new lime.animation.Delay().setDuration(1.5);
+    FadeOut = new lime.animation.FadeTo(0).setDuration(0.1);
+    FadeInOut = new lime.animation.Sequence(Delay1, FadeIn, Delay2, FadeOut);
+    FadeInOut.addTarget(questionText);
+    FadeInOut.addTarget(questionImage);
+    FirstSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(1), new lime.animation.FadeTo(1));
+    DelaySpawn = new lime.animation.Delay().setDuration(1.9);
     SecondSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(0), new lime.animation.FadeTo(0).setDuration(1));
     moveUpOut = new lime.animation.Sequence(FirstSpawn, DelaySpawn, SecondSpawn);
-    console.log(moveUpOut.getDuration());
-    question.runAction(moveUpOut);
+    questionBalloon.setScale(0).setAnchorPoint(0, 1);
+    moveUpOut.addTarget(questionBalloon);
+    FadeInOut.play();
+    moveUpOut.play();
     row = 0;
     this.items = [];
     row = 3;
@@ -436,7 +465,7 @@
         return lime.scheduleManager.schedule(animate01, imageLayer);
       })(velocity, imageLayer);
     };
-    return lime.scheduleManager.scheduleWithDelay(delayFunc, imageLayer, 1000, 1);
+    return lime.scheduleManager.scheduleWithDelay(delayFunc, imageLayer, 2000, 1);
   };
 
   catching.start = function() {
@@ -712,10 +741,56 @@
         catching.lblTimer.setText("0 ");
         catching.isGameEnded = true;
         lime.scheduleManager.unschedule(callbackFactory.timer, callbackFactory);
-        scene = catching.lastScene();
+        scene = catching.timeoutScene();
         return catching.director.replaceScene(scene);
       }
     });
+  };
+
+  catching.timeoutScene = function() {
+    var background, changeScene, scene;
+    scene = new lime.Scene;
+    allScenes.push(scene);
+    background = new lime.Layer;
+    this.theme.stop();
+    addCharacter("scene_bg.png", {
+      x: 2,
+      y: 10,
+      at: background,
+      callback: function(char) {
+        return char.setScale(0.99);
+      }
+    });
+    addCharacter("game_bg.png", {
+      x: 0,
+      y: 0,
+      at: background,
+      w: sceneWidth,
+      h: sceneHeight
+    });
+    addCharacter("game_frame.png", {
+      x: -2,
+      y: 5,
+      at: background,
+      callback: function(char) {
+        return char.setScale(0.95, 0.9);
+      }
+    });
+    addCharacter("gameover.png", {
+      x: 0,
+      y: 0,
+      at: background,
+      callback: function(char) {
+        char.setScale(0);
+        return char.runAction(new lime.animation.ScaleTo(1.0));
+      }
+    });
+    scene.appendChild(background);
+    changeScene = function() {
+      return catching.director.replaceScene(catching.lastScene());
+    };
+    lime.scheduleManager.scheduleWithDelay(changeScene, catching, 1500, 1);
+    return scene;
   };
 
   catching.lastScene = function() {
