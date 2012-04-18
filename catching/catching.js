@@ -21,6 +21,8 @@
 
   goog.require('lime.animation.Spawn');
 
+  goog.require('lime.animation.Sequence');
+
   goog.require('lime.animation.FadeTo');
 
   goog.require('lime.animation.ScaleTo');
@@ -30,6 +32,8 @@
   goog.require('lime.animation.MoveBy');
 
   goog.require('lime.animation.ScaleBy');
+
+  goog.require('lime.audio.Audio');
 
   goog.require('goog.array');
 
@@ -50,6 +54,8 @@
   this.muteMe = [];
 
   this.allScenes = [];
+
+  catching.isGameEnded = false;
 
   this.answerAnimationFactory = [];
 
@@ -269,7 +275,7 @@
   };
 
   buildSetOfAnimation = function(col, opts) {
-    var correctIdx, flatIdx, imageLayer, item, local_blockPattern, margin, positionX, positionY, question, randomManager, row, startX, x, y, _fn;
+    var DelaySpawn, FirstSpawn, SecondSpawn, correctIdx, flatIdx, imageLayer, item, local_blockPattern, margin, moveUpOut, positionX, positionY, question, randomManager, row, startX, x, y, _fn;
     if (col == null) col = 3;
     if (opts == null) opts = {};
     imageLayer = new lime.Layer;
@@ -279,14 +285,21 @@
     correctIdx = local_blockPattern[0];
     randomManager = randomItemManager();
     question = addCharacter(randomManager.getAt(correctIdx), {
-      x: 100,
-      y: sceneHeight - 200,
+      x: 80,
+      y: sceneHeight - 100,
       at: opts.questionLayer,
       absolutePosition: true,
       callback: function(char) {
-        return char.setAnchorPoint(0, 0);
+        char.setAnchorPoint(0, 1);
+        return char.setOpacity(0);
       }
     });
+    FirstSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(1.5), new lime.animation.FadeTo(1));
+    DelaySpawn = new lime.animation.Delay().setDuration(0.6);
+    SecondSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(0), new lime.animation.FadeTo(0).setDuration(1));
+    moveUpOut = new lime.animation.Sequence(FirstSpawn, DelaySpawn, SecondSpawn);
+    console.log(moveUpOut.getDuration());
+    question.runAction(moveUpOut);
     row = 0;
     this.items = [];
     row = 3;
@@ -295,7 +308,7 @@
         var listen_key;
         item.domClassName = goog.getCssName('lime-button');
         listen_key = goog.events.listen(item, ['click', 'touchstart'], function(e) {
-          var correctArrow, moveUp, moveUpOut, position, runningSchedule, that, wrongArrow;
+          var correctArrow, moveUp, position, runningSchedule, that, wrongArrow;
           that = this;
           if (flatIdx === correctIdx) {
             goog.array.forEach(muteMe, function(e, i) {
@@ -363,12 +376,12 @@
           startX = 175;
           margin = 225;
           positionX = startX + (x * margin);
-          positionY = 20 + y * 100;
+          positionY = y * 100 - 150;
         } else {
           startX = 135;
           margin = 180;
           positionX = startX + (x * margin);
-          positionY = 20 + y * 100;
+          positionY = y * 100 - 150;
         }
         item.setPosition(positionX, positionY);
         _fn(item, flatIdx);
@@ -379,7 +392,7 @@
   };
 
   spawnQuestionAndAnswer = function(opts) {
-    var ORDER, animate01, background, col, imageLayer, questionLayer, velocity;
+    var background, col, delayFunc, imageLayer, questionLayer;
     background = opts.background;
     col = catching.level === 'hard' ? 4 : 3;
     questionLayer = opts.questionLayer;
@@ -390,43 +403,59 @@
     });
     background.appendChild(imageLayer, 1);
     background.appendChild(questionLayer);
-    velocity = 0.1;
-    ORDER = 0;
-    animate01 = function(dt) {
-      var position, runningSchedule;
-      position = this.getPosition();
-      position.y += velocity * dt;
-      if (position.y > 700) {
-        goog.array.forEach(muteMe, function(e) {
-          return goog.events.removeAll(e);
-        });
-        runningSchedule = answerAnimationFactory.pop();
-        lime.scheduleManager.unschedule(runningSchedule.callback, runningSchedule.scope);
-        imageLayer.removeAllChildren();
-        spawnQuestionAndAnswer({
-          background: background,
-          questionLayer: questionLayer
-        });
-      }
-      return this.setPosition(position);
+    delayFunc = function() {
+      var animate01, velocity;
+      velocity = 0.1;
+      animate01 = function(dt) {
+        var position, runningSchedule;
+        position = this.getPosition();
+        position.y += velocity * dt;
+        console.log("ANIMATING");
+        if (position.y > 600) {
+          goog.array.forEach(muteMe, function(e) {
+            return goog.events.removeAll(e);
+          });
+          runningSchedule = answerAnimationFactory.pop();
+          lime.scheduleManager.unschedule(runningSchedule.callback, runningSchedule.scope);
+          imageLayer.removeAllChildren();
+          if (catching.isGameEnded === false) {
+            spawnQuestionAndAnswer({
+              background: background,
+              questionLayer: questionLayer
+            });
+          }
+        }
+        return this.setPosition(position);
+      };
+      answerAnimationFactory.push({
+        callback: animate01,
+        scope: imageLayer
+      });
+      console.log(answerAnimationFactory);
+      return (function(velocity, imageLayer) {
+        return lime.scheduleManager.schedule(animate01, imageLayer);
+      })(velocity, imageLayer);
     };
-    answerAnimationFactory.push({
-      callback: animate01,
-      scope: imageLayer
-    });
-    return (function(velocity, imageLayer) {
-      return lime.scheduleManager.schedule(animate01, imageLayer);
-    })(velocity, imageLayer);
+    return lime.scheduleManager.scheduleWithDelay(delayFunc, imageLayer, 1000, 1);
   };
 
   catching.start = function() {
     var scene;
     catching.director = new lime.Director(document.body, sceneWidth, sceneHeight);
+    try {
+      this.theme = new lime.audio.Audio("assets/sound/theme-song.mp3");
+      this.theme.baseElement.loop = true;
+    } catch (e) {
+      if (typeof console !== "undefined" && console !== null) {
+        if (typeof console.log === "function") console.log(e);
+      }
+    }
     return scene = catching.intro();
   };
 
   catching.intro = function() {
     var background, btnStart, btnState1, btnState2, scene, smoke;
+    catching.isGameEnded = false;
     this.allScenes = [];
     scene = new lime.Scene;
     allScenes.push(scene);
@@ -613,6 +642,7 @@
       catching.blockPatternIdx = goog.array.map(blockPatternHard, function(e, i) {
         return getIdxMap(e);
       });
+      console.log(catching.blockPatternIdx);
       return catching.secondScene();
     });
     return catching.director.replaceScene(scene);
@@ -623,6 +653,7 @@
     scene = new lime.Scene;
     allScenes.push(scene);
     background = new lime.Layer;
+    this.theme.play();
     scene.appendChild(background);
     col = catching.level === 'easy' ? 3 : 4;
     addCharacter("scene_bg.png", {
@@ -678,10 +709,8 @@
         return catching.lblTimer.setText(rt);
       },
       timeoutCallback: function(rt) {
-        var runningSchedule;
         catching.lblTimer.setText("0 ");
-        runningSchedule = answerAnimationFactory.pop();
-        lime.scheduleManager.unschedule(runningSchedule.callback, runningSchedule.scope);
+        catching.isGameEnded = true;
         lime.scheduleManager.unschedule(callbackFactory.timer, callbackFactory);
         scene = catching.lastScene();
         return catching.director.replaceScene(scene);
@@ -690,46 +719,66 @@
   };
 
   catching.lastScene = function() {
-    var background, boy, bubble, girl, menu, menu1, menu2, scene, scoreLabel, title1;
+    var background, bubble, menu, menu2, scene, scoreLabel, title1;
     scene = new lime.Scene;
     allScenes.push(scene);
     background = new lime.Layer;
-    setUp({
-      part: 'gameFrame',
-      at: background
+    this.theme.stop();
+    addCharacter("scene_bg.png", {
+      x: 2,
+      y: 10,
+      at: background,
+      callback: function(char) {
+        return char.setScale(0.99);
+      }
+    });
+    addCharacter("boy.png", {
+      x: -230,
+      y: 170,
+      at: background,
+      callback: function(char) {
+        return char.setScale(0.8);
+      }
+    });
+    addCharacter("girl.png", {
+      x: -60,
+      y: 150,
+      at: background,
+      callback: function(char) {
+        return char.setScale(0.8);
+      }
+    });
+    addCharacter("game_bg.png", {
+      x: 0,
+      y: 0,
+      at: background,
+      w: sceneWidth,
+      h: sceneHeight
+    });
+    addCharacter("game_frame.png", {
+      x: -2,
+      y: 5,
+      at: background,
+      callback: function(char) {
+        return char.setScale(0.95, 0.9);
+      }
     });
     menu = addCharacter("list.png", {
-      x: -295,
-      y: -170,
+      x: -225,
+      y: -150,
       at: background
     });
-    menu.setScale(1.2);
     title1 = addCharacter("title_1.png", {
-      x: -295,
-      y: -310,
-      at: background
+      x: -225,
+      y: -260,
+      at: background,
+      callback: function(char) {
+        return char.setScale(0.4);
+      }
     });
-    title1.setScale(0.5);
-    menu1 = addCharacter("menu-story.png", {
-      x: -295,
-      y: -230,
-      at: background
-    });
-    menu1.setScale(1.3);
     menu2 = addCharacter("menu-replay.png", {
-      x: -295,
-      y: -156,
-      at: background
-    });
-    menu2.setScale(1.3);
-    boy = addCharacter("boy.png", {
-      x: -280,
-      y: 170,
-      at: background
-    });
-    girl = addCharacter("girl.png", {
-      x: -100,
-      y: 200,
+      x: -225,
+      y: -141,
       at: background
     });
     bubble = addCharacter("bubble-point.png", {
@@ -737,7 +786,6 @@
       y: -80,
       at: background
     });
-    bubble.setScale(1.4);
     scoreLabel = new lime.Label;
     scoreLabel.setText(score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48);
     menu2.domClassName = goog.getCssName('lime-button');
@@ -750,5 +798,7 @@
   };
 
   this.catching = catching;
+
+  goog.exportSymbol('catching.start', catching.start);
 
 }).call(this);

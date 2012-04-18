@@ -12,11 +12,13 @@ goog.require 'lime.Button'
 goog.require 'lime.RoundedRect'
 goog.require 'lime.fill.LinearGradient'
 goog.require 'lime.animation.Spawn'
+goog.require 'lime.animation.Sequence'
 goog.require 'lime.animation.FadeTo'
 goog.require 'lime.animation.ScaleTo'
 goog.require 'lime.animation.MoveTo'
 goog.require 'lime.animation.MoveBy'
 goog.require 'lime.animation.ScaleBy'
+goog.require 'lime.audio.Audio'
 
 goog.require 'goog.array'
 goog.require 'lime.GlossyButton'
@@ -32,6 +34,8 @@ callbackFactory =
 @muteMe = []
 
 @allScenes = []
+
+catching.isGameEnded = false
 
 @answerAnimationFactory = []
 
@@ -227,11 +231,24 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     correctIdx = local_blockPattern[0]
     randomManager = do randomItemManager
     question = addCharacter randomManager.getAt(correctIdx),
-        x: 100
-        y: sceneHeight-200
+        x: 80
+        y: sceneHeight-100
         at: opts.questionLayer
         absolutePosition: true
-        callback: (char) -> char.setAnchorPoint 0, 0
+        callback: (char) ->
+            char.setAnchorPoint 0, 1
+            char.setOpacity(0)
+
+    FirstSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(1.5), new lime.animation.FadeTo(1))
+    DelaySpawn = new lime.animation.Delay().setDuration(0.6)
+    SecondSpawn = new lime.animation.Spawn(new lime.animation.ScaleTo(0), new lime.animation.FadeTo(0).setDuration(1))
+
+
+    moveUpOut = new lime.animation.Sequence(FirstSpawn, DelaySpawn, SecondSpawn)
+    console.log moveUpOut.getDuration()
+
+    question.runAction(moveUpOut)
+
     row = 0
     @items = []
     row = 3
@@ -244,13 +261,13 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                 startX = 175
                 margin = 225
                 positionX = startX + (x*margin)
-                positionY = 20+y*100
+                positionY = y*100-150
             else
                 startX = 135
                 margin = 180
 
                 positionX = startX + (x * margin)
-                positionY = 20+y*100
+                positionY = y*100-150
 
             item.setPosition positionX, positionY
             do (item, flatIdx) ->
@@ -301,29 +318,39 @@ spawnQuestionAndAnswer = (opts) ->
     background.appendChild imageLayer, 1
     background.appendChild questionLayer
 
-    # Animate
-    velocity = 0.1;
-    ORDER = 0
-    animate01 = (dt) ->
-        position = this.getPosition()
-        position.y += velocity * dt # if dt is bigger we just move more
-        if position.y > 700
-            goog.array.forEach muteMe, (e) ->
-                goog.events.removeAll e
-            runningSchedule = answerAnimationFactory.pop()
-            lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
-            imageLayer.removeAllChildren()
-            spawnQuestionAndAnswer background: background, questionLayer: questionLayer
-        @setPosition position
+    delayFunc = ->
+        # Animate
+        velocity = 0.1;
+        animate01 = (dt) ->
+            position = this.getPosition()
+            position.y += velocity * dt # if dt is bigger we just move more
+            console.log "ANIMATING"
+            if position.y > 600
+                goog.array.forEach muteMe, (e) ->
+                    goog.events.removeAll e
+                runningSchedule = answerAnimationFactory.pop()
+                lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
+                imageLayer.removeAllChildren()
+                spawnQuestionAndAnswer background: background, questionLayer: questionLayer if catching.isGameEnded is false
+            @setPosition position
 
-    answerAnimationFactory.push callback: animate01, scope: imageLayer
+        answerAnimationFactory.push callback: animate01, scope: imageLayer
+        console.log answerAnimationFactory
+        do (velocity, imageLayer) ->
+            lime.scheduleManager.schedule(animate01, imageLayer)
 
-    do (velocity, imageLayer) ->
-        lime.scheduleManager.schedule(animate01, imageLayer)
+    lime.scheduleManager.scheduleWithDelay(delayFunc, imageLayer, 1000, 1)
 
 #catching
 catching.start = ->
     catching.director = new lime.Director document.body, sceneWidth, sceneHeight
+    try
+        @theme = new lime.audio.Audio("assets/sound/theme-song.mp3")
+        @theme.baseElement.loop = true;
+    catch e
+        console?.log? e
+
+
     #var introScene = new lime.Scene
     #var modeScene = new lime.Scene
     #var gameScene = new lime.Scene
@@ -332,6 +359,7 @@ catching.start = ->
     # set current scene active
 
 catching.intro = ->
+    catching.isGameEnded = false
     @allScenes = []
     scene = new lime.Scene
     allScenes.push scene
@@ -453,9 +481,8 @@ catching.selectLevel = ->
         score.reset()
         catching.level = 'hard'
         catching.blockPatternIdx = goog.array.map blockPatternHard, (e, i) -> getIdxMap e
+        console.log catching.blockPatternIdx
         do catching.secondScene
-
-
 
     catching.director.replaceScene scene
 
@@ -463,6 +490,8 @@ catching.secondScene = ->
     scene = new lime.Scene
     allScenes.push scene
     background = new lime.Layer
+
+    @theme.play()
 
     scene.appendChild background
 
@@ -494,33 +523,31 @@ catching.secondScene = ->
             catching.lblTimer.setText(rt)
         timeoutCallback: (rt) ->
             catching.lblTimer.setText "0 "
-            runningSchedule = answerAnimationFactory.pop()
-            lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
+            catching.isGameEnded = true
             lime.scheduleManager.unschedule callbackFactory.timer, callbackFactory
             scene = catching.lastScene()
-
             catching.director.replaceScene scene
-
-            # catching.director.setPaused true
-
 
 catching.lastScene = () ->
     scene = new lime.Scene
     allScenes.push scene
     background = new lime.Layer
-    setUp part: 'gameFrame', at: background
-    menu = addCharacter "list.png", x: -295, y: -170, at: background
-    menu.setScale 1.2
-    title1 = addCharacter "title_1.png", x: -295, y: -310, at: background
-    title1.setScale 0.5
-    menu1 = addCharacter "menu-story.png", x: -295, y: -230, at: background
-    menu1.setScale 1.3
-    menu2 = addCharacter "menu-replay.png", x: -295, y: -156, at: background
-    menu2.setScale 1.3
-    boy  = addCharacter "boy.png", x: -280, y: 170, at: background
-    girl = addCharacter "girl.png", x: -100, y: 200, at: background
+
+    @theme.stop()
+
+
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
+    addCharacter "boy.png", x: -230, y: 170, at: background, callback: (char) -> char.setScale(0.8)
+    addCharacter "girl.png", x: -60, y: 150, at: background, callback: (char) -> char.setScale(0.8)
+    addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
+
+    menu = addCharacter "list.png", x: -225, y: -150, at: background
+    title1 = addCharacter "title_1.png", x: -225, y: -260, at: background, callback: (char) -> char.setScale(0.4)
+    # menu1 = addCharacter "menu-story.png", x: -225, y: -205, at: background
+    menu2 = addCharacter "menu-replay.png", x: -225, y: -141, at: background
+
     bubble = addCharacter "bubble-point.png", x: 180, y: -80, at: background
-    bubble.setScale 1.4
     scoreLabel = new lime.Label
 
     scoreLabel.setText(score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48)
@@ -538,3 +565,5 @@ catching.lastScene = () ->
     return  scene
 
 @catching = catching
+
+goog.exportSymbol 'catching.start', catching.start
