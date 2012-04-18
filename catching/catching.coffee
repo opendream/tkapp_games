@@ -525,16 +525,41 @@ catching.secondScene = ->
             catching.lblTimer.setText "0 "
             catching.isGameEnded = true
             lime.scheduleManager.unschedule callbackFactory.timer, callbackFactory
-            scene = catching.lastScene()
+            scene = catching.timeoutScene()
             catching.director.replaceScene scene
 
-catching.lastScene = () ->
+catching.timeoutScene = () ->
     scene = new lime.Scene
     allScenes.push scene
     background = new lime.Layer
 
     @theme.stop()
 
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
+    addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
+
+    # Show timeout text
+    addCharacter "gameover.png", x: 0, y: 0, at: background, callback: (char) ->
+        char.setScale 0
+        char.runAction new lime.animation.ScaleTo 1.0
+
+    scene.appendChild background
+
+    changeScene = () -> catching.director.replaceScene catching.lastScene()
+    lime.scheduleManager.scheduleWithDelay changeScene, catching, 1500, 1
+
+    return scene
+
+
+catching.lastScene = () ->
+    scene = new lime.Scene
+    allScenes.push scene
+    background = new lime.Layer
+
+    # Show timeout text
+
+    @theme.stop()
 
     addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
     addCharacter "boy.png", x: -230, y: 170, at: background, callback: (char) -> char.setScale(0.8)
