@@ -283,7 +283,6 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     questionImage.setOpacity(0)
 
     opts.questionLayer.setAnchorPoint(0,1).setPosition(150,450)
-    console.log opts.questionLayer
 
     characterSound = meta_data[file].sound
 
@@ -309,7 +308,6 @@ buildSetOfAnimation = (col=3, opts = {}) ->
 
     playSound = ->
         # alert "PLAY SOUND"
-        console.log "PLAY SOUND", this
         this.stop()
         this.play()
     lime.scheduleManager.scheduleWithDelay playSound, characterSound, 600, 1
@@ -403,7 +401,6 @@ spawnQuestionAndAnswer = (opts) ->
         animate01 = (dt) ->
             position = this.getPosition()
             position.y += velocity * dt # if dt is bigger we just move more
-            console.log "ANIMATING"
             if position.y > 600
                 goog.array.forEach catching.muteMe, (e) ->
                     goog.events.removeAll e
@@ -414,7 +411,6 @@ spawnQuestionAndAnswer = (opts) ->
             @setPosition position
 
         answerAnimationFactory.push callback: animate01, scope: imageLayer
-        console.log answerAnimationFactory
         do (velocity, imageLayer) ->
             lime.scheduleManager.schedule(animate01, imageLayer)
 
@@ -554,7 +550,6 @@ catching.selectLevel = ->
         catching.score.reset()
         catching.level = 'hard'
         catching.blockPatternIdx = goog.array.map blockPatternHard, (e, i) -> getIdxMap e
-        console.log catching.blockPatternIdx
         do catching.secondScene
 
     catching.director.replaceScene scene
@@ -660,5 +655,6 @@ catching.lastScene = () ->
     return  scene
 
 @catching = catching
+@game = catching
 
 goog.exportSymbol 'catching.start', catching.start

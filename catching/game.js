@@ -1,4 +1,4 @@
-(function() {
+var game_func = function () {
   var IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, meta_data, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('catching');
@@ -509,7 +509,7 @@
 
   catching.start = function() {
     var scene;
-    catching.director = new lime.Director(document.body, sceneWidth, sceneHeight);
+    catching.director = new lime.Director(document.getElementById("game5"), sceneWidth, sceneHeight);
     try {
       catching.theme = new lime.audio.Audio("assets/sound/theme-song.mp3");
       catching.theme.baseElement.loop = true;
@@ -919,4 +919,6 @@
 
   goog.exportSymbol('catching.start', catching.start);
 
-}).call(this);
+  return catching;
+
+}
