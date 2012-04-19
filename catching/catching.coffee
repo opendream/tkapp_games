@@ -9,8 +9,8 @@ goog.require 'lime.Layer'
 goog.require 'lime.Circle'
 goog.require 'lime.Label'
 goog.require 'lime.Button'
-goog.require 'lime.RoundedRect'
-goog.require 'lime.fill.LinearGradient'
+# goog.require 'lime.RoundedRect'
+# goog.require 'lime.fill.LinearGradient'
 goog.require 'lime.animation.Spawn'
 goog.require 'lime.animation.Sequence'
 goog.require 'lime.animation.FadeTo'
@@ -31,9 +31,9 @@ sceneCenterY = sceneHeight/2
 callbackFactory =
     timer: ->
 
-@muteMe = []
+catching.muteMe = []
 
-@allScenes = []
+catching.allScenes = []
 
 catching.isGameEnded = false
 
@@ -139,7 +139,7 @@ randomItemManager = () ->
     }
 
 # score
-@score = do ->
+catching.score = do ->
     _score = 0
     add = () ->
         _score++
@@ -164,34 +164,34 @@ setUp = (opts) ->
                 margin = 225
                 addCharacter "block_pipe.png",
                 x: startX, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
-                callback: (char) -> char.setAnchorPoint 0, 0
+                callback: (character) -> character.setAnchorPoint 0, 0
 
                 addCharacter "block_pipe.png",
                 x: startX + margin, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
-                callback: (char) -> char.setAnchorPoint 0, 0
+                callback: (character) -> character.setAnchorPoint 0, 0
 
                 addCharacter "block_pipe.png",
                 x: startX + 2*margin, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
-                callback: (char) -> char.setAnchorPoint 0, 0
+                callback: (character) -> character.setAnchorPoint 0, 0
             else
                 startX = 80
                 margin = 180
                 return [
                     addCharacter "block_pipe.png",
                     x: startX, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
-                    callback: (char) -> char.setAnchorPoint 0, 0
+                    callback: (character) -> character.setAnchorPoint 0, 0
 
                     addCharacter "block_pipe.png",
                     x: startX + margin, y: 45, w: 104, h: 122, absolute: true, at: opts.at,
-                    callback: (char) -> char.setAnchorPoint 0, 0
+                    callback: (character) -> character.setAnchorPoint 0, 0
 
                     addCharacter "block_pipe.png",
                     x: startX + (2 * margin), y: 45, w: 104, h: 122, absolute: true, at: opts.at,
-                    callback: (char) -> char.setAnchorPoint 0, 0
+                    callback: (character) -> character.setAnchorPoint 0, 0
 
                     addCharacter "block_pipe.png",
                     x: startX + (3 * margin), y: 45, w: 104, h: 122, absolute: true, at: opts.at,
-                    callback: (char) -> char.setAnchorPoint 0, 0
+                    callback: (character) -> character.setAnchorPoint 0, 0
                 ]
 
                 # addCharacter "game_frame.png", x: 0, y: 2, w: 40, h: -20, at: opts.at
@@ -328,13 +328,13 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                 listen_key = goog.events.listen item, ['click', 'touchstart'], (e) ->
                     that = this
                     if flatIdx is correctIdx
-                        goog.array.forEach muteMe, (e, i) ->
+                        goog.array.forEach catching.muteMe, (e, i) ->
                             goog.events.removeAll e
                         runningSchedule = answerAnimationFactory.pop()
                         lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
-                        score.add()
+                        catching.score.add()
                         moveUp = new lime.animation.MoveBy(0, -120).setDuration(0.4)
-                        correctArrow = addCharacter "correct.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (char) -> char.setScale(0.7)
+                        correctArrow = addCharacter "correct.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (character) -> character.setScale(0.7)
                         moveUp.addTarget(correctArrow).play()
                         do ->
                             callback = ->
@@ -342,7 +342,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                                 spawnQuestionAndAnswer questionLayer: opts.questionLayer, background: opts.background
                             setTimeout callback, 500
                     else
-                        wrongArrow = addCharacter "wrong.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (char) -> char.setScale(0.7)
+                        wrongArrow = addCharacter "wrong.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (character) -> character.setScale(0.7)
                         moveUp = new lime.animation.MoveBy(0, -100).setDuration(0.8)
                         # moveUp.addTarget(wrongArrow).play()
 
@@ -354,7 +354,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                         that.setHidden(true)
                         wrongArrow.runAction(moveUpOut)
                 items.push item
-                muteMe.push item
+                catching.muteMe.push item
 
     imageLayer.row_ = row
     imageLayer
@@ -377,7 +377,7 @@ spawnQuestionAndAnswer = (opts) ->
             position.y += velocity * dt # if dt is bigger we just move more
             console.log "ANIMATING"
             if position.y > 600
-                goog.array.forEach muteMe, (e) ->
+                goog.array.forEach catching.muteMe, (e) ->
                     goog.events.removeAll e
                 runningSchedule = answerAnimationFactory.pop()
                 lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
@@ -398,6 +398,8 @@ catching.start = ->
     try
         @theme = new lime.audio.Audio("assets/sound/theme-song.mp3")
         @theme.baseElement.loop = true;
+        @theme.baseElement.preload = "auto";
+        console.log @theme.baseElement
     catch e
         console?.log? e
 
@@ -411,9 +413,9 @@ catching.start = ->
 
 catching.intro = ->
     catching.isGameEnded = false
-    @allScenes = []
+    catching.allScenes = []
     scene = new lime.Scene
-    allScenes.push scene
+    catching.allScenes.push scene
     background = new lime.Layer
 
     smoke = [
@@ -430,14 +432,14 @@ catching.intro = ->
     # new lime.animation.FadeTo(0).addTarget(smoke[2]).play()
     # new lime.animation.FadeTo(0).addTarget(smoke[3]).play()
 
-    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
-    addCharacter "boy.png", x: -230, y: 170, at: background, callback: (char) -> char.setScale(0.8)
-    addCharacter "girl.png", x: -60, y: 150, at: background, callback: (char) -> char.setScale(0.8)
-    addCharacter "postbox.png", x: 250, y: 100, at: background, callback: (char) -> char.setScale(0.9)
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
+    addCharacter "boy.png", x: -230, y: 170, at: background, callback: (character) -> character.setScale(0.8)
+    addCharacter "girl.png", x: -60, y: 150, at: background, callback: (character) -> character.setScale(0.8)
+    addCharacter "postbox.png", x: 250, y: 100, at: background, callback: (character) -> character.setScale(0.9)
     addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
-    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
-    addCharacter "title_1.png", x: 0, y: -180, at: background, callback: (char) -> char.setScale (0.9)
-    addCharacter "title_2.png", x: 0, y: -75, at: background, callback: (char) -> char.setScale (0.9)
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (character) -> character.setScale(0.95, 0.9)
+    addCharacter "title_1.png", x: 0, y: -180, at: background, callback: (character) -> character.setScale (0.9)
+    addCharacter "title_2.png", x: 0, y: -75, at: background, callback: (character) -> character.setScale (0.9)
 
 
     btnState1 = new lime.Sprite().setFill 'assets/images/btn_start_normal.png'
@@ -454,7 +456,7 @@ catching.intro = ->
 
 catching.selectLevel = ->
     scene = new lime.Scene
-    allScenes.push scene
+    catching.allScenes.push scene
     background = new lime.Layer
     scene.appendChild background
 
@@ -467,14 +469,14 @@ catching.selectLevel = ->
     # title2 = addCharacter "title_2.png", x: 0, y: -75, at: background
 
 
-    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
-    boy = addCharacter "boy.png", x: -230, y: 170, at: background, callback: (char) -> char.setScale(0.8)
-    girl = addCharacter "girl.png", x: -60, y: 150, at: background, callback: (char) -> char.setScale(0.8)
-    postbox = addCharacter "postbox.png", x: 250, y: 100, at: background, callback: (char) -> char.setScale(0.9)
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
+    boy = addCharacter "boy.png", x: -230, y: 170, at: background, callback: (character) -> character.setScale(0.8)
+    girl = addCharacter "girl.png", x: -60, y: 150, at: background, callback: (character) -> character.setScale(0.8)
+    postbox = addCharacter "postbox.png", x: 250, y: 100, at: background, callback: (character) -> character.setScale(0.9)
     addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
-    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
-    title1 = addCharacter "title_1.png", x: 0, y: -180, at: background, callback: (char) -> char.setScale (0.9)
-    title2 = addCharacter "title_2.png", x: 0, y: -75, at: background, callback: (char) -> char.setScale (0.9)
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (character) -> character.setScale(0.95, 0.9)
+    title1 = addCharacter "title_1.png", x: 0, y: -180, at: background, callback: (character) -> character.setScale (0.9)
+    title2 = addCharacter "title_2.png", x: 0, y: -75, at: background, callback: (character) -> character.setScale (0.9)
 
     boyAction = new lime.animation.Spawn(
         new lime.animation.MoveBy(-40, 0).enableOptimizations(),
@@ -523,13 +525,13 @@ catching.selectLevel = ->
 
 
     goog.events.listen buttonEasy, ['click', 'touchstart'], ->
-        score.reset()
+        catching.score.reset()
         catching.level = 'easy'
         catching.blockPatternIdx = goog.array.map blockPattern, (e, i) -> getIdxMap e
         do catching.secondScene
 
     goog.events.listen buttonHard, ['click', 'touchstart'], ->
-        score.reset()
+        catching.score.reset()
         catching.level = 'hard'
         catching.blockPatternIdx = goog.array.map blockPatternHard, (e, i) -> getIdxMap e
         console.log catching.blockPatternIdx
@@ -539,7 +541,7 @@ catching.selectLevel = ->
 
 catching.secondScene = ->
     scene = new lime.Scene
-    allScenes.push scene
+    catching.allScenes.push scene
     background = new lime.Layer
 
     @theme.play()
@@ -549,10 +551,10 @@ catching.secondScene = ->
     col = if catching.level is 'easy' then 3 else 4
 
 
-    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
     addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
     setUp part: 'blockPipe', by: col, at: background
-    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (character) -> character.setScale(0.95, 0.9)
     clock = addCharacter "clock.png", x: sceneCenterX-85, y: sceneCenterY-120, at: background, name: 'Clock'
 
     questionLayer = new lime.Layer
@@ -581,19 +583,19 @@ catching.secondScene = ->
 
 catching.timeoutScene = () ->
     scene = new lime.Scene
-    allScenes.push scene
+    catching.allScenes.push scene
     background = new lime.Layer
 
     @theme.stop()
 
-    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
     addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
-    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (character) -> character.setScale(0.95, 0.9)
 
     # Show timeout text
-    addCharacter "gameover.png", x: 0, y: 0, at: background, callback: (char) ->
-        char.setScale 0
-        char.runAction new lime.animation.ScaleTo 1.0
+    addCharacter "gameover.png", x: 0, y: 0, at: background, callback: (character) ->
+        character.setScale 0
+        character.runAction new lime.animation.ScaleTo 1.0
 
     scene.appendChild background
 
@@ -605,28 +607,28 @@ catching.timeoutScene = () ->
 
 catching.lastScene = () ->
     scene = new lime.Scene
-    allScenes.push scene
+    catching.allScenes.push scene
     background = new lime.Layer
 
     # Show timeout text
 
     @theme.stop()
 
-    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (char) -> char.setScale(0.99)
-    addCharacter "boy.png", x: -230, y: 170, at: background, callback: (char) -> char.setScale(0.8)
-    addCharacter "girl.png", x: -60, y: 150, at: background, callback: (char) -> char.setScale(0.8)
+    addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
+    addCharacter "boy.png", x: -230, y: 170, at: background, callback: (character) -> character.setScale(0.8)
+    addCharacter "girl.png", x: -60, y: 150, at: background, callback: (character) -> character.setScale(0.8)
     addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
-    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (char) -> char.setScale(0.95, 0.9)
+    addCharacter "game_frame.png", x: -2, y: 5, at: background, callback: (character) -> character.setScale(0.95, 0.9)
 
     menu = addCharacter "list.png", x: -225, y: -150, at: background
-    title1 = addCharacter "title_1.png", x: -225, y: -260, at: background, callback: (char) -> char.setScale(0.4)
+    title1 = addCharacter "title_1.png", x: -225, y: -260, at: background, callback: (character) -> character.setScale(0.4)
     # menu1 = addCharacter "menu-story.png", x: -225, y: -205, at: background
     menu2 = addCharacter "menu-replay.png", x: -225, y: -141, at: background
 
     bubble = addCharacter "bubble-point.png", x: 180, y: -80, at: background
     scoreLabel = new lime.Label
 
-    scoreLabel.setText(score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48)
+    scoreLabel.setText(catching.score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48)
     menu2.domClassName = goog.getCssName('lime-button');
 
 

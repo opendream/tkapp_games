@@ -15,10 +15,6 @@
 
   goog.require('lime.Button');
 
-  goog.require('lime.RoundedRect');
-
-  goog.require('lime.fill.LinearGradient');
-
   goog.require('lime.animation.Spawn');
 
   goog.require('lime.animation.Sequence');
@@ -51,9 +47,9 @@
     timer: function() {}
   };
 
-  this.muteMe = [];
+  catching.muteMe = [];
 
-  this.allScenes = [];
+  catching.allScenes = [];
 
   catching.isGameEnded = false;
 
@@ -129,7 +125,7 @@
     };
   };
 
-  this.score = (function() {
+  catching.score = (function() {
     var add, getScore, reset, _score;
     _score = 0;
     add = function() {
@@ -165,8 +161,8 @@
             h: 122,
             absolute: true,
             at: opts.at,
-            callback: function(char) {
-              return char.setAnchorPoint(0, 0);
+            callback: function(character) {
+              return character.setAnchorPoint(0, 0);
             }
           });
           addCharacter("block_pipe.png", {
@@ -176,8 +172,8 @@
             h: 122,
             absolute: true,
             at: opts.at,
-            callback: function(char) {
-              return char.setAnchorPoint(0, 0);
+            callback: function(character) {
+              return character.setAnchorPoint(0, 0);
             }
           });
           return addCharacter("block_pipe.png", {
@@ -187,8 +183,8 @@
             h: 122,
             absolute: true,
             at: opts.at,
-            callback: function(char) {
-              return char.setAnchorPoint(0, 0);
+            callback: function(character) {
+              return character.setAnchorPoint(0, 0);
             }
           });
         } else {
@@ -202,8 +198,8 @@
               h: 122,
               absolute: true,
               at: opts.at,
-              callback: function(char) {
-                return char.setAnchorPoint(0, 0);
+              callback: function(character) {
+                return character.setAnchorPoint(0, 0);
               }
             }), addCharacter("block_pipe.png", {
               x: startX + margin,
@@ -212,8 +208,8 @@
               h: 122,
               absolute: true,
               at: opts.at,
-              callback: function(char) {
-                return char.setAnchorPoint(0, 0);
+              callback: function(character) {
+                return character.setAnchorPoint(0, 0);
               }
             }), addCharacter("block_pipe.png", {
               x: startX + (2 * margin),
@@ -222,8 +218,8 @@
               h: 122,
               absolute: true,
               at: opts.at,
-              callback: function(char) {
-                return char.setAnchorPoint(0, 0);
+              callback: function(character) {
+                return character.setAnchorPoint(0, 0);
               }
             }), addCharacter("block_pipe.png", {
               x: startX + (3 * margin),
@@ -232,8 +228,8 @@
               h: 122,
               absolute: true,
               at: opts.at,
-              callback: function(char) {
-                return char.setAnchorPoint(0, 0);
+              callback: function(character) {
+                return character.setAnchorPoint(0, 0);
               }
             })
           ];
@@ -354,20 +350,20 @@
           var correctArrow, moveUp, position, runningSchedule, that, wrongArrow;
           that = this;
           if (flatIdx === correctIdx) {
-            goog.array.forEach(muteMe, function(e, i) {
+            goog.array.forEach(catching.muteMe, function(e, i) {
               return goog.events.removeAll(e);
             });
             runningSchedule = answerAnimationFactory.pop();
             lime.scheduleManager.unschedule(runningSchedule.callback, runningSchedule.scope);
-            score.add();
+            catching.score.add();
             moveUp = new lime.animation.MoveBy(0, -120).setDuration(0.4);
             correctArrow = addCharacter("correct.png", {
               x: that.position_.x,
               y: that.position_.y,
               absolute: true,
               at: imageLayer,
-              callback: function(char) {
-                return char.setScale(0.7);
+              callback: function(character) {
+                return character.setScale(0.7);
               }
             });
             moveUp.addTarget(correctArrow).play();
@@ -388,8 +384,8 @@
               y: that.position_.y,
               absolute: true,
               at: imageLayer,
-              callback: function(char) {
-                return char.setScale(0.7);
+              callback: function(character) {
+                return character.setScale(0.7);
               }
             });
             moveUp = new lime.animation.MoveBy(0, -100).setDuration(0.8);
@@ -403,7 +399,7 @@
           }
         });
         items.push(item);
-        return muteMe.push(item);
+        return catching.muteMe.push(item);
       };
       for (y = 0; 0 <= row ? y < row : y > row; 0 <= row ? y++ : y--) {
         flatIdx = x * row + y;
@@ -455,7 +451,7 @@
         position.y += velocity * dt;
         console.log("ANIMATING");
         if (position.y > 600) {
-          goog.array.forEach(muteMe, function(e) {
+          goog.array.forEach(catching.muteMe, function(e) {
             return goog.events.removeAll(e);
           });
           runningSchedule = answerAnimationFactory.pop();
@@ -488,6 +484,8 @@
     try {
       this.theme = new lime.audio.Audio("assets/sound/theme-song.mp3");
       this.theme.baseElement.loop = true;
+      this.theme.baseElement.preload = "auto";
+      console.log(this.theme.baseElement);
     } catch (e) {
       if (typeof console !== "undefined" && console !== null) {
         if (typeof console.log === "function") console.log(e);
@@ -499,9 +497,9 @@
   catching.intro = function() {
     var background, btnStart, btnState1, btnState2, scene, smoke;
     catching.isGameEnded = false;
-    this.allScenes = [];
+    catching.allScenes = [];
     scene = new lime.Scene;
-    allScenes.push(scene);
+    catching.allScenes.push(scene);
     background = new lime.Layer;
     smoke = [new lime.Sprite().setFill('assets/images/smoke-1.png'), new lime.Sprite().setFill('assets/images/smoke-2.png'), new lime.Sprite().setFill('assets/images/smoke-3.png'), new lime.Sprite().setFill('assets/images/smoke-4.png')];
     scene.appendChild(background);
@@ -509,32 +507,32 @@
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      callback: function(character) {
+        return character.setScale(0.99);
       }
     });
     addCharacter("boy.png", {
       x: -230,
       y: 170,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      callback: function(character) {
+        return character.setScale(0.8);
       }
     });
     addCharacter("girl.png", {
       x: -60,
       y: 150,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      callback: function(character) {
+        return character.setScale(0.8);
       }
     });
     addCharacter("postbox.png", {
       x: 250,
       y: 100,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      callback: function(character) {
+        return character.setScale(0.9);
       }
     });
     addCharacter("game_bg.png", {
@@ -548,24 +546,24 @@
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      callback: function(character) {
+        return character.setScale(0.95, 0.9);
       }
     });
     addCharacter("title_1.png", {
       x: 0,
       y: -180,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      callback: function(character) {
+        return character.setScale(0.9);
       }
     });
     addCharacter("title_2.png", {
       x: 0,
       y: -75,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      callback: function(character) {
+        return character.setScale(0.9);
       }
     });
     btnState1 = new lime.Sprite().setFill('assets/images/btn_start_normal.png');
@@ -581,39 +579,39 @@
   catching.selectLevel = function() {
     var background, boy, boyAction, btnEasyState1, btnEasyState2, btnLv2State1, btnLv2State2, buttonEasy, buttonHard, buttonLayer, fadeIn, girl, girlAction, moveTitleUp, postbox, postboxAction, scene, title1, title2;
     scene = new lime.Scene;
-    allScenes.push(scene);
+    catching.allScenes.push(scene);
     background = new lime.Layer;
     scene.appendChild(background);
     addCharacter("scene_bg.png", {
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      callback: function(character) {
+        return character.setScale(0.99);
       }
     });
     boy = addCharacter("boy.png", {
       x: -230,
       y: 170,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      callback: function(character) {
+        return character.setScale(0.8);
       }
     });
     girl = addCharacter("girl.png", {
       x: -60,
       y: 150,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      callback: function(character) {
+        return character.setScale(0.8);
       }
     });
     postbox = addCharacter("postbox.png", {
       x: 250,
       y: 100,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      callback: function(character) {
+        return character.setScale(0.9);
       }
     });
     addCharacter("game_bg.png", {
@@ -627,24 +625,24 @@
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      callback: function(character) {
+        return character.setScale(0.95, 0.9);
       }
     });
     title1 = addCharacter("title_1.png", {
       x: 0,
       y: -180,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      callback: function(character) {
+        return character.setScale(0.9);
       }
     });
     title2 = addCharacter("title_2.png", {
       x: 0,
       y: -75,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      callback: function(character) {
+        return character.setScale(0.9);
       }
     });
     boyAction = new lime.animation.Spawn(new lime.animation.MoveBy(-40, 0).enableOptimizations(), new lime.animation.FadeTo(100).enableOptimizations());
@@ -672,7 +670,7 @@
     fadeIn.play();
     scene.appendChild(buttonLayer);
     goog.events.listen(buttonEasy, ['click', 'touchstart'], function() {
-      score.reset();
+      catching.score.reset();
       catching.level = 'easy';
       catching.blockPatternIdx = goog.array.map(blockPattern, function(e, i) {
         return getIdxMap(e);
@@ -680,7 +678,7 @@
       return catching.secondScene();
     });
     goog.events.listen(buttonHard, ['click', 'touchstart'], function() {
-      score.reset();
+      catching.score.reset();
       catching.level = 'hard';
       catching.blockPatternIdx = goog.array.map(blockPatternHard, function(e, i) {
         return getIdxMap(e);
@@ -694,7 +692,7 @@
   catching.secondScene = function() {
     var background, clock, col, questionLayer, scene;
     scene = new lime.Scene;
-    allScenes.push(scene);
+    catching.allScenes.push(scene);
     background = new lime.Layer;
     this.theme.play();
     scene.appendChild(background);
@@ -703,8 +701,8 @@
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      callback: function(character) {
+        return character.setScale(0.99);
       }
     });
     addCharacter("game_bg.png", {
@@ -723,8 +721,8 @@
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      callback: function(character) {
+        return character.setScale(0.95, 0.9);
       }
     });
     clock = addCharacter("clock.png", {
@@ -764,15 +762,15 @@
   catching.timeoutScene = function() {
     var background, changeScene, scene;
     scene = new lime.Scene;
-    allScenes.push(scene);
+    catching.allScenes.push(scene);
     background = new lime.Layer;
     this.theme.stop();
     addCharacter("scene_bg.png", {
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      callback: function(character) {
+        return character.setScale(0.99);
       }
     });
     addCharacter("game_bg.png", {
@@ -786,17 +784,17 @@
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      callback: function(character) {
+        return character.setScale(0.95, 0.9);
       }
     });
     addCharacter("gameover.png", {
       x: 0,
       y: 0,
       at: background,
-      callback: function(char) {
-        char.setScale(0);
-        return char.runAction(new lime.animation.ScaleTo(1.0));
+      callback: function(character) {
+        character.setScale(0);
+        return character.runAction(new lime.animation.ScaleTo(1.0));
       }
     });
     scene.appendChild(background);
@@ -810,31 +808,31 @@
   catching.lastScene = function() {
     var background, bubble, menu, menu2, scene, scoreLabel, title1;
     scene = new lime.Scene;
-    allScenes.push(scene);
+    catching.allScenes.push(scene);
     background = new lime.Layer;
     this.theme.stop();
     addCharacter("scene_bg.png", {
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      callback: function(character) {
+        return character.setScale(0.99);
       }
     });
     addCharacter("boy.png", {
       x: -230,
       y: 170,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      callback: function(character) {
+        return character.setScale(0.8);
       }
     });
     addCharacter("girl.png", {
       x: -60,
       y: 150,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      callback: function(character) {
+        return character.setScale(0.8);
       }
     });
     addCharacter("game_bg.png", {
@@ -848,8 +846,8 @@
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      callback: function(character) {
+        return character.setScale(0.95, 0.9);
       }
     });
     menu = addCharacter("list.png", {
@@ -861,8 +859,8 @@
       x: -225,
       y: -260,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.4);
+      callback: function(character) {
+        return character.setScale(0.4);
       }
     });
     menu2 = addCharacter("menu-replay.png", {
@@ -876,7 +874,7 @@
       at: background
     });
     scoreLabel = new lime.Label;
-    scoreLabel.setText(score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48);
+    scoreLabel.setText(catching.score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48);
     menu2.domClassName = goog.getCssName('lime-button');
     goog.events.listen(menu2, ['click', 'touchstart'], function() {
       return catching.intro();
