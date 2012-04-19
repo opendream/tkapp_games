@@ -242,7 +242,7 @@ question.start = function() {
             //     });
             // });
 
-            goog.events.listen(arrowLayer, 'click', function (e) {
+            goog.events.listen(arrowLayer, ['click','touchstart'], function (e) {
             	director.replaceScene(sceneChoice);
             });
 
@@ -279,7 +279,7 @@ question.start = function() {
 					
 					layer.domClassName = goog.getCssName('lime-button');
                     
-					goog.events.listen(layer, 'click', function (e) {
+					goog.events.listen(layer, ['click','touchstart'], function (e) {
 							scene.removeChild(choiceLabel);
 							no = no + 1;
 							if(no < 5){
@@ -418,7 +418,7 @@ question.start = function() {
                         });
 
 						!function(localList) {
-							 goog.events.listen(localList, 'click', function (e) {
+							 goog.events.listen(localList, ['click','touchstart'], function (e) {
 									goog.array.forEach(localList.getParent().children_, function(e, i, arr) {
 									  goog.events.removeAll(e)
 									});
