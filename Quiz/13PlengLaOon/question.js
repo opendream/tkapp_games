@@ -530,9 +530,9 @@ question.start = function() {
                     // make question label
                     choiceLabel.appendChild(
                         new lime.Label()
-                                .setSize(440, 100)
+                                .setSize(440, 120)
                                 .setText(choice.question)
-                                .setFontSize(28)
+                                .setFontSize(25)
                                 .setFontColor('#990000')
                                 .setPosition(300, 135)
                     );
