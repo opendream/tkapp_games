@@ -30,13 +30,9 @@ sceneCenterY = sceneHeight/2
 
 callbackFactory =
     timer: ->
-
 catching.muteMe = []
-
 catching.allScenes = []
-
 catching.isGameEnded = false
-
 @answerAnimationFactory = []
 
 getIdxMap = (a) ->
@@ -111,16 +107,37 @@ IconText =
     "item-uncle.png": "คุณลุง"
     "item-wolf.png": "หมาป่า"
 
-IconAudio =
-    "item-brother.png": "item-brother.mp3"
-    "item-buff.png": "item-buff.mp3"
-    "item-gamesai.png": "item-gamesai.mp3"
-    "item-grandfather.png": "item-grandfather.mp3"
-    "item-grandmother.png": "item-grandmother.mp3"
-    "item-sister.png": "item-sister.mp3"
-    "item-sister2.png": "item-sister2.mp3"
-    "item-uncle.png": "item-uncle.mp3"
-    "item-wolf.png": "item-wolf.mp3"
+meta_data =
+    "item-brother.png":
+        text: "พี่ชาย"
+        sound: "assets/sound/item-brother.mp3"
+    "item-buff.png":
+        text: "ควาย"
+        sound: "assets/sound/item-buff.mp3"
+    "item-gamesai.png":
+        text: "แก้มใส"
+        sound: "assets/sound/item-gamesai.mp3"
+    "item-grandfather.png":
+        text: "คุณตา"
+        sound: "assets/sound/item-grandfather.mp3"
+    "item-grandmother.png":
+        text: "คุณยาย"
+        sound: "assets/sound/item-grandmother.mp3"
+    "item-sister.png":
+        text: "คุณน้า"
+        sound: "assets/sound/item-sister.mp3"
+    "item-sister2.png":
+        text: "น้องสาว"
+        sound: "assets/sound/item-sister2.mp3"
+    "item-uncle.png":
+        text: "คุณลุง"
+        sound: "assets/sound/item-uncle.mp3"
+    "item-wolf.png":
+        text: "หมาป่า"
+        sound: "assets/sound/item-wolf.mp3"
+
+
+IconAudio = { }
 
 # Helper
 randomItemManager = () ->
@@ -152,12 +169,6 @@ catching.score = do ->
 
 setUp = (opts) ->
     switch opts.part
-        when "gameFrame"
-            console.log "gameFrame"
-            # b3 = addCharacter "game_frame.png", x: 0, y: 5, at: opts.at, w: sceneWidth - 5, h: sceneHeight - 20, weight: 20
-            # b2 = addCharacter "game_bg.png", x: 0, y: 0, at: opts.at, w: sceneWidth weight: 30
-            # b2.setScale 1.0
-            # b1 = addCharacter "scene_bg.png", x: 4, y: -10, at: opts.at, w: sceneWidth, h: sceneHeight, weight: 100
         when "blockPipe"
             if opts.by is 3
                 startX = 120
@@ -274,7 +285,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     opts.questionLayer.setAnchorPoint(0,1).setPosition(150,450)
     console.log opts.questionLayer
 
-    characterSound = new lime.audio.Audio("assets/sound/#{IconAudio[file]}")
+    characterSound = meta_data[file].sound
 
     # Fade in and fade out
     Delay1 = new lime.animation.Delay().setDuration(1.0)
@@ -296,7 +307,12 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     moveUpOut.addTarget questionBalloon
 
 
-    lime.scheduleManager.scheduleWithDelay characterSound.play, characterSound, 600
+    playSound = ->
+        # alert "PLAY SOUND"
+        console.log "PLAY SOUND"
+        this.stop()
+        this.play()
+    lime.scheduleManager.scheduleWithDelay playSound, characterSound, 600, 1
     FadeInOut.play()
     moveUpOut.play()
 
@@ -396,10 +412,10 @@ spawnQuestionAndAnswer = (opts) ->
 catching.start = ->
     catching.director = new lime.Director document.body, sceneWidth, sceneHeight
     try
-        @theme = new lime.audio.Audio("assets/sound/theme-song.mp3")
-        @theme.baseElement.loop = true;
-        @theme.baseElement.preload = "auto";
-        console.log @theme.baseElement
+        catching.theme = new lime.audio.Audio("assets/sound/theme-song.mp3")
+        catching.theme.baseElement.loop = true;
+        catching.theme.baseElement.preload = "auto";
+        console.log catching.theme.baseElement
     catch e
         console?.log? e
 
@@ -418,19 +434,13 @@ catching.intro = ->
     catching.allScenes.push scene
     background = new lime.Layer
 
-    smoke = [
-        new lime.Sprite().setFill('assets/images/smoke-1.png')
-        new lime.Sprite().setFill('assets/images/smoke-2.png')
-        new lime.Sprite().setFill('assets/images/smoke-3.png')
-        new lime.Sprite().setFill('assets/images/smoke-4.png')
-    ]
+    goog.object.forEach meta_data, (item, idx) ->
+        item.sound = new lime.audio.Audio item.sound
+
+
+    # goog.object.forEach catching.sound, (item) -> item.baseElement.load()
 
     scene.appendChild background
-
-    # new lime.animation.FadeTo(0).addTarget(smoke[0]).play()
-    # new lime.animation.FadeTo(0).addTarget(smoke[1]).play()
-    # new lime.animation.FadeTo(0).addTarget(smoke[2]).play()
-    # new lime.animation.FadeTo(0).addTarget(smoke[3]).play()
 
     addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
     addCharacter "boy.png", x: -230, y: 170, at: background, callback: (character) -> character.setScale(0.8)
@@ -544,7 +554,8 @@ catching.secondScene = ->
     catching.allScenes.push scene
     background = new lime.Layer
 
-    @theme.play()
+    catching.theme.stop()
+    catching.theme.play()
 
     scene.appendChild background
 
@@ -586,7 +597,7 @@ catching.timeoutScene = () ->
     catching.allScenes.push scene
     background = new lime.Layer
 
-    @theme.stop()
+    catching.theme.stop()
 
     addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
     addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
@@ -612,7 +623,7 @@ catching.lastScene = () ->
 
     # Show timeout text
 
-    @theme.stop()
+    catching.theme.stop()
 
     addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
     addCharacter "boy.png", x: -230, y: 170, at: background, callback: (character) -> character.setScale(0.8)
@@ -631,11 +642,7 @@ catching.lastScene = () ->
     scoreLabel.setText(catching.score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48)
     menu2.domClassName = goog.getCssName('lime-button');
 
-
-    goog.events.listen menu2, ['click', 'touchstart'], ->
-        catching.intro()
-
-
+    goog.events.listen menu2, ['click', 'touchstart'], -> catching.intro()
 
     scene.appendChild background
     scene.appendChild scoreLabel

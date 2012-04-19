@@ -1,5 +1,5 @@
 (function() {
-  var IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
+  var IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, meta_data, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('catching');
 
@@ -93,17 +93,46 @@
     "item-wolf.png": "หมาป่า"
   };
 
-  IconAudio = {
-    "item-brother.png": "item-brother.mp3",
-    "item-buff.png": "item-buff.mp3",
-    "item-gamesai.png": "item-gamesai.mp3",
-    "item-grandfather.png": "item-grandfather.mp3",
-    "item-grandmother.png": "item-grandmother.mp3",
-    "item-sister.png": "item-sister.mp3",
-    "item-sister2.png": "item-sister2.mp3",
-    "item-uncle.png": "item-uncle.mp3",
-    "item-wolf.png": "item-wolf.mp3"
+  meta_data = {
+    "item-brother.png": {
+      text: "พี่ชาย",
+      sound: "assets/sound/item-brother.mp3"
+    },
+    "item-buff.png": {
+      text: "ควาย",
+      sound: "assets/sound/item-buff.mp3"
+    },
+    "item-gamesai.png": {
+      text: "แก้มใส",
+      sound: "assets/sound/item-gamesai.mp3"
+    },
+    "item-grandfather.png": {
+      text: "คุณตา",
+      sound: "assets/sound/item-grandfather.mp3"
+    },
+    "item-grandmother.png": {
+      text: "คุณยาย",
+      sound: "assets/sound/item-grandmother.mp3"
+    },
+    "item-sister.png": {
+      text: "คุณน้า",
+      sound: "assets/sound/item-sister.mp3"
+    },
+    "item-sister2.png": {
+      text: "น้องสาว",
+      sound: "assets/sound/item-sister2.mp3"
+    },
+    "item-uncle.png": {
+      text: "คุณลุง",
+      sound: "assets/sound/item-uncle.mp3"
+    },
+    "item-wolf.png": {
+      text: "หมาป่า",
+      sound: "assets/sound/item-wolf.mp3"
+    }
   };
+
+  IconAudio = {};
 
   randomItemManager = function() {
     var IconItemArray, lastGetIdx, size;
@@ -148,8 +177,6 @@
   setUp = function(opts) {
     var margin, startX;
     switch (opts.part) {
-      case "gameFrame":
-        return console.log("gameFrame");
       case "blockPipe":
         if (opts.by === 3) {
           startX = 120;
@@ -295,7 +322,7 @@
   };
 
   buildSetOfAnimation = function(col, opts) {
-    var Delay1, Delay2, DelaySpawn, FadeIn, FadeInOut, FadeOut, FirstSpawn, SecondSpawn, characterSound, correctIdx, file, flatIdx, imageLayer, item, local_blockPattern, margin, moveUpOut, positionX, positionY, questionBalloon, questionImage, questionText, randomManager, row, startX, x, y, _fn;
+    var Delay1, Delay2, DelaySpawn, FadeIn, FadeInOut, FadeOut, FirstSpawn, SecondSpawn, characterSound, correctIdx, file, flatIdx, imageLayer, item, local_blockPattern, margin, moveUpOut, playSound, positionX, positionY, questionBalloon, questionImage, questionText, randomManager, row, startX, x, y, _fn;
     if (col == null) col = 3;
     if (opts == null) opts = {};
     imageLayer = new lime.Layer;
@@ -322,7 +349,7 @@
     questionImage.setOpacity(0);
     opts.questionLayer.setAnchorPoint(0, 1).setPosition(150, 450);
     console.log(opts.questionLayer);
-    characterSound = new lime.audio.Audio("assets/sound/" + IconAudio[file]);
+    characterSound = meta_data[file].sound;
     Delay1 = new lime.animation.Delay().setDuration(1.0);
     FadeIn = new lime.animation.FadeTo(1).setDuration(0.3);
     Delay2 = new lime.animation.Delay().setDuration(1.5);
@@ -336,7 +363,12 @@
     moveUpOut = new lime.animation.Sequence(FirstSpawn, DelaySpawn, SecondSpawn);
     questionBalloon.setScale(0).setAnchorPoint(0, 1);
     moveUpOut.addTarget(questionBalloon);
-    lime.scheduleManager.scheduleWithDelay(characterSound.play, characterSound, 600);
+    playSound = function() {
+      console.log("PLAY SOUND");
+      this.stop();
+      return this.play();
+    };
+    lime.scheduleManager.scheduleWithDelay(playSound, characterSound, 600, 1);
     FadeInOut.play();
     moveUpOut.play();
     row = 0;
@@ -482,10 +514,10 @@
     var scene;
     catching.director = new lime.Director(document.body, sceneWidth, sceneHeight);
     try {
-      this.theme = new lime.audio.Audio("assets/sound/theme-song.mp3");
-      this.theme.baseElement.loop = true;
-      this.theme.baseElement.preload = "auto";
-      console.log(this.theme.baseElement);
+      catching.theme = new lime.audio.Audio("assets/sound/theme-song.mp3");
+      catching.theme.baseElement.loop = true;
+      catching.theme.baseElement.preload = "auto";
+      console.log(catching.theme.baseElement);
     } catch (e) {
       if (typeof console !== "undefined" && console !== null) {
         if (typeof console.log === "function") console.log(e);
@@ -495,13 +527,15 @@
   };
 
   catching.intro = function() {
-    var background, btnStart, btnState1, btnState2, scene, smoke;
+    var background, btnStart, btnState1, btnState2, scene;
     catching.isGameEnded = false;
     catching.allScenes = [];
     scene = new lime.Scene;
     catching.allScenes.push(scene);
     background = new lime.Layer;
-    smoke = [new lime.Sprite().setFill('assets/images/smoke-1.png'), new lime.Sprite().setFill('assets/images/smoke-2.png'), new lime.Sprite().setFill('assets/images/smoke-3.png'), new lime.Sprite().setFill('assets/images/smoke-4.png')];
+    goog.object.forEach(meta_data, function(item, idx) {
+      return item.sound = new lime.audio.Audio(item.sound);
+    });
     scene.appendChild(background);
     addCharacter("scene_bg.png", {
       x: 2,
@@ -694,7 +728,8 @@
     scene = new lime.Scene;
     catching.allScenes.push(scene);
     background = new lime.Layer;
-    this.theme.play();
+    catching.theme.stop();
+    catching.theme.play();
     scene.appendChild(background);
     col = catching.level === 'easy' ? 3 : 4;
     addCharacter("scene_bg.png", {
@@ -764,7 +799,7 @@
     scene = new lime.Scene;
     catching.allScenes.push(scene);
     background = new lime.Layer;
-    this.theme.stop();
+    catching.theme.stop();
     addCharacter("scene_bg.png", {
       x: 2,
       y: 10,
@@ -810,7 +845,7 @@
     scene = new lime.Scene;
     catching.allScenes.push(scene);
     background = new lime.Layer;
-    this.theme.stop();
+    catching.theme.stop();
     addCharacter("scene_bg.png", {
       x: 2,
       y: 10,
