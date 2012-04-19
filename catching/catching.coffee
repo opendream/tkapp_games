@@ -309,7 +309,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
 
     playSound = ->
         # alert "PLAY SOUND"
-        console.log "PLAY SOUND"
+        console.log "PLAY SOUND", this
         this.stop()
         this.play()
     lime.scheduleManager.scheduleWithDelay playSound, characterSound, 600, 1
@@ -349,16 +349,28 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                         runningSchedule = answerAnimationFactory.pop()
                         lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
                         catching.score.add()
-                        moveUp = new lime.animation.MoveBy(0, -120).setDuration(0.4)
-                        correctArrow = addCharacter "correct.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (character) -> character.setScale(0.7)
-                        moveUp.addTarget(correctArrow).play()
-                        do ->
+                        moveUpOut = new lime.animation.Spawn(new lime.animation.MoveBy(0, -250), new lime.animation.FadeTo(0)).setDuration(1)
+
+                        correctArrow = addCharacter "correct.png",
+                            x: that.position_.x
+                            y: that.position_.y + imageLayer.position_.y
+                            absolute: true
+                            at: opts.background
+                            callback: (character) -> character.setScale(0.7)
+                        correctArrow.runAction(moveUpOut)
+                        do (correctArrow) ->
                             callback = ->
+                                correctArrow.setHidden(true)
                                 imageLayer.removeAllChildren()
                                 spawnQuestionAndAnswer questionLayer: opts.questionLayer, background: opts.background
                             setTimeout callback, 500
                     else
-                        wrongArrow = addCharacter "wrong.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (character) -> character.setScale(0.7)
+                        wrongArrow = addCharacter "wrong.png",
+                            x: that.position_.x
+                            y: that.position_.y
+                            absolute: true
+                            at: imageLayer
+                            callback: (character) -> character.setScale(0.7)
                         moveUp = new lime.animation.MoveBy(0, -100).setDuration(0.8)
                         # moveUp.addTarget(wrongArrow).play()
 
@@ -414,8 +426,6 @@ catching.start = ->
     try
         catching.theme = new lime.audio.Audio("assets/sound/theme-song.mp3")
         catching.theme.baseElement.loop = true;
-        catching.theme.baseElement.preload = "auto";
-        console.log catching.theme.baseElement
     catch e
         console?.log? e
 
