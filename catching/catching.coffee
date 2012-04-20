@@ -239,13 +239,12 @@ addCharacter =  (image, opts) ->
     return character
 
 
-startTimer = (opts = {} ) ->
+timerManager = (opts = {} ) ->
     counter = opts.limit or 10
     delay = opts.delay or 1000
     decreaseBy = opts.decreaseBy or 1
     opts?.runningCallback?(counter)
     counter = counter - 1
-
     do ->
         callbackFactory.timer = (dt) ->
             unless counter > 0
@@ -254,6 +253,9 @@ startTimer = (opts = {} ) ->
                 opts?.runningCallback?(counter)
             counter = counter - decreaseBy
         lime.scheduleManager.scheduleWithDelay(callbackFactory.timer, opts.limeScope or callbackFactory, delay)
+    return addTime: (time) ->
+        counter += time
+        opts?.runningCallback?(counter)
 
 
 buildSetOfAnimation = (col=3, opts = {}) ->
@@ -584,7 +586,7 @@ catching.secondScene = ->
     scene.appendChild catching.lblTimer
     catching.director.replaceScene scene
 
-    startTimer
+    timerManager
         limit: if catching.level is 'hard' then 70 else 80
         delay: 1000
         limeScope: callbackFactory

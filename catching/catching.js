@@ -1,5 +1,5 @@
 (function() {
-  var IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, meta_data, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
+  var IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, meta_data, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, timerManager;
 
   goog.provide('catching');
 
@@ -286,7 +286,7 @@
     return character;
   };
 
-  startTimer = function(opts) {
+  timerManager = function(opts) {
     var counter, decreaseBy, delay;
     if (opts == null) opts = {};
     counter = opts.limit || 10;
@@ -298,7 +298,7 @@
       }
     }
     counter = counter - 1;
-    return (function() {
+    (function() {
       callbackFactory.timer = function(dt) {
         if (!(counter > 0)) {
           if (counter <= 0) {
@@ -319,6 +319,12 @@
       };
       return lime.scheduleManager.scheduleWithDelay(callbackFactory.timer, opts.limeScope || callbackFactory, delay);
     })();
+    return {
+      addTime: function(time) {
+        counter += time;
+        return opts != null ? typeof opts.runningCallback === "function" ? opts.runningCallback(counter) : void 0 : void 0;
+      }
+    };
   };
 
   buildSetOfAnimation = function(col, opts) {
@@ -771,7 +777,7 @@
     catching.lblTimer.setFontColor('#000');
     scene.appendChild(catching.lblTimer);
     catching.director.replaceScene(scene);
-    return startTimer({
+    return timerManager({
       limit: catching.level === 'hard' ? 70 : 80,
       delay: 1000,
       limeScope: callbackFactory,
