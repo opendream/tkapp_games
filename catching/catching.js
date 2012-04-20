@@ -1,5 +1,5 @@
 (function() {
-  var IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, meta_data, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, timerManager;
+  var addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, meta_data, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, timerManager;
 
   goog.provide('catching');
 
@@ -69,30 +69,6 @@
 
   blockPatternHard = [[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1], [0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0], [0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0]];
 
-  IconItem = {
-    brother: "item-brother.png",
-    buff: "item-buff.png",
-    gamesai: "item-gamesai.png",
-    grandfather: "item-grandfather.png",
-    grandmother: "item-grandmother.png",
-    sister: "item-sister.png",
-    sister2: "item-sister2.png",
-    uncle: "item-uncle.png",
-    wolf: "item-wolf.png"
-  };
-
-  IconText = {
-    "item-brother.png": "พี่ชาย",
-    "item-buff.png": "ควาย",
-    "item-gamesai.png": "แก้มใส",
-    "item-grandfather.png": "คุณตา",
-    "item-grandmother.png": "คุณยาย",
-    "item-sister.png": "พี่สาว",
-    "item-sister2.png": "น้องสาว",
-    "item-uncle.png": "คุณลุง",
-    "item-wolf.png": "หมาป่า"
-  };
-
   meta_data = {
     "item-brother.png": {
       text: "พี่ชาย",
@@ -103,7 +79,7 @@
       sound: "assets/sound/item-buff.mp3"
     },
     "item-gamesai.png": {
-      text: "แก้มใส",
+      text: "เด็กหญิงแก้มใส",
       sound: "assets/sound/item-gamesai.mp3"
     },
     "item-grandfather.png": {
@@ -132,12 +108,10 @@
     }
   };
 
-  IconAudio = {};
-
   randomItemManager = function() {
     var IconItemArray, lastGetIdx, size;
-    size = goog.object.getCount(IconItem);
-    IconItemArray = goog.object.getValues(IconItem);
+    IconItemArray = goog.object.getKeys(meta_data);
+    size = IconItemArray.length;
     lastGetIdx = 0;
     goog.array.shuffle(IconItemArray);
     return {
@@ -344,7 +318,7 @@
       at: opts.questionLayer,
       absolutePosition: true
     });
-    questionText = new lime.Label().setText(IconText[file]).setPosition(10, 30).setFontSize(21).setFontColor('#FFF').setOpacity(0);
+    questionText = new lime.Label().setText(meta_data[file].text).setPosition(10, 30).setFontSize(21).setFontColor('#FFF').setOpacity(0);
     opts.questionLayer.appendChild(questionText);
     questionImage = addCharacter(file, {
       x: 10,

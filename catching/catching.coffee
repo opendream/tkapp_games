@@ -84,30 +84,7 @@ blockPatternHard = [[
         1, 1, 1, 0
     ]]
 
-
-IconItem =
-    brother: "item-brother.png"
-    buff: "item-buff.png"
-    gamesai: "item-gamesai.png"
-    grandfather: "item-grandfather.png"
-    grandmother: "item-grandmother.png"
-    sister: "item-sister.png"
-    sister2: "item-sister2.png"
-    uncle: "item-uncle.png"
-    wolf: "item-wolf.png"
-
-IconText =
-    "item-brother.png": "พี่ชาย"
-    "item-buff.png": "ควาย"
-    "item-gamesai.png": "แก้มใส"
-    "item-grandfather.png": "คุณตา"
-    "item-grandmother.png": "คุณยาย"
-    "item-sister.png": "พี่สาว"
-    "item-sister2.png": "น้องสาว"
-    "item-uncle.png": "คุณลุง"
-    "item-wolf.png": "หมาป่า"
-
-meta_data =
+ meta_data =
     "item-brother.png":
         text: "พี่ชาย"
         sound: "assets/sound/item-brother.mp3"
@@ -115,7 +92,7 @@ meta_data =
         text: "ควาย"
         sound: "assets/sound/item-buff.mp3"
     "item-gamesai.png":
-        text: "แก้มใส"
+        text: "เด็กหญิงแก้มใส"
         sound: "assets/sound/item-gamesai.mp3"
     "item-grandfather.png":
         text: "คุณตา"
@@ -136,13 +113,10 @@ meta_data =
         text: "หมาป่า"
         sound: "assets/sound/item-wolf.mp3"
 
-
-IconAudio = { }
-
 # Helper
 randomItemManager = () ->
-    size = goog.object.getCount(IconItem)
-    IconItemArray = goog.object.getValues IconItem
+    IconItemArray = goog.object.getKeys meta_data
+    size = IconItemArray.length
     lastGetIdx = 0
     goog.array.shuffle IconItemArray
     return {
@@ -274,7 +248,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
         at: opts.questionLayer
         absolutePosition: true
 
-    questionText = new lime.Label().setText(IconText[file]).setPosition(10,30).setFontSize(21).setFontColor('#FFF').setOpacity(0)
+    questionText = new lime.Label().setText(meta_data[file].text).setPosition(10,30).setFontSize(21).setFontColor('#FFF').setOpacity(0)
     opts.questionLayer.appendChild questionText
 
     questionImage = addCharacter file,
