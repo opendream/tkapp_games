@@ -47,9 +47,9 @@
     timer: function() {}
   };
 
-  catching.muteMe = [];
+  catching.events = [];
 
-  catching.allScenes = [];
+  catching.scenes = [];
 
   catching.isGameEnded = false;
 
@@ -105,6 +105,41 @@
     "item-wolf.png": {
       text: "หมาป่า",
       sound: "assets/sound/item-wolf.mp3"
+    }
+  };
+
+  meta_data = {
+    "image-13.png": {
+      text: "เจ้าดอกรัก",
+      sound: "assets/sound/sound-20.mp3"
+    },
+    "image-18.png": {
+      text: "แม่เจ้าดอกรัก",
+      sound: "assets/sound/sound-15.mp3"
+    },
+    "image-23.png": {
+      text: "ตาเจียม",
+      sound: "assets/sound/sound-25.mp3"
+    },
+    "image-28.png": {
+      text: "นางพริ้ง",
+      sound: "assets/sound/sound-30.mp3"
+    },
+    "image-3.png": {
+      text: "หมวก",
+      sound: "assets/sound/sound-5.mp3"
+    },
+    "image-33.png": {
+      text: "นายแม้น",
+      sound: "assets/sound/sound-35.mp3"
+    },
+    "image-38.png": {
+      text: "ยายละไม",
+      sound: "assets/sound/sound-40.mp3"
+    },
+    "image-8.png": {
+      text: "จอบขุดดิน",
+      sound: "assets/sound/sound-10.mp3"
     }
   };
 
@@ -360,7 +395,7 @@
           var correctArrow, moveUp, position, runningSchedule, that, wrongArrow;
           that = this;
           if (flatIdx === correctIdx) {
-            goog.array.forEach(catching.muteMe, function(e, i) {
+            goog.array.forEach(catching.events, function(e, i) {
               return goog.events.removeAll(e);
             });
             runningSchedule = answerAnimationFactory.pop();
@@ -410,7 +445,7 @@
           }
         });
         items.push(item);
-        return catching.muteMe.push(item);
+        return catching.events.push(item);
       };
       for (y = 0; 0 <= row ? y < row : y > row; 0 <= row ? y++ : y--) {
         flatIdx = x * row + y;
@@ -461,7 +496,7 @@
         position = this.getPosition();
         position.y += velocity * dt;
         if (position.y > 600) {
-          goog.array.forEach(catching.muteMe, function(e) {
+          goog.array.forEach(catching.events, function(e) {
             return goog.events.removeAll(e);
           });
           runningSchedule = answerAnimationFactory.pop();
@@ -504,9 +539,9 @@
   catching.intro = function() {
     var background, btnStart, btnState1, btnState2, scene;
     catching.isGameEnded = false;
-    catching.allScenes = [];
+    catching.scenes = [];
     scene = new lime.Scene;
-    catching.allScenes.push(scene);
+    catching.scenes.push(scene);
     background = new lime.Layer;
     goog.object.forEach(meta_data, function(item, idx) {
       return item.sound = new lime.audio.Audio(item.sound);
@@ -588,7 +623,7 @@
   catching.selectLevel = function() {
     var background, boy, boyAction, btnEasyState1, btnEasyState2, btnLv2State1, btnLv2State2, buttonEasy, buttonHard, buttonLayer, fadeIn, girl, girlAction, moveTitleUp, postbox, postboxAction, scene, title1, title2;
     scene = new lime.Scene;
-    catching.allScenes.push(scene);
+    catching.scenes.push(scene);
     background = new lime.Layer;
     scene.appendChild(background);
     addCharacter("scene_bg.png", {
@@ -700,7 +735,7 @@
   catching.secondScene = function() {
     var background, clock, col, questionLayer, scene;
     scene = new lime.Scene;
-    catching.allScenes.push(scene);
+    catching.scenes.push(scene);
     background = new lime.Layer;
     catching.theme.stop();
     catching.theme.play();
@@ -771,7 +806,7 @@
   catching.timeoutScene = function() {
     var background, changeScene, scene;
     scene = new lime.Scene;
-    catching.allScenes.push(scene);
+    catching.scenes.push(scene);
     background = new lime.Layer;
     catching.theme.stop();
     addCharacter("scene_bg.png", {
@@ -817,7 +852,7 @@
   catching.lastScene = function() {
     var background, bubble, menu, menu2, scene, scoreLabel, title1;
     scene = new lime.Scene;
-    catching.allScenes.push(scene);
+    catching.scenes.push(scene);
     background = new lime.Layer;
     catching.theme.stop();
     addCharacter("scene_bg.png", {

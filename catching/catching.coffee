@@ -30,8 +30,8 @@ sceneCenterY = sceneHeight/2
 
 callbackFactory =
     timer: ->
-catching.muteMe = []
-catching.allScenes = []
+catching.events = []
+catching.scenes = []
 catching.isGameEnded = false
 @answerAnimationFactory = []
 
@@ -112,6 +112,83 @@ blockPatternHard = [[
     "item-wolf.png":
         text: "หมาป่า"
         sound: "assets/sound/item-wolf.mp3"
+
+meta_data =
+    "image-13.png":
+        text: "เจ้าดอกรัก"
+        sound: "assets/sound/sound-20.mp3"
+    "image-18.png":
+        text: "แม่เจ้าดอกรัก"
+        sound: "assets/sound/sound-15.mp3"
+    "image-23.png":
+        text: "ตาเจียม"
+        sound: "assets/sound/sound-25.mp3"
+    "image-28.png":
+        text: "นางพริ้ง"
+        sound: "assets/sound/sound-30.mp3"
+    "image-3.png":
+        text: "หมวก"
+        sound: "assets/sound/sound-5.mp3"
+    "image-33.png":
+        text: "นายแม้น"
+        sound: "assets/sound/sound-35.mp3"
+    "image-38.png":
+        text: "ยายละไม"
+        sound: "assets/sound/sound-40.mp3"
+    "image-8.png":
+        text: "จอบขุดดิน"
+        sound: "assets/sound/sound-10.mp3"
+
+# เพื่อนรักต่างดาว
+# meta_data =
+#     "image-13.png":
+#        text: "คีริ"
+#        sound: "assets/sound/sound-10.mp3"
+#     "image-18.png":
+#        text: "ปูโต๊ะ"
+#        sound: "assets/sound/sound-.mp3"
+#     "image-23.png":
+#        text: "โปเต๊ะ"
+#        sound: "assets/sound/sound-25.mp3"
+#     "image-28.png":
+#        text: "ศาสตราจารย์คููรุ"
+#        sound: "assets/sound/sound-30.mp3"
+#     "image-3.png":
+#        text: "ไส้เดือน"
+#        sound: "assets/sound/sound-5.mp3"
+#     "image-8.png":
+#        text: "คาระ"
+#        sound: "assets/sound/sound-15.mp3"
+
+#ช้างดื้อ
+# meta_data =
+#     "image-13.png":
+#         text: "งู"
+#         sound: "assets/sound/sound-15.mp3"
+#     "image-18.png":
+#         text: "อีกา"
+#         sound: "assets/sound/sound-20.mp3"
+#     "image-23.png":
+#         text: "กวาง"
+#         sound: "assets/sound/sound-25.mp3"
+#     "image-28.png":
+#         text: "นกสีเขียว"
+#         sound: "assets/sound/sound-30.mp3"
+#     "image-3.png":
+#         text: "พ่อช้าง"
+#         sound: "assets/sound/sound-5.mp3"
+#     "image-33.png":
+#         text: "นกสีแดง"
+#         sound: "assets/sound/sound-35.mp3"
+#     "image-38.png":
+#         text: "ช้างดื้อ"
+#         sound: "assets/sound/sound-40.mp3"
+#     "image-43.png":
+#         text: "เสือ"
+#         sound: "assets/sound/sound-45.mp3"
+#     "image-8.png"
+#         text: "แม่ช้าง"
+#         sound: "assets/sound/sound-10.mp3"
 
 # Helper
 randomItemManager = () ->
@@ -281,9 +358,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     questionBalloon.setScale(0).setAnchorPoint(0,1)
     moveUpOut.addTarget questionBalloon
 
-
     playSound = ->
-        # alert "PLAY SOUND"
         this.stop()
         this.play()
     lime.scheduleManager.scheduleWithDelay playSound, characterSound, 600, 1
@@ -318,7 +393,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                 listen_key = goog.events.listen item, ['click', 'touchstart'], (e) ->
                     that = this
                     if flatIdx is correctIdx
-                        goog.array.forEach catching.muteMe, (e, i) ->
+                        goog.array.forEach catching.events  , (e, i) ->
                             goog.events.removeAll e
                         runningSchedule = answerAnimationFactory.pop()
                         lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
@@ -356,7 +431,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                         that.setHidden(true)
                         wrongArrow.runAction(moveUpOut)
                 items.push item
-                catching.muteMe.push item
+                catching.events.push item
 
     imageLayer.row_ = row
     imageLayer
@@ -378,7 +453,7 @@ spawnQuestionAndAnswer = (opts) ->
             position = this.getPosition()
             position.y += velocity * dt # if dt is bigger we just move more
             if position.y > 600
-                goog.array.forEach catching.muteMe, (e) ->
+                goog.array.forEach catching.events, (e) ->
                     goog.events.removeAll e
                 runningSchedule = answerAnimationFactory.pop()
                 lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
@@ -400,20 +475,13 @@ catching.start = ->
         catching.theme.baseElement.loop = true;
     catch e
         console?.log? e
-
-
-    #var introScene = new lime.Scene
-    #var modeScene = new lime.Scene
-    #var gameScene = new lime.Scene
-    #var summaryScene = new lime.Scene
     scene = catching.intro()
-    # set current scene active
 
 catching.intro = ->
     catching.isGameEnded = false
-    catching.allScenes = []
+    catching.scenes = []
     scene = new lime.Scene
-    catching.allScenes.push scene
+    catching.scenes.push scene
     background = new lime.Layer
 
     goog.object.forEach meta_data, (item, idx) ->
@@ -448,7 +516,7 @@ catching.intro = ->
 
 catching.selectLevel = ->
     scene = new lime.Scene
-    catching.allScenes.push scene
+    catching.scenes.push scene
     background = new lime.Layer
     scene.appendChild background
 
@@ -532,7 +600,7 @@ catching.selectLevel = ->
 
 catching.secondScene = ->
     scene = new lime.Scene
-    catching.allScenes.push scene
+    catching.scenes.push scene
     background = new lime.Layer
 
     catching.theme.stop()
@@ -575,7 +643,7 @@ catching.secondScene = ->
 
 catching.timeoutScene = () ->
     scene = new lime.Scene
-    catching.allScenes.push scene
+    catching.scenes.push scene
     background = new lime.Layer
 
     catching.theme.stop()
@@ -599,7 +667,7 @@ catching.timeoutScene = () ->
 
 catching.lastScene = () ->
     scene = new lime.Scene
-    catching.allScenes.push scene
+    catching.scenes.push scene
     background = new lime.Layer
 
     # Show timeout text
