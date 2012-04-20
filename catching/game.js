@@ -1,5 +1,5 @@
-(function() {
-  var addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, meta_data, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, timerManager;
+var game_func = function () {
+  var IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, meta_data, randomItemManager, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, setUp, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('catching');
 
@@ -69,6 +69,30 @@
 
   blockPatternHard = [[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1], [0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1], [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0], [0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0]];
 
+  IconItem = {
+    brother: "item-brother.png",
+    buff: "item-buff.png",
+    gamesai: "item-gamesai.png",
+    grandfather: "item-grandfather.png",
+    grandmother: "item-grandmother.png",
+    sister: "item-sister.png",
+    sister2: "item-sister2.png",
+    uncle: "item-uncle.png",
+    wolf: "item-wolf.png"
+  };
+
+  IconText = {
+    "item-brother.png": "พี่ชาย",
+    "item-buff.png": "ควาย",
+    "item-gamesai.png": "แก้มใส",
+    "item-grandfather.png": "คุณตา",
+    "item-grandmother.png": "คุณยาย",
+    "item-sister.png": "พี่สาว",
+    "item-sister2.png": "น้องสาว",
+    "item-uncle.png": "คุณลุง",
+    "item-wolf.png": "หมาป่า"
+  };
+
   meta_data = {
     "item-brother.png": {
       text: "พี่ชาย",
@@ -79,7 +103,7 @@
       sound: "assets/sound/item-buff.mp3"
     },
     "item-gamesai.png": {
-      text: "เด็กหญิงแก้มใส",
+      text: "แก้มใส",
       sound: "assets/sound/item-gamesai.mp3"
     },
     "item-grandfather.png": {
@@ -108,10 +132,12 @@
     }
   };
 
+  IconAudio = {};
+
   randomItemManager = function() {
     var IconItemArray, lastGetIdx, size;
-    IconItemArray = goog.object.getKeys(meta_data);
-    size = IconItemArray.length;
+    size = goog.object.getCount(IconItem);
+    IconItemArray = goog.object.getValues(IconItem);
     lastGetIdx = 0;
     goog.array.shuffle(IconItemArray);
     return {
@@ -260,7 +286,7 @@
     return character;
   };
 
-  timerManager = function(opts) {
+  startTimer = function(opts) {
     var counter, decreaseBy, delay;
     if (opts == null) opts = {};
     counter = opts.limit || 10;
@@ -272,7 +298,7 @@
       }
     }
     counter = counter - 1;
-    (function() {
+    return (function() {
       callbackFactory.timer = function(dt) {
         if (!(counter > 0)) {
           if (counter <= 0) {
@@ -293,12 +319,6 @@
       };
       return lime.scheduleManager.scheduleWithDelay(callbackFactory.timer, opts.limeScope || callbackFactory, delay);
     })();
-    return {
-      addTime: function(time) {
-        counter += time;
-        return opts != null ? typeof opts.runningCallback === "function" ? opts.runningCallback(counter) : void 0 : void 0;
-      }
-    };
   };
 
   buildSetOfAnimation = function(col, opts) {
@@ -318,7 +338,7 @@
       at: opts.questionLayer,
       absolutePosition: true
     });
-    questionText = new lime.Label().setText(meta_data[file].text).setPosition(10, 30).setFontSize(21).setFontColor('#FFF').setOpacity(0);
+    questionText = new lime.Label().setText(IconText[file]).setPosition(10, 30).setFontSize(21).setFontColor('#FFF').setOpacity(0);
     opts.questionLayer.appendChild(questionText);
     questionImage = addCharacter(file, {
       x: 10,
@@ -489,7 +509,7 @@
 
   catching.start = function() {
     var scene;
-    catching.director = new lime.Director(document.body, sceneWidth, sceneHeight);
+    catching.director = new lime.Director(document.getElementById("game5"), sceneWidth, sceneHeight);
     try {
       catching.theme = new lime.audio.Audio("assets/sound/theme-song.mp3");
       catching.theme.baseElement.loop = true;
@@ -751,7 +771,7 @@
     catching.lblTimer.setFontColor('#000');
     scene.appendChild(catching.lblTimer);
     catching.director.replaceScene(scene);
-    return timerManager({
+    return startTimer({
       limit: catching.level === 'hard' ? 70 : 80,
       delay: 1000,
       limeScope: callbackFactory,
@@ -899,4 +919,6 @@
 
   goog.exportSymbol('catching.start', catching.start);
 
-}).call(this);
+  return catching;
+
+}

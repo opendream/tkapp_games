@@ -30,13 +30,9 @@ sceneCenterY = sceneHeight/2
 
 callbackFactory =
     timer: ->
-
 catching.muteMe = []
-
 catching.allScenes = []
-
 catching.isGameEnded = false
-
 @answerAnimationFactory = []
 
 getIdxMap = (a) ->
@@ -88,44 +84,39 @@ blockPatternHard = [[
         1, 1, 1, 0
     ]]
 
-
-IconItem =
-    brother: "item-brother.png"
-    buff: "item-buff.png"
-    gamesai: "item-gamesai.png"
-    grandfather: "item-grandfather.png"
-    grandmother: "item-grandmother.png"
-    sister: "item-sister.png"
-    sister2: "item-sister2.png"
-    uncle: "item-uncle.png"
-    wolf: "item-wolf.png"
-
-IconText =
-    "item-brother.png": "พี่ชาย"
-    "item-buff.png": "ควาย"
-    "item-gamesai.png": "แก้มใส"
-    "item-grandfather.png": "คุณตา"
-    "item-grandmother.png": "คุณยาย"
-    "item-sister.png": "พี่สาว"
-    "item-sister2.png": "น้องสาว"
-    "item-uncle.png": "คุณลุง"
-    "item-wolf.png": "หมาป่า"
-
-IconAudio =
-    "item-brother.png": "item-brother.mp3"
-    "item-buff.png": "item-buff.mp3"
-    "item-gamesai.png": "item-gamesai.mp3"
-    "item-grandfather.png": "item-grandfather.mp3"
-    "item-grandmother.png": "item-grandmother.mp3"
-    "item-sister.png": "item-sister.mp3"
-    "item-sister2.png": "item-sister2.mp3"
-    "item-uncle.png": "item-uncle.mp3"
-    "item-wolf.png": "item-wolf.mp3"
+ meta_data =
+    "item-brother.png":
+        text: "พี่ชาย"
+        sound: "assets/sound/item-brother.mp3"
+    "item-buff.png":
+        text: "ควาย"
+        sound: "assets/sound/item-buff.mp3"
+    "item-gamesai.png":
+        text: "เด็กหญิงแก้มใส"
+        sound: "assets/sound/item-gamesai.mp3"
+    "item-grandfather.png":
+        text: "คุณตา"
+        sound: "assets/sound/item-grandfather.mp3"
+    "item-grandmother.png":
+        text: "คุณยาย"
+        sound: "assets/sound/item-grandmother.mp3"
+    "item-sister.png":
+        text: "คุณน้า"
+        sound: "assets/sound/item-sister.mp3"
+    "item-sister2.png":
+        text: "น้องสาว"
+        sound: "assets/sound/item-sister2.mp3"
+    "item-uncle.png":
+        text: "คุณลุง"
+        sound: "assets/sound/item-uncle.mp3"
+    "item-wolf.png":
+        text: "หมาป่า"
+        sound: "assets/sound/item-wolf.mp3"
 
 # Helper
 randomItemManager = () ->
-    size = goog.object.getCount(IconItem)
-    IconItemArray = goog.object.getValues IconItem
+    IconItemArray = goog.object.getKeys meta_data
+    size = IconItemArray.length
     lastGetIdx = 0
     goog.array.shuffle IconItemArray
     return {
@@ -152,12 +143,6 @@ catching.score = do ->
 
 setUp = (opts) ->
     switch opts.part
-        when "gameFrame"
-            console.log "gameFrame"
-            # b3 = addCharacter "game_frame.png", x: 0, y: 5, at: opts.at, w: sceneWidth - 5, h: sceneHeight - 20, weight: 20
-            # b2 = addCharacter "game_bg.png", x: 0, y: 0, at: opts.at, w: sceneWidth weight: 30
-            # b2.setScale 1.0
-            # b1 = addCharacter "scene_bg.png", x: 4, y: -10, at: opts.at, w: sceneWidth, h: sceneHeight, weight: 100
         when "blockPipe"
             if opts.by is 3
                 startX = 120
@@ -228,13 +213,12 @@ addCharacter =  (image, opts) ->
     return character
 
 
-startTimer = (opts = {} ) ->
+timerManager = (opts = {} ) ->
     counter = opts.limit or 10
     delay = opts.delay or 1000
     decreaseBy = opts.decreaseBy or 1
     opts?.runningCallback?(counter)
     counter = counter - 1
-
     do ->
         callbackFactory.timer = (dt) ->
             unless counter > 0
@@ -243,6 +227,9 @@ startTimer = (opts = {} ) ->
                 opts?.runningCallback?(counter)
             counter = counter - decreaseBy
         lime.scheduleManager.scheduleWithDelay(callbackFactory.timer, opts.limeScope or callbackFactory, delay)
+    return addTime: (time) ->
+        counter += time
+        opts?.runningCallback?(counter)
 
 
 buildSetOfAnimation = (col=3, opts = {}) ->
@@ -261,7 +248,7 @@ buildSetOfAnimation = (col=3, opts = {}) ->
         at: opts.questionLayer
         absolutePosition: true
 
-    questionText = new lime.Label().setText(IconText[file]).setPosition(10,30).setFontSize(21).setFontColor('#FFF').setOpacity(0)
+    questionText = new lime.Label().setText(meta_data[file].text).setPosition(10,30).setFontSize(21).setFontColor('#FFF').setOpacity(0)
     opts.questionLayer.appendChild questionText
 
     questionImage = addCharacter file,
@@ -272,9 +259,8 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     questionImage.setOpacity(0)
 
     opts.questionLayer.setAnchorPoint(0,1).setPosition(150,450)
-    console.log opts.questionLayer
 
-    characterSound = new lime.audio.Audio("assets/sound/#{IconAudio[file]}")
+    characterSound = meta_data[file].sound
 
     # Fade in and fade out
     Delay1 = new lime.animation.Delay().setDuration(1.0)
@@ -296,7 +282,11 @@ buildSetOfAnimation = (col=3, opts = {}) ->
     moveUpOut.addTarget questionBalloon
 
 
-    lime.scheduleManager.scheduleWithDelay characterSound.play, characterSound, 600
+    playSound = ->
+        # alert "PLAY SOUND"
+        this.stop()
+        this.play()
+    lime.scheduleManager.scheduleWithDelay playSound, characterSound, 600, 1
     FadeInOut.play()
     moveUpOut.play()
 
@@ -333,16 +323,28 @@ buildSetOfAnimation = (col=3, opts = {}) ->
                         runningSchedule = answerAnimationFactory.pop()
                         lime.scheduleManager.unschedule runningSchedule.callback, runningSchedule.scope
                         catching.score.add()
-                        moveUp = new lime.animation.MoveBy(0, -120).setDuration(0.4)
-                        correctArrow = addCharacter "correct.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (character) -> character.setScale(0.7)
-                        moveUp.addTarget(correctArrow).play()
-                        do ->
+                        moveUpOut = new lime.animation.Spawn(new lime.animation.MoveBy(0, -250), new lime.animation.FadeTo(0)).setDuration(1)
+
+                        correctArrow = addCharacter "correct.png",
+                            x: that.position_.x
+                            y: that.position_.y + imageLayer.position_.y
+                            absolute: true
+                            at: opts.background
+                            callback: (character) -> character.setScale(0.7)
+                        correctArrow.runAction(moveUpOut)
+                        do (correctArrow) ->
                             callback = ->
+                                correctArrow.setHidden(true)
                                 imageLayer.removeAllChildren()
                                 spawnQuestionAndAnswer questionLayer: opts.questionLayer, background: opts.background
                             setTimeout callback, 500
                     else
-                        wrongArrow = addCharacter "wrong.png", x: that.position_.x, y: that.position_.y, absolute: true, at: imageLayer, callback: (character) -> character.setScale(0.7)
+                        wrongArrow = addCharacter "wrong.png",
+                            x: that.position_.x
+                            y: that.position_.y
+                            absolute: true
+                            at: imageLayer
+                            callback: (character) -> character.setScale(0.7)
                         moveUp = new lime.animation.MoveBy(0, -100).setDuration(0.8)
                         # moveUp.addTarget(wrongArrow).play()
 
@@ -375,7 +377,6 @@ spawnQuestionAndAnswer = (opts) ->
         animate01 = (dt) ->
             position = this.getPosition()
             position.y += velocity * dt # if dt is bigger we just move more
-            console.log "ANIMATING"
             if position.y > 600
                 goog.array.forEach catching.muteMe, (e) ->
                     goog.events.removeAll e
@@ -386,7 +387,6 @@ spawnQuestionAndAnswer = (opts) ->
             @setPosition position
 
         answerAnimationFactory.push callback: animate01, scope: imageLayer
-        console.log answerAnimationFactory
         do (velocity, imageLayer) ->
             lime.scheduleManager.schedule(animate01, imageLayer)
 
@@ -396,10 +396,8 @@ spawnQuestionAndAnswer = (opts) ->
 catching.start = ->
     catching.director = new lime.Director document.body, sceneWidth, sceneHeight
     try
-        @theme = new lime.audio.Audio("assets/sound/theme-song.mp3")
-        @theme.baseElement.loop = true;
-        @theme.baseElement.preload = "auto";
-        console.log @theme.baseElement
+        catching.theme = new lime.audio.Audio("assets/sound/theme-song.mp3")
+        catching.theme.baseElement.loop = true;
     catch e
         console?.log? e
 
@@ -418,19 +416,13 @@ catching.intro = ->
     catching.allScenes.push scene
     background = new lime.Layer
 
-    smoke = [
-        new lime.Sprite().setFill('assets/images/smoke-1.png')
-        new lime.Sprite().setFill('assets/images/smoke-2.png')
-        new lime.Sprite().setFill('assets/images/smoke-3.png')
-        new lime.Sprite().setFill('assets/images/smoke-4.png')
-    ]
+    goog.object.forEach meta_data, (item, idx) ->
+        item.sound = new lime.audio.Audio item.sound
+
+
+    # goog.object.forEach catching.sound, (item) -> item.baseElement.load()
 
     scene.appendChild background
-
-    # new lime.animation.FadeTo(0).addTarget(smoke[0]).play()
-    # new lime.animation.FadeTo(0).addTarget(smoke[1]).play()
-    # new lime.animation.FadeTo(0).addTarget(smoke[2]).play()
-    # new lime.animation.FadeTo(0).addTarget(smoke[3]).play()
 
     addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
     addCharacter "boy.png", x: -230, y: 170, at: background, callback: (character) -> character.setScale(0.8)
@@ -534,7 +526,6 @@ catching.selectLevel = ->
         catching.score.reset()
         catching.level = 'hard'
         catching.blockPatternIdx = goog.array.map blockPatternHard, (e, i) -> getIdxMap e
-        console.log catching.blockPatternIdx
         do catching.secondScene
 
     catching.director.replaceScene scene
@@ -544,7 +535,8 @@ catching.secondScene = ->
     catching.allScenes.push scene
     background = new lime.Layer
 
-    @theme.play()
+    catching.theme.stop()
+    catching.theme.play()
 
     scene.appendChild background
 
@@ -568,7 +560,7 @@ catching.secondScene = ->
     scene.appendChild catching.lblTimer
     catching.director.replaceScene scene
 
-    startTimer
+    timerManager
         limit: if catching.level is 'hard' then 70 else 80
         delay: 1000
         limeScope: callbackFactory
@@ -586,7 +578,7 @@ catching.timeoutScene = () ->
     catching.allScenes.push scene
     background = new lime.Layer
 
-    @theme.stop()
+    catching.theme.stop()
 
     addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
     addCharacter "game_bg.png", x: 0, y: 0, at: background, w: sceneWidth, h: sceneHeight
@@ -612,7 +604,7 @@ catching.lastScene = () ->
 
     # Show timeout text
 
-    @theme.stop()
+    catching.theme.stop()
 
     addCharacter "scene_bg.png", x: 2, y: 10, at: background, callback: (character) -> character.setScale(0.99)
     addCharacter "boy.png", x: -230, y: 170, at: background, callback: (character) -> character.setScale(0.8)
@@ -631,11 +623,7 @@ catching.lastScene = () ->
     scoreLabel.setText(catching.score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y - 36).setFontColor('red').setFontSize(48)
     menu2.domClassName = goog.getCssName('lime-button');
 
-
-    goog.events.listen menu2, ['click', 'touchstart'], ->
-        catching.intro()
-
-
+    goog.events.listen menu2, ['click', 'touchstart'], -> catching.intro()
 
     scene.appendChild background
     scene.appendChild scoreLabel
@@ -643,5 +631,6 @@ catching.lastScene = () ->
     return  scene
 
 @catching = catching
+@game = catching
 
 goog.exportSymbol 'catching.start', catching.start
