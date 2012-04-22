@@ -87,52 +87,31 @@ blockPatternHard = [[
 meta_data =
     "gamesai/item-brother.png":
         text: "พี่ชาย"
-        sound: "assets/sound/dokrak/item-brother.mp3"
-    "item-buff.png":
+        sound: "assets/sound/gamesai/item-brother.mp3"
+    "gamesai/item-buff.png":
         text: "ควาย"
-        sound: "assets/sound/dokrak/item-buff.mp3"
+        sound: "assets/sound/gamesai/item-buff.mp3"
     "gamesai/item-gamesai.png":
         text: "เด็กหญิงแก้มใส"
-        sound: "assets/sound/dokrak/item-gamesai.mp3"
+        sound: "assets/sound/gamesai/item-gamesai.mp3"
     "gamesai/item-grandfather.png":
         text: "คุณตา"
-        sound: "assets/sound/dokrak/item-grandfather.mp3"
+        sound: "assets/sound/gamesai/item-grandfather.mp3"
     "gamesai/item-grandmother.png":
         text: "คุณยาย"
-        sound: "assets/sound/dokrak/item-grandmother.mp3"
+        sound: "assets/sound/gamesai/item-grandmother.mp3"
     "gamesai/item-sister.png":
         text: "คุณน้า"
-        sound: "assets/sound/dokrak/item-sister.mp3"
+        sound: "assets/sound/gamesai/item-sister.mp3"
     "gamesai/item-sister2.png":
         text: "น้องสาว"
-        sound: "assets/sound/dokrak/item-sister2.mp3"
+        sound: "assets/sound/gamesai/item-sister2.mp3"
     "gamesai/item-uncle.png":
         text: "คุณลุง"
-        sound: "assets/sound/dokrak/item-uncle.mp3"
+        sound: "assets/sound/gamesai/item-uncle.mp3"
     "gamesai/item-wolf.png":
         text: "หมาป่า"
-        sound: "assets/sound/dokrak/item-wolf.mp3"
-# เพื่อนรักต่างดาว
-meta_data =
-    "friends/image-13.png":
-       text: "คีริ"
-       sound: "assets/sound/friends/sound-10.mp3"
-    "friends/image-18.png":
-       text: "ปูโต๊ะ"
-       sound: "assets/sound/friends/sound-.mp3"
-    "friends/image-23.png":
-       text: "โปเต๊ะ"
-       sound: "assets/sound/friends/sound-25.mp3"
-    "friends/image-28.png":
-       text: "ศาสตราจารย์คููรุ"
-       sound: "assets/sound/friends/sound-30.mp3"
-    "friends/image-3.png":
-       text: "ไส้เดือน"
-       sound: "assets/sound/friends/sound-5.mp3"
-    "friends/image-8.png":
-       text: "คาระ"
-       sound: "assets/sound/friends/sound-15.mp3"
-
+        sound: "assets/sound/gamesai/item-wolf.mp3"
 
 meta_data =
     "dokrak/image-13.png":
@@ -191,6 +170,27 @@ meta_data =
         text: "แม่ช้าง"
         sound: "assets/sound/elephant/sound-10.mp3"
 
+# เพื่อนรักต่างดาว
+meta_data =
+    "friends/image-13.png":
+       text: "คีริ"
+       sound: "assets/sound/friends/sound-10.mp3"
+    "friends/image-18.png":
+       text: "ปูโต๊ะ"
+       sound: "assets/sound/friends/sound-20.mp3"
+    "friends/image-23.png":
+       text: "โปเต๊ะ"
+       sound: "assets/sound/friends/sound-25.mp3"
+    "friends/image-28.png":
+       text: "ศาสตราจารย์คููรุ"
+       sound: "assets/sound/friends/sound-30.mp3"
+    "friends/image-3.png":
+       text: "ไส้เดือน"
+       sound: "assets/sound/friends/sound-5.mp3"
+    "friends/image-8.png":
+       text: "คาระ"
+       sound: "assets/sound/friends/sound-15.mp3"
+
 # Helper
 randomItemManager = () ->
     IconItemArray = goog.object.getKeys meta_data
@@ -217,7 +217,9 @@ catching.score = do ->
     getScore = -> _score
     { getScore, add, reset }
 
-catching.setMetadata = (data) -> meta_data = data
+catching.setMetadata = (data) -> 
+    meta_data = data
+    catching.intro()
 
 #animation
 
