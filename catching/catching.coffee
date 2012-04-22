@@ -133,6 +133,34 @@ meta_data =
        text: "คาระ"
        sound: "assets/sound/friends/sound-15.mp3"
 
+
+meta_data =
+    "dokrak/image-13.png":
+        text: "เจ้าดอกรัก"
+        sound: "assets/sound/dokrak/sound-20.mp3"
+    "dokrak/image-18.png":
+        text: "แม่เจ้าดอกรัก"
+        sound: "assets/sound/dokrak/sound-15.mp3"
+    "dokrak/image-23.png":
+        text: "ตาเจียม"
+        sound: "assets/sound/dokrak/sound-25.mp3"
+    "dokrak/image-28.png":
+        text: "นางพริ้ง"
+        sound: "assets/sound/dokrak/sound-30.mp3"
+    "dokrak/image-3.png":
+        text: "หมวก"
+        sound: "assets/sound/dokrak/sound-5.mp3"
+    "dokrak/image-33.png":
+        text: "นายแม้น"
+        sound: "assets/sound/dokrak/sound-35.mp3"
+    "dokrak/image-38.png":
+        text: "ยายละไม"
+        sound: "assets/sound/dokrak/sound-40.mp3"
+    "dokrak/image-8.png":
+        text: "จอบขุดดิน"
+        sound: "assets/sound/dokrak/sound-10.mp3"
+
+
 # ช้างดื้อ
 meta_data =
     "elephant/image-13.png":
@@ -162,34 +190,6 @@ meta_data =
     "elephant/image-8.png": 
         text: "แม่ช้าง"
         sound: "assets/sound/elephant/sound-10.mp3"
-
-
-meta_data =
-    "dokrak/image-13.png":
-        text: "เจ้าดอกรัก"
-        sound: "assets/sound/dokrak/sound-20.mp3"
-    "dokrak/image-18.png":
-        text: "แม่เจ้าดอกรัก"
-        sound: "assets/sound/dokrak/sound-15.mp3"
-    "dokrak/image-23.png":
-        text: "ตาเจียม"
-        sound: "assets/sound/dokrak/sound-25.mp3"
-    "dokrak/image-28.png":
-        text: "นางพริ้ง"
-        sound: "assets/sound/dokrak/sound-30.mp3"
-    "dokrak/image-3.png":
-        text: "หมวก"
-        sound: "assets/sound/dokrak/sound-5.mp3"
-    "dokrak/image-33.png":
-        text: "นายแม้น"
-        sound: "assets/sound/dokrak/sound-35.mp3"
-    "dokrak/image-38.png":
-        text: "ยายละไม"
-        sound: "assets/sound/dokrak/sound-40.mp3"
-    "dokrak/image-8.png":
-        text: "จอบขุดดิน"
-        sound: "assets/sound/dokrak/sound-10.mp3"
-
 
 # Helper
 randomItemManager = () ->
