@@ -166,7 +166,7 @@ meta_data =
     "elephant/image-43.png":
         text: "เสือ"
         sound: "assets/sound/elephant/sound-45.mp3"
-    "elephant/image-8.png": 
+    "elephant/image-8.png":
         text: "แม่ช้าง"
         sound: "assets/sound/elephant/sound-10.mp3"
 
@@ -217,7 +217,7 @@ catching.score = do ->
     getScore = -> _score
     { getScore, add, reset }
 
-catching.setMetadata = (data) -> 
+catching.setMetadata = (data) ->
     meta_data = data
     catching.intro()
 
@@ -330,8 +330,6 @@ buildSetOfAnimation = (col=3, opts = {}) ->
         at: opts.questionLayer
         absolutePosition: true
 
-    questionText = new lime.Label().setText(meta_data[file].text).setPosition(10,30).setFontSize(21).setFontColor('#FFF').setOpacity(0)
-    opts.questionLayer.appendChild questionText
 
     questionImage = addCharacter file,
         x: 10,
@@ -339,6 +337,9 @@ buildSetOfAnimation = (col=3, opts = {}) ->
         at: opts.questionLayer
         absolutePosition: true
     questionImage.setOpacity(0)
+
+    questionText = new lime.Label().setText(meta_data[file].text).setPosition(10,45).setFontSize(19).setFontColor('#FFF').setOpacity(0)
+    opts.questionLayer.appendChild questionText
 
     opts.questionLayer.setAnchorPoint(0,1).setPosition(150,450)
 
