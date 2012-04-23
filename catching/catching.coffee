@@ -84,111 +84,112 @@ blockPatternHard = [[
         1, 1, 1, 0
     ]]
 
- meta_data =
+meta_data =
     "gamesai/item-brother.png":
         text: "พี่ชาย"
-        sound: "assets/sound/item-brother.mp3"
-    "item-buff.png":
+        sound: "assets/sound/gamesai/item-brother.mp3"
+    "gamesai/item-buff.png":
         text: "ควาย"
-        sound: "assets/sound/item-buff.mp3"
+        sound: "assets/sound/gamesai/item-buff.mp3"
     "gamesai/item-gamesai.png":
         text: "เด็กหญิงแก้มใส"
-        sound: "assets/sound/item-gamesai.mp3"
+        sound: "assets/sound/gamesai/item-gamesai.mp3"
     "gamesai/item-grandfather.png":
         text: "คุณตา"
-        sound: "assets/sound/item-grandfather.mp3"
+        sound: "assets/sound/gamesai/item-grandfather.mp3"
     "gamesai/item-grandmother.png":
         text: "คุณยาย"
-        sound: "assets/sound/item-grandmother.mp3"
+        sound: "assets/sound/gamesai/item-grandmother.mp3"
     "gamesai/item-sister.png":
         text: "คุณน้า"
-        sound: "assets/sound/item-sister.mp3"
+        sound: "assets/sound/gamesai/item-sister.mp3"
     "gamesai/item-sister2.png":
         text: "น้องสาว"
-        sound: "assets/sound/item-sister2.mp3"
+        sound: "assets/sound/gamesai/item-sister2.mp3"
     "gamesai/item-uncle.png":
         text: "คุณลุง"
-        sound: "assets/sound/item-uncle.mp3"
+        sound: "assets/sound/gamesai/item-uncle.mp3"
     "gamesai/item-wolf.png":
         text: "หมาป่า"
-        sound: "assets/sound/item-wolf.mp3"
+        sound: "assets/sound/gamesai/item-wolf.mp3"
 
 meta_data =
     "dokrak/image-13.png":
         text: "เจ้าดอกรัก"
-        sound: "assets/sound/sound-20.mp3"
+        sound: "assets/sound/dokrak/sound-20.mp3"
     "dokrak/image-18.png":
         text: "แม่เจ้าดอกรัก"
-        sound: "assets/sound/sound-15.mp3"
+        sound: "assets/sound/dokrak/sound-15.mp3"
     "dokrak/image-23.png":
         text: "ตาเจียม"
-        sound: "assets/sound/sound-25.mp3"
+        sound: "assets/sound/dokrak/sound-25.mp3"
     "dokrak/image-28.png":
         text: "นางพริ้ง"
-        sound: "assets/sound/sound-30.mp3"
+        sound: "assets/sound/dokrak/sound-30.mp3"
     "dokrak/image-3.png":
         text: "หมวก"
-        sound: "assets/sound/sound-5.mp3"
+        sound: "assets/sound/dokrak/sound-5.mp3"
     "dokrak/image-33.png":
         text: "นายแม้น"
-        sound: "assets/sound/sound-35.mp3"
+        sound: "assets/sound/dokrak/sound-35.mp3"
     "dokrak/image-38.png":
         text: "ยายละไม"
-        sound: "assets/sound/sound-40.mp3"
+        sound: "assets/sound/dokrak/sound-40.mp3"
     "dokrak/image-8.png":
         text: "จอบขุดดิน"
-        sound: "assets/sound/sound-10.mp3"
+        sound: "assets/sound/dokrak/sound-10.mp3"
 
-# เพื่อนรักต่างดาว
-meta_data =
-    "friends/image-13.png":
-       text: "คีริ"
-       sound: "assets/sound/sound-10.mp3"
-    "friends/image-18.png":
-       text: "ปูโต๊ะ"
-       sound: "assets/sound/sound-.mp3"
-    "friends/image-23.png":
-       text: "โปเต๊ะ"
-       sound: "assets/sound/sound-25.mp3"
-    "friends/image-28.png":
-       text: "ศาสตราจารย์คููรุ"
-       sound: "assets/sound/sound-30.mp3"
-    "friends/image-3.png":
-       text: "ไส้เดือน"
-       sound: "assets/sound/sound-5.mp3"
-    "friends/image-8.png":
-       text: "คาระ"
-       sound: "assets/sound/sound-15.mp3"
 
 # ช้างดื้อ
 meta_data =
     "elephant/image-13.png":
         text: "งู"
-        sound: "assets/sound/sound-15.mp3"
+        sound: "assets/sound/elephant/sound-15.mp3"
     "elephant/image-18.png":
         text: "อีกา"
-        sound: "assets/sound/sound-20.mp3"
+        sound: "assets/sound/elephant/sound-20.mp3"
     "elephant/image-23.png":
         text: "กวาง"
-        sound: "assets/sound/sound-25.mp3"
+        sound: "assets/sound/elephant/sound-25.mp3"
     "elephant/image-28.png":
         text: "นกสีเขียว"
-        sound: "assets/sound/sound-30.mp3"
+        sound: "assets/sound/elephant/sound-30.mp3"
     "elephant/image-3.png":
         text: "พ่อช้าง"
-        sound: "assets/sound/sound-5.mp3"
+        sound: "assets/sound/elephant/sound-5.mp3"
     "elephant/image-33.png":
         text: "นกสีแดง"
-        sound: "assets/sound/sound-35.mp3"
+        sound: "assets/sound/elephant/sound-35.mp3"
     "elephant/image-38.png":
         text: "ช้างดื้อ"
-        sound: "assets/sound/sound-40.mp3"
+        sound: "assets/sound/elephant/sound-40.mp3"
     "elephant/image-43.png":
         text: "เสือ"
-        sound: "assets/sound/sound-45.mp3"
-    "elephant/image-8.png"
+        sound: "assets/sound/elephant/sound-45.mp3"
+    "elephant/image-8.png": 
         text: "แม่ช้าง"
-        sound: "assets/sound/sound-10.mp3"
+        sound: "assets/sound/elephant/sound-10.mp3"
+
+# เพื่อนรักต่างดาว
+meta_data =
+    "friends/image-13.png":
+       text: "คีริ"
+       sound: "assets/sound/friends/sound-10.mp3"
+    "friends/image-18.png":
+       text: "ปูโต๊ะ"
+       sound: "assets/sound/friends/sound-20.mp3"
+    "friends/image-23.png":
+       text: "โปเต๊ะ"
+       sound: "assets/sound/friends/sound-25.mp3"
+    "friends/image-28.png":
+       text: "ศาสตราจารย์คููรุ"
+       sound: "assets/sound/friends/sound-30.mp3"
+    "friends/image-3.png":
+       text: "ไส้เดือน"
+       sound: "assets/sound/friends/sound-5.mp3"
+    "friends/image-8.png":
+       text: "คาระ"
+       sound: "assets/sound/friends/sound-15.mp3"
 
 # Helper
 randomItemManager = () ->
@@ -216,7 +217,9 @@ catching.score = do ->
     getScore = -> _score
     { getScore, add, reset }
 
-catching.setMetadata = (data) -> meta_data = data
+catching.setMetadata = (data) -> 
+    meta_data = data
+    catching.intro()
 
 #animation
 
