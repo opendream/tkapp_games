@@ -1003,6 +1003,10 @@
 
   this.game = catching;
 
+  this.game_func = function() {
+    return catching;
+  };
+
   goog.exportSymbol('catching.start', catching.start);
 
 }).call(this);

@@ -706,5 +706,6 @@ catching.lastScene = () ->
 
 @catching = catching
 @game = catching
+@game_func = -> catching
 
 goog.exportSymbol 'catching.start', catching.start
