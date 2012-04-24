@@ -9,6 +9,7 @@ goog.require('lime.Layer');
 goog.require('lime.Circle');
 goog.require('lime.Label');
 goog.require('lime.GlossyButton');
+goog.require('lime.animation.Sequence');
 goog.require('lime.animation.Spawn');
 goog.require('lime.animation.FadeTo');
 goog.require('lime.animation.ScaleTo');
@@ -18,7 +19,7 @@ goog.require('lime.animation.Easing');
 goog.require('lime.animation.KeyframeAnimation');
 goog.require('lime.audio.Audio');
 
-	var callbackFactory, choiceAmount = 3;
+	var callbackFactory, choiceAmount = 3, problemAmount = 1, correctCount = 0, gameCount = 0;
 
 	//path 
 	imagePath = "assets/images/";
@@ -37,32 +38,32 @@ goog.require('lime.audio.Audio');
 	problems = [
 		{
 			shadowID: "A",
-			shadow: "",
+			shadow: "char1-shadow.png",
 			noneshadow: "char1.png"
 		},
 		{
 			shadowID: "B",
-			shadow: "",
+			shadow: "char2-shadow.png",
 			noneshadow: "char2.png"
 		},
 		{
 			shadowID: "C",
-			shadow: "",
+			shadow: "char3-shadow.png",
 			noneshadow: "char3.png"
 		},
 		{
 			shadowID: "D",
-			shadow: "",
+			shadow: "char4-shadow.png",
 			noneshadow: "char4.png"
 		},
 		{
 			shadowID: "E",
-			shadow: "",
+			shadow: "char5-shadow.png",
 			noneshadow: "char5.png"
 		},
 		{
 			shadowID: "F",
-			shadow: "",
+			shadow: "char6-shadow.png",
 			noneshadow: "char6.png"
 		}
 	];
@@ -247,11 +248,13 @@ shadow.start = function() {
 			});
 			
 			goog.events.listen(hardButtonLayer, ['click', 'touchstart'], function (e){
-				console.log("Under Construction");
+				setupHardGame(sceneHardPlay);
+				director.replaceScene(sceneHardPlay);
 			});
 		},
 		
 		setupEasyGame = function (scene) {
+			//UI Element
 			var background = new lime.Layer().setSize(sceneWidth,sceneHeight).setPosition(0,0),
 				border = new lime.Sprite().setAnchorPoint(0, 0).setFill(imagePath + "border.png").setPosition(0, 0),
 				sky = new lime.Sprite().setAnchorPoint(0, 0).setFill(imagePath + "sky.bmp").setSize(sceneWidth-50,sceneHeight-50).setPosition(25, 20),
@@ -268,13 +271,13 @@ shadow.start = function() {
 					.setFontSize(30)
 					.setPosition(timer.getPosition().x, timer.getPosition().y + 30)
 					.setFontColor('#000'),
-				allChoice,problem,count = 0,
+				allChoice,problem, //Helper Function
 				generateProblem = function (){
 					var randomX = Math.floor(Math.random()*450) + 120;
 						randomY = Math.floor(Math.random()*150) + 200;
 						randomManager = randomItemManager();
 						shadowProblem = randomManager.getItem();
-						problemShadow = new lime.Sprite().setFill(imagePath + shadowProblem.noneshadow).setPosition(randomX, randomY).setScale(0.5)
+						problemShadow = new lime.Sprite().setFill(imagePath + shadowProblem.shadow).setPosition(randomX, randomY).setScale(0.5)
 					return problemShadow;
 				},
 				buildChoice = function () {
@@ -295,9 +298,11 @@ shadow.start = function() {
 							goog.events.listen(localLayer, ['click', 'touchstart'], function (e){
 								if(isCorrect){
 									console.log("correct");
+									choiceLabel.removeChild(localLayer);
+									spawnAnimationWithString("correct");
 									score += 5;
-									++count;
-									if (count >= 3)
+									++gameCount;
+									if (gameCount >= 3)
 										choiceAmount = 4;
 									scene
 										.removeChild(problemShadow)
@@ -310,6 +315,8 @@ shadow.start = function() {
 										.appendChild(choiceLabel);
 								}else {
 									console.log("incorrect");
+									spawnAnimationWithString("incorrect");
+									choiceLabel.removeChild(localLayer);
 								}
 							});
 						}(answerLayer)
@@ -360,6 +367,20 @@ shadow.start = function() {
 					}
 					
 					return allChoiceTMP;
+				},
+				spawnAnimationWithString = function (s){
+					var spawnImage;
+					if (s == "correct"){
+						spawnImage = new lime.Sprite().setFill(imagePath + "correct.png").setScale(0.8).setPosition(sceneCenterX, sceneCenterY);
+					}else if (s == "incorrect"){
+						spawnImage = new lime.Sprite().setFill(imagePath + "incorrect.png").setScale(0.8).setPosition(sceneCenterX, sceneCenterY);
+					}
+					var spawnAnimation = new lime.animation.Sequence(
+							new lime.animation.FadeTo(1).setDuration(0.5),
+							new lime.animation.FadeTo(0).setDuration(0.5)
+						);
+					spawnImage.runAction(spawnAnimation);
+					scene.appendChild(spawnImage);
 				}
 				
 				background
@@ -396,11 +417,12 @@ shadow.start = function() {
 				
 				scene
 					.appendChild(background)
-					.appendChild(problemShadow)
+					.appendChild(problem)
 					.appendChild(choiceLabel)
 					.appendChild(timerLabel);
 		},
-		setupHardGame = function (scene) {
+					
+		setupHardGame = function (scene){
 			var background = new lime.Layer().setSize(sceneWidth,sceneHeight).setPosition(0,0),
 				border = new lime.Sprite().setAnchorPoint(0, 0).setFill(imagePath + "border.png").setPosition(0, 0),
 				sky = new lime.Sprite().setAnchorPoint(0, 0).setFill(imagePath + "sky.bmp").setSize(sceneWidth-50,sceneHeight-50).setPosition(25, 20),
@@ -417,100 +439,162 @@ shadow.start = function() {
 					.setFontSize(30)
 					.setPosition(timer.getPosition().x, timer.getPosition().y + 30)
 					.setFontColor('#000'),
-				allChoice,problem1,problem2,count = 0,
-				generateProblem = function (){
-					var randomX = Math.floor(Math.random()*450) + 120;
-						randomY = Math.floor(Math.random()*150) + 200;
-						randomManager = randomItemManager();
-						shadowProblem = randomManager.getItem();
-						problemShadow = new lime.Sprite().setFill(imagePath + shadowProblem.noneshadow).setPosition(randomX, randomY).setScale(0.5)
-					return problemShadow;
-				},
-				buildChoice = function () {
-					var buildChoiceAnswer = function (imageName, isCorrect){
-						var answerLayer = new lime.Layer(),
-							wood = new lime.Sprite().setFill(imagePath + "woodborder.bmp").setScale(0.8),
-							choiceImage = new lime.Sprite().setFill(imagePath + imageName).setScale(0.3),
-							isCorrect,tmp;
-							
-						answerLayer.domClassName = goog.getCssName('lime-button');
-						
-						answerLayer
-							.appendChild(wood)
-							.appendChild(choiceImage)
-							.setSize(139, 117);
-							
-						!function(localLayer) {
-							goog.events.listen(localLayer, ['click', 'touchstart'], function (e){
-								if(isCorrect){
-									console.log("correct");
-									score += 5;
-									++count;
-									if (count >= 3)
-										choiceAmount = 4;
-									scene
-										.removeChild(problemShadow)
-										.removeChild(choiceLabel);
-									problem = generateProblem();
-									allChoice = generateChoice(choiceAmount);
-									choiceLabel = buildChoice();
-									scene
-										.appendChild(problemShadow)
-										.appendChild(choiceLabel);
-								}else {
-									console.log("incorrect");
-								}
-							});
-						}(answerLayer)
-						
-						return answerLayer;
-					}; 
-					
-					var choiceLabel = new lime.Node();
-					
-					var startPosX = gap = 200;
-					if(choiceAmount == 4){
-						startPosX = 220;
-						gap = 150;
+				problemArray, allChoice, shadowLayer,
+				
+				generateProblem = function (pbAmount){
+					var randomManager = randomItemManager(),
+						pbsArray = randomManager.getAll(),
+						pbsTMP = [];
+					for(var i=0; i<pbAmount; i++){
+						 pbsTMP.push(pbsArray[i]);
 					}
-						var posX = sceneCenterX - startPosX;
-						allChoice.forEach (function (element, index, array){
-							isCorrect = (shadowProblem.shadowID == element.shadowID);
-							tmp = buildChoiceAnswer(element.noneshadow, isCorrect);
-							tmp.setPosition(posX, sceneCenterY + 210);
-
-							choiceLabel.appendChild(tmp);	
-							posX = posX + gap;
-						});
-					
-					
-					return choiceLabel;
+					return pbsTMP;
 				},
+				generateShadow = function (pArray){
+					var shadowArrayTMP = [], shadowLayerTMP = new lime.Layer().setSize(800, 600);
+					goog.array.forEach(pArray, function (element, index){
+						var randomX = Math.floor(Math.random()*450) + 120,
+							randomY = Math.floor(Math.random()*150) + 200;
+						shadowArrayTMP.push(new lime.Sprite().setFill(imagePath + element.shadow).setPosition(randomX, randomY).setScale(0.5));
+					});
+					
+					goog.array.forEach(shadowArrayTMP, function (element, index){
+						shadowLayerTMP.appendChild(element);
+					});
+					
+					return shadowLayerTMP;
+				},
+				
 				generateChoice = function (c){
-					var allChoiceTMP;
-					while(true){
+					var allChoiceTMP = [], choiceWithoutProblem = [];
+					
+					problemArray.forEach(function (element, index, array){
+						allChoiceTMP.push(element);
+					});
+					
+					moreChoice = c - problemArray.length;
+					
+					// create list of choice without problems
+					goog.array.forEach(problems, function (elementA, index){
 						var exist = false;
-						randomManager2 = randomItemManager();
-						allData = randomManager2.getAll();
-						allChoiceTMP = goog.array.slice(allData,0,c);
-
-						allChoiceTMP.forEach (function (element, index, array){
-							if (element.shadowID === shadowProblem.shadowID){
+						goog.array.forEach(problemArray, function (elementB, index){
+							if (elementA.shadowID == elementB.shadowID)
 								exist = true;
-							}
 						});
-
-						if(exist === true)
-							break;
+						
+						if (!exist)
+							choiceWithoutProblem.push(elementA);
+					});
+					
+					//shuffle the above list
+					goog.array.shuffle(choiceWithoutProblem);
+					
+					for (var i=0; i<moreChoice; ++i){
+						allChoiceTMP.push(choiceWithoutProblem[i]);
 					}
-
-					for(var i=0; i<3; ++i){
+					
+					for (var i=0; i<3; ++i){
 						goog.array.shuffle(allChoiceTMP);
 					}
 					
 					return allChoiceTMP;
+				},
+				setupChoice = function(cArray){
+					var isCorrect, choiceTMP;
+					var createEachChoice = function (imageName, isCorrect){
+						var choiceLayer = new lime.Layer(),
+							wood = new lime.Sprite().setFill(imagePath + "woodborder.bmp").setScale(0.8),
+							image = new lime.Sprite().setFill(imagePath + imageName).setScale(0.3);
+						
+						choiceLayer.domClassName = goog.getCssName('lime-button');
+						choiceLayer
+							.appendChild(wood)
+							.appendChild(image)
+							.setSize(139, 117);
+						
+						!function (localChoice){
+							goog.events.listen(localChoice, ['click', 'touchstart'], function (e){
+								if (isCorrect){
+									console.log("correct");
+									spawnAnimationWithString("correct");
+									allChoiceLayer.removeChild(localChoice);
+									score += 5;
+									++gameCount;
+									++correctCount;
+									
+									//change scene
+									if (correctCount == problemAmount){
+										//change to hard mose
+										if (gameCount >= 5){
+											choiceAmount = 4;
+											problemAmount = 2;
+										}
+										scene
+											.removeChild(shadowLayer)
+											.removeChild(allChoiceLayer);
+											
+										problemArray = generateProblem(problemAmount);
+										allChoice = generateChoice(choiceAmount);
+										shadowLayer = generateShadow(problemArray);
+										choiceLayer = setupChoice(allChoice);
+										
+										console.log(correctCount , problemAmount, choiceAmount);
+
+										scene
+											.appendChild(shadowLayer)
+											.appendChild(choiceLayer);
+										
+										correctCount = 0;
+									}
+								}else {
+									console.log("incorrect");
+									spawnAnimationWithString("incorrect");
+									allChoiceLayer.removeChild(localChoice);
+								}
+							});
+						}(choiceLayer)
+					
+						return choiceLayer;
+					};
+					
+					var allChoiceLayer = new lime.Node(),
+						diffPosX = choiceGap = 200;
+					if(choiceAmount == 4){
+						diffPosX = 220;
+						choiceGap = 150;
+					}
+					
+					var posX = sceneCenterX - diffPosX;
+					goog.array.forEach(cArray, function (elementA, index){
+						isCorrect = false;
+						goog.array.forEach(problemArray, function (elementB, index){
+							if (elementB.shadowID == elementA.shadowID)
+								isCorrect = true;
+						});
+						choiceTMP = createEachChoice(elementA.noneshadow, isCorrect);
+						choiceTMP.setPosition(posX, sceneCenterY + 210);
+						allChoiceLayer.appendChild(choiceTMP);
+						posX += choiceGap;
+					});
+					
+					return allChoiceLayer;
+				},
+				spawnAnimationWithString = function (s){
+					var spawnImage;
+					if (s == "correct"){
+						spawnImage = new lime.Sprite().setFill(imagePath + "correct.png").setScale(0.8).setPosition(sceneCenterX, sceneCenterY);
+					}else if (s == "incorrect"){
+						spawnImage = new lime.Sprite().setFill(imagePath + "incorrect.png").setScale(0.8).setPosition(sceneCenterX, sceneCenterY);
+					}
+					var spawnAnimation = new lime.animation.Sequence(
+							new lime.animation.FadeTo(1).setDuration(0.5),
+							new lime.animation.FadeTo(0).setDuration(0.5)
+						);
+					spawnImage.runAction(spawnAnimation);
+					scene.appendChild(spawnImage);
 				}
 				
+				// add element to Background
 				background
 					.appendChild(sky)
 					.appendChild(tree3)
@@ -522,14 +606,11 @@ shadow.start = function() {
 					.appendChild(timer)
 					.appendChild(border)
 					.appendChild(gameName)
-					
-				problem1 = generateProblem();
-				problem2 = generateProblem();
-				allChoice = generateChoice(3);
-				choiceLabel = buildChoice();
 				
+				
+				// timer 
 				timerManager({
-			      limit: 60,
+			      limit: 30,
 			      delay: 1000,
 			      limeScope: callbackFactory,
 			      runningCallback: function(rt) {
@@ -543,14 +624,22 @@ shadow.start = function() {
 					director.replaceScene(sceneScore);
 			      }
 			    })
+			
+				//----------------------------------------------
 				
+				problemArray = generateProblem(problemAmount);
+				allChoice = generateChoice(choiceAmount);
+				shadowLayer = generateShadow(problemArray);
+				choiceLayer = setupChoice(allChoice); 
+				
+				//add element to screen
 				scene
 					.appendChild(background)
-					.appendChild(problem1)
-					.appendChild(problem2)
-					.appendChild(choiceLabel)
-					.appendChild(timerLabel);
+					.appendChild(timerLabel)
+					.appendChild(shadowLayer)
+					.appendChild(choiceLayer);
 		},
+		
 		setupScoreScene = function (scene) {
 			var background = new lime.Layer().setSize(sceneWidth,sceneHeight).setPosition(0,0),
 				border = new lime.Sprite().setAnchorPoint(0, 0).setFill(imagePath + "border.png").setPosition(0, 0),
@@ -586,10 +675,7 @@ shadow.start = function() {
     setupIntro(sceneIntro);
 
 	// set current scene active
-	//director.replaceScene(sceneIntro);
-	
-	setupHardGame(sceneHardPlay);
-	director.replaceScene(sceneHardPlay);
+	director.replaceScene(sceneIntro);
 }
 
 
