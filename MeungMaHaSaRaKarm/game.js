@@ -416,9 +416,12 @@ game.start = function(){
     clearButton.appendChild(clearLabel);
     
     var character = 'assets/images/character/character-' + (Math.floor(Math.random()*5)+1) + '.png';
+    var paintBorder = new lime.Sprite()
+        .setSize(435, 325)
+        .setPosition(sceneCenterX, 280)
+        .setFill(0, 0, 0);
     var paintImage = new lime.Sprite()
-        .setScale(0.65)
-        .setPosition(sceneCenterX, 285)
+        .setPosition(sceneCenterX, 280)
         .setFill(character)
         .setRenderer(lime.Renderer.CANVAS)
         .setHidden(true);
@@ -493,8 +496,9 @@ game.start = function(){
         scene.appendChild(boder);
         scene.appendChild(smallTitle);
         scene.appendChild(stand1);
-        scene.appendChild(howTo);
+        scene.appendChild(paintBorder);
         scene.appendChild(paintImage);
+        scene.appendChild(howTo);
         
     	director.makeMobileWebAppCapable();
     	director.replaceScene(scene);
