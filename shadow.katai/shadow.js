@@ -278,8 +278,10 @@ shadow.start = function() {
 				timer = new lime.Sprite().setFill(imagePath + "timer.png").setPosition(700,100),
 				themeSound = new lime.audio.Audio(soundPath + "theme.mp3"),
 				buttonSound = new lime.audio.Audio(soundPath + "button.mp3"),
-				correctSound = new lime.audio.Audio(soundPath + "correct.mp3"),
+				correctSound2 = new lime.audio.Audio(soundPath + "correct3.mp3"),
 				incorrectSound = new lime.audio.Audio(soundPath + "incorrect.mp3"),
+				vvv = new lime.audio.Audio(soundPath + "correct3.mp3"),
+
 				timerLabel = new lime.Label()
 					.setSize(50,60)
 					.setFontSize(30)
@@ -314,10 +316,9 @@ shadow.start = function() {
 								buttonSound.stop();
 								buttonSound.play();
 								if(isCorrect){
-									console.log("correct");
 									problem.setFill(imagePath + imageName);
-									correctSound.stop();
-									correctSound.play();
+									correctSound2.stop();
+									correctSound2.play();
 									choiceLabel.removeChild(localLayer);
 									spawnAnimationWithString("correct");
 									score += 5;
@@ -470,7 +471,7 @@ shadow.start = function() {
 				timer = new lime.Sprite().setFill(imagePath + "timer.png").setPosition(700,100),
 				themeSound = new lime.audio.Audio(soundPath + "theme.mp3"),
 				buttonSound = new lime.audio.Audio(soundPath + "button.mp3"),
-				correctSound = new lime.audio.Audio(soundPath + "correct.mp3"),
+				correctSound = new lime.audio.Audio(soundPath + "correct3.mp3"),
 				incorrectSound = new lime.audio.Audio(soundPath + "incorrect.mp3"),
 				timerLabel = new lime.Label()
 					.setSize(50,60)
