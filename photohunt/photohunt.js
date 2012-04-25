@@ -1,5 +1,5 @@
 (function() {
-  var IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, spawnQuestionAndAnswer, startTimer;
+  var clickSound, IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, spawnQuestionAndAnswer, startTimer;
 
   goog.provide('photohunt');
 
@@ -272,13 +272,18 @@
     background.appendChild(btnStart);
     photohunt.director.replaceScene(scene);
     _arrow.domClassName = goog.getCssName('lime-button');
+    clickSound = new lime.audio.Audio("assets/sound/click.mp3");
+
     goog.events.listen(_arrow, ['click', 'touchstart'], function() {
+      clickSound.play();
       return photohunt.selectLevel();
     });
     goog.events.listen(click, ['click', 'touchstart'], function() {
+      clickSound.play();
       return photohunt.selectLevel();
     });
     return goog.events.listen(btnStart, ['click', 'touchstart'], function() {
+      clickSound.play();
       return photohunt.selectLevel();
     });
   };
@@ -408,13 +413,13 @@
     goog.events.listen(buttonEasy, ['click', 'touchstart'], function() {
       score.reset();
       photohunt.level = 'easy';
-      
+      clickSound.play()
       return photohunt.secondScene();
     });
     goog.events.listen(buttonHard, ['click', 'touchstart'], function() {
       score.reset();
       photohunt.level = 'hard';
-      
+      clickSound.play()
       console.log(photohunt.blockPatternIdx);
       return photohunt.secondScene();
     });
@@ -432,71 +437,71 @@
       num:6,
       position:[{x:60,y:14},{x:234,y:30},{x:182,y:80},{x:185,y:130},{x:250,y:160},{x:80,y:230}],
       correct:[0,0,0,0,0,0],
-      leftImage:"assets/images/problems/image8a.png",
-      rightImage:"assets/images/problems/image8b.png"
+      leftImage:"assets/images/problems/image8a.jpg",
+      rightImage:"assets/images/problems/image8b.jpg"
     },
     {
       num:4,
       position:[{x:140,y:60},{x:115,y:180},{x:178,y:195},{x:20,y:125}],
       correct:[0,0,0,0],
-      leftImage:"assets/images/problems/image3a.png",
-      rightImage:"assets/images/problems/image3b.png"
+      leftImage:"assets/images/problems/image3a.jpg",
+      rightImage:"assets/images/problems/image3b.jpg"
     },
     {
       num:6,
       position:[{x:220,y:170},{x:95,y:50},{x:240,y:120},{x:210,y:5},{x:170,y:130},{x:160,y:250},],
       correct:[0,0,0,0,0,0],
-      leftImage:"assets/images/problems/image9a.png",
-      rightImage:"assets/images/problems/image9b.png"
+      leftImage:"assets/images/problems/image9a.jpg",
+      rightImage:"assets/images/problems/image9b.jpg"
     },
     {
       num:6,
       position:[{x:220,y:25},{x:195,y:95},{x:40,y:100},{x:40,y:150},{x:8,y:230},{x:75,y:0}],
       correct:[0,0,0,0,0,0],
-      leftImage:"assets/images/problems/image7a.png",
-      rightImage:"assets/images/problems/image7b.png"
+      leftImage:"assets/images/problems/image7a.jpg",
+      rightImage:"assets/images/problems/image7b.jpg"
     },
     {
       num:4,
       position:[{x:210,y:25},{x:35,y:100},{x:60,y:250},{x:160,y:240}],
       correct:[0,0,0,0],
-      leftImage:"assets/images/problems/image2a.png",
-      rightImage:"assets/images/problems/image2b.png"
+      leftImage:"assets/images/problems/image2a.jpg",
+      rightImage:"assets/images/problems/image2b.jpg"
     },
      {
       num:6,
       position:[{x:60,y:230},{x:152,y:210},{x:90,y:55},{x:210,y:60},{x:250,y:230},{x:45,y:60}],
       correct:[0,0,0,0,0,0],
-      leftImage:"assets/images/problems/image6a.png",
-      rightImage:"assets/images/problems/image6b.png"
+      leftImage:"assets/images/problems/image6a.jpg",
+      rightImage:"assets/images/problems/image6b.jpg"
     },
     {
       num:5,
       position:[{x:80,y:65},{x:190,y:80},{x:7,y:250},{x:150,y:30},{x:230,y:140}],
       correct:[0,0,0,0,0],
-      leftImage:"assets/images/problems/image4a.png",
-      rightImage:"assets/images/problems/image4b.png"
+      leftImage:"assets/images/problems/image4a.jpg",
+      rightImage:"assets/images/problems/image4b.jpg"
     },
     {
       num:6,
       position:[{x:80,y:30},{x:0,y:0},{x:180,y:100},{x:10,y:230},{x:200,y:170},{x:60,y:200}],
       correct:[0,0,0,0,0,0],
-      leftImage:"assets/images/problems/image5a.png",
-      rightImage:"assets/images/problems/image5b.png"
+      leftImage:"assets/images/problems/image5a.jpg",
+      rightImage:"assets/images/problems/image5b.jpg"
     },
     {
       num:4,
       position:[{x:20,y:160},{x:250,y:35},{x:80,y:250},{x:100,y:0}],
       correct:[0,0,0,0],
-      leftImage:"assets/images/problems/image1a.png",
-      rightImage:"assets/images/problems/image1b.png"
+      leftImage:"assets/images/problems/image1a.jpg",
+      rightImage:"assets/images/problems/image1b.jpg"
     },
        {
       num:6,
       position:[{x:80,y:250},{x:100,y:0},{x:205,y:100},{x:20,y:20},{x:220,y:230},{x:120,y:210}],
       correct:[0,0,0,0,0,0],
-      leftImage:"assets/images/problems/image10a.png",
-      rightImage:"assets/images/problems/image10b.png"
+      leftImage:"assets/images/problems/image10a.jpg",
+      rightImage:"assets/images/problems/image10b.jpg"
     },
     ];
 
@@ -919,7 +924,7 @@
       absolute: true
     });
     scoreLabel = new lime.Label;
-    scoreLabel.setText(score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y + 40).setFontColor('red').setFontSize(48);
+    scoreLabel.setText(score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y + 40).setFontColor('red').setFontSize(45);
     menu2.domClassName = goog.getCssName('lime-button');
     goog.events.listen(menu2, ['click', 'touchstart'], function() {
       return photohunt.intro();
