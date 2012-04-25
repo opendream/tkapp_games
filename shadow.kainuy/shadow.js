@@ -37,32 +37,32 @@ goog.require('lime.audio.Audio');
 
 	problems = [
 		{
-			shadowID: "A",
+			shadowID: "0",
 			shadow: "char1-shadow.png",
 			noneshadow: "char1.png"
 		},
 		{
-			shadowID: "B",
+			shadowID: "1",
 			shadow: "char2-shadow.png",
 			noneshadow: "char2.png"
 		},
 		{
-			shadowID: "C",
+			shadowID: "2",
 			shadow: "char3-shadow.png",
 			noneshadow: "char3.png"
 		},
 		{
-			shadowID: "D",
+			shadowID: "3",
 			shadow: "char4-shadow.png",
 			noneshadow: "char4.png"
 		},
 		{
-			shadowID: "E",
+			shadowID: "4",
 			shadow: "char5-shadow.png",
 			noneshadow: "char5.png"
 		},
 		{
-			shadowID: "F",
+			shadowID: "5",
 			shadow: "char6-shadow.png",
 			noneshadow: "char6.png"
 		}
@@ -335,7 +335,7 @@ shadow.start = function() {
 										scene
 											.appendChild(problemShadow)
 											.appendChild(choiceLabel);
-									}, 1000);
+									}, 700);
 								}else {
 									console.log("incorrect");
 									incorrectSound.stop();
@@ -493,8 +493,10 @@ shadow.start = function() {
 					goog.array.forEach(pArray, function (element, index){
 						var randomX = Math.floor(Math.random()*450) + 120,
 							randomY = Math.floor(Math.random()*150) + 200,
-							randomRotation = Math.floor(Math.random()*350);
-						shadowArrayTMP.push(new lime.Sprite().setFill(imagePath + element.shadow).setPosition(randomX, randomY).setScale(0.7).setRotation(randomRotation));
+							randomRotation = Math.floor(Math.random()*350),
+						eachShadow = new lime.Sprite().setFill(imagePath + element.shadow).setPosition(randomX, randomY).setScale(0.7).setRotation(randomRotation);
+						eachShadow.problemID = element.shadowID;
+						shadowArrayTMP.push(eachShadow);
 					});
 					
 					goog.array.forEach(shadowArrayTMP, function (element, index){
@@ -539,11 +541,11 @@ shadow.start = function() {
 					return allChoiceTMP;
 				},
 				setupChoice = function(cArray){
-					var isCorrect, choiceTMP;
-					var createEachChoice = function (imageName, isCorrect){
+					var isCorrect, choiceTMP, problemToChange;
+					var createEachChoice = function (choiceElement, isCorrect){
 						var choiceLayer = new lime.Layer(),
 							wood = new lime.Sprite().setFill(imagePath + "woodborder.bmp").setScale(0.8),
-							image = new lime.Sprite().setFill(imagePath + imageName).setScale(0.3);
+							image = new lime.Sprite().setFill(imagePath + choiceElement.noneshadow).setScale(0.3);
 						
 						choiceLayer.domClassName = goog.getCssName('lime-button');
 						choiceLayer
@@ -555,6 +557,12 @@ shadow.start = function() {
 							goog.events.listen(localChoice, ['click', 'touchstart'], function (e){
 								buttonSound.stop();
 								buttonSound.play();
+								goog.array.forEach(shadowLayer.children_, function (element, index){
+									if (element.problemID == localChoice.choiceID)
+										problemToChange = element;
+								});
+								//console.log("problemToChange ", problemToChange.problemID);
+								//console.log("choiceSelected  ", localChoice.choiceID);
 								if (isCorrect){
 									console.log("correct");
 									correctSound.stop();
@@ -564,7 +572,7 @@ shadow.start = function() {
 									score += 5;
 									++gameCount;
 									++correctCount;
-									
+									problemToChange.setFill(imagePath + choiceElement.noneshadow);
 									//change scene
 									if (correctCount == problemAmount){
 										//change to hard mose
@@ -572,7 +580,6 @@ shadow.start = function() {
 											choiceAmount = 4;
 											problemAmount = 2;
 										}
-										
 										setTimeout(function () {
 											scene
 												.removeChild(shadowLayer)
@@ -586,7 +593,7 @@ shadow.start = function() {
 											scene
 												.appendChild(shadowLayer)
 												.appendChild(choiceLayer);
-										}, 1000);
+										}, 700);
 										correctCount = 0;
 									}
 								}else {
@@ -613,10 +620,12 @@ shadow.start = function() {
 					goog.array.forEach(cArray, function (elementA, index){
 						isCorrect = false;
 						goog.array.forEach(problemArray, function (elementB, index){
-							if (elementB.shadowID == elementA.shadowID)
+							if (elementB.shadowID == elementA.shadowID){
 								isCorrect = true;
+							}	
 						});
-						choiceTMP = createEachChoice(elementA.noneshadow, isCorrect);
+						choiceTMP = createEachChoice(elementA, isCorrect);
+						choiceTMP.choiceID = elementA.shadowID;
 						choiceTMP.setPosition(posX, sceneCenterY + 210);
 						allChoiceLayer.appendChild(choiceTMP);
 						posX += choiceGap;
@@ -660,7 +669,7 @@ shadow.start = function() {
 				
 				// timer 
 				timerManager({
-			      limit: 30,
+			      limit: 60,
 			      delay: 1000,
 			      limeScope: callbackFactory,
 			      runningCallback: function(rt) {
@@ -705,9 +714,19 @@ shadow.start = function() {
 				boy = new lime.Sprite().setFill(imagePath + "boyBG.png").setPosition(600,450).setOpacity(0.1),
 				girl = new lime.Sprite().setFill(imagePath + "girlBG.png").setPosition(280,430).setOpacity(0.1),
 				tv = new lime.Sprite().setFill(imagePath + "tv.png").setPosition(sceneCenterX,sceneCenterY-30),
-				bless = new lime.Label().setText("เก่งมากจ้ะ").setFontSize(32).setPosition(sceneCenterX - 50, sceneCenterY - 50),
+				bless = new lime.Label().setText("เก่งมากจ้ะ").setFontSize(32).setPosition(sceneCenterX - 50, sceneCenterY - 50).setFontColor("#8B2323"),
 				timeoutSound = new lime.audio.Audio(soundPath + "timeout.wav"),
-				getScoreLabel = new lime.Label().setText("หนูทำได้    " + score + "    คะแนน").setFontSize(32).setPosition(sceneCenterX - 50, sceneCenterY);
+				getScore = new lime.Label().setText(score).setFontSize(32).setPosition(sceneCenterX - 30, sceneCenterY).setFontColor("#00EEEE"),
+				getScoreLabel = new lime.Label().setText("หนูทำได้").setFontSize(32).setPosition(sceneCenterX - 120, sceneCenterY).setFontColor("#8B2323"),
+				getScoreLabel2 = new lime.Label().setText("คะแนน").setFontSize(32).setPosition(sceneCenterX + 50, sceneCenterY).setFontColor("#8B2323"),
+				starLayer = new lime.Layer().setSize(200, 50);
+				
+				var beginPosX = sceneCenterX - 120;
+				for (var i=0; i<5; ++i){
+					star = new lime.Sprite().setFill(imagePath + "star.png").setPosition(beginPosX, sceneCenterY + 40);
+					starLayer.appendChild(star);
+					beginPosX += 40;
+				}
 				
 				setTimeout(function () {
 					timeoutSound.play();
@@ -727,7 +746,10 @@ shadow.start = function() {
 				scene
 					.appendChild(background)
 					.appendChild(bless)
-					.appendChild(getScoreLabel);
+					.appendChild(getScoreLabel)
+					.appendChild(getScoreLabel2)
+					.appendChild(getScore)
+					.appendChild(starLayer);
 		}
 		
 	// set up intro layer
