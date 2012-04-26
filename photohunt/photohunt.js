@@ -167,7 +167,9 @@
     }
     return scene = photohunt.intro();
   };
-
+  photohunt.stop = function(){
+    this.theme.stop();
+  }
   photohunt.intro = function() {
     var background, btnStart, btnState1, btnState2, scene;
     photohunt.isGameEnded = false;
