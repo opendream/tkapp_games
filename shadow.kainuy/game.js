@@ -1,5 +1,10 @@
+var game_func = function () {
+
+var atype = navigator.userAgent.toLowerCase().match('firefox')? 'ogg': 'mp3';
+
+
 //set main namespace
-goog.provide('shadow');
+goog.provide('game');
 
 
 //get requirements
@@ -128,10 +133,20 @@ goog.require('lime.audio.Audio');
 	      }
 	    };
 	  };
+var gameNameSound, levelSound, themeSound, buttonSound, correctSound2, incorrectSound, vvv;
+game.stop = function() {
+    gameNameSound.stop();
+    levelSound.stop();
+    themeSound.stop();
+    buttonSound.stop();
+    correctSound2.stop();
+    incorrectSound.stop();
+    vvv.stop();
+}
 
 // entrypoint
-shadow.start = function() {
-	var director = new lime.Director(document.body, 800, 600),
+game.start = function() {
+	var director = new lime.Director(document.getElementById('game5'), 800, 600),
         sceneIntro = new lime.Scene(),
 		sceneLevel = new lime.Scene(),
         sceneEasyPlay = new lime.Scene(),
@@ -154,10 +169,11 @@ shadow.start = function() {
 				girl = new lime.Sprite().setFill(imagePath + "girlBG.png").setPosition(280,430),
 				doll = new lime.Sprite().setFill(imagePath + "doll.png").setOpacity(0.1),
 				dollShadow = new lime.Sprite().setFill(imagePath + "dollShadow.png"),
-				dollLayer = new lime.Layer(),
-				gameNameSound = new lime.audio.Audio(soundPath + "gamename.mp3"),
-				levelSound = new lime.audio.Audio(soundPath + "level.mp3");
-			
+				dollLayer = new lime.Layer();
+				    
+			gameNameSound = new lime.audio.Audio(soundPath + "gamename." + atype);
+			levelSound = new lime.audio.Audio(soundPath + "level." + atype);
+		
 			setTimeout(function () {
 				gameNameSound.play();
 			}, 200);
@@ -265,6 +281,13 @@ shadow.start = function() {
 		
 		setupEasyGame = function (scene) {
 			//UI Element
+			
+			themeSound = new lime.audio.Audio(soundPath + "theme." + atype);
+			buttonSound = new lime.audio.Audio(soundPath + "button." + atype);
+			correctSound2 = new lime.audio.Audio(soundPath + "correct3." + atype);
+			incorrectSound = new lime.audio.Audio(soundPath + "incorrect." + atype);
+			vvv = new lime.audio.Audio(soundPath + "correct3." + atype);
+			
 			var background = new lime.Layer().setSize(sceneWidth,sceneHeight).setPosition(0,0),
 				border = new lime.Sprite().setAnchorPoint(0, 0).setFill(imagePath + "border.png").setPosition(0, 0),
 				sky = new lime.Sprite().setAnchorPoint(0, 0).setFill(imagePath + "sky.bmp").setSize(sceneWidth-50,sceneHeight-50).setPosition(25, 20),
@@ -276,11 +299,7 @@ shadow.start = function() {
 				girl = new lime.Sprite().setFill(imagePath + "girlBG.png").setPosition(280,430).setOpacity(0.1),
 				tv = new lime.Sprite().setFill(imagePath + "tv.png").setPosition(sceneCenterX,sceneCenterY-30),
 				timer = new lime.Sprite().setFill(imagePath + "timer.png").setPosition(700,100),
-				themeSound = new lime.audio.Audio(soundPath + "theme.mp3"),
-				buttonSound = new lime.audio.Audio(soundPath + "button.mp3"),
-				correctSound2 = new lime.audio.Audio(soundPath + "correct3.mp3"),
-				incorrectSound = new lime.audio.Audio(soundPath + "incorrect.mp3"),
-				vvv = new lime.audio.Audio(soundPath + "correct3.mp3"),
+
 
 				timerLabel = new lime.Label()
 					.setSize(50,60)
@@ -338,7 +357,6 @@ shadow.start = function() {
 											.appendChild(choiceLabel);
 									}, 700);
 								}else {
-									console.log("incorrect");
 									incorrectSound.stop();
 									incorrectSound.play();
 									spawnAnimationWithString("incorrect");
@@ -440,7 +458,6 @@ shadow.start = function() {
 			      timeoutCallback: function(rt) {
 			        timerLabel.setText("0 ");
 			        lime.scheduleManager.unschedule(callbackFactory.timer, callbackFactory);
-			        console.log("Game Ended --> Score is: " + score);
 			
 					if (themeSound.isPlaying())
 						themeSound.stop();
@@ -458,6 +475,11 @@ shadow.start = function() {
 		},
 					
 		setupHardGame = function (scene){
+		    themeSound = new lime.audio.Audio(soundPath + "theme." + atype);
+			buttonSound = new lime.audio.Audio(soundPath + "button." + atype);
+			correctSound = new lime.audio.Audio(soundPath + "correct3." + atype);
+			incorrectSound = new lime.audio.Audio(soundPath + "incorrect." + atype);
+			
 			var background = new lime.Layer().setSize(sceneWidth,sceneHeight).setPosition(0,0),
 				border = new lime.Sprite().setAnchorPoint(0, 0).setFill(imagePath + "border.png").setPosition(0, 0),
 				sky = new lime.Sprite().setAnchorPoint(0, 0).setFill(imagePath + "sky.bmp").setSize(sceneWidth-50,sceneHeight-50).setPosition(25, 20),
@@ -469,10 +491,7 @@ shadow.start = function() {
 				girl = new lime.Sprite().setFill(imagePath + "girlBG.png").setPosition(280,430).setOpacity(0.1),
 				tv = new lime.Sprite().setFill(imagePath + "tv.png").setPosition(sceneCenterX,sceneCenterY-30),
 				timer = new lime.Sprite().setFill(imagePath + "timer.png").setPosition(700,100),
-				themeSound = new lime.audio.Audio(soundPath + "theme.mp3"),
-				buttonSound = new lime.audio.Audio(soundPath + "button.mp3"),
-				correctSound = new lime.audio.Audio(soundPath + "correct3.mp3"),
-				incorrectSound = new lime.audio.Audio(soundPath + "incorrect.mp3"),
+
 				timerLabel = new lime.Label()
 					.setSize(50,60)
 					.setFontSize(30)
@@ -562,10 +581,7 @@ shadow.start = function() {
 									if (element.problemID == localChoice.choiceID)
 										problemToChange = element;
 								});
-								//console.log("problemToChange ", problemToChange.problemID);
-								//console.log("choiceSelected  ", localChoice.choiceID);
 								if (isCorrect){
-									console.log("correct");
 									correctSound.stop();
 									correctSound.play();
 									spawnAnimationWithString("correct");
@@ -598,7 +614,6 @@ shadow.start = function() {
 										correctCount = 0;
 									}
 								}else {
-									console.log("incorrect");
 									incorrectSound.stop();
 									incorrectSound.play();
 									spawnAnimationWithString("incorrect");
@@ -679,7 +694,6 @@ shadow.start = function() {
 			      timeoutCallback: function(rt) {
 			        timerLabel.setText("0 ");
 			        lime.scheduleManager.unschedule(callbackFactory.timer, callbackFactory);
-			        console.log("Game Ended --> Score is: " + score);
 			
 					if (themeSound.isPlaying())
 						themeSound.stop();
@@ -715,11 +729,11 @@ shadow.start = function() {
 				boy = new lime.Sprite().setFill(imagePath + "boyBG.png").setPosition(600,450).setOpacity(0.1),
 				girl = new lime.Sprite().setFill(imagePath + "girlBG.png").setPosition(280,430).setOpacity(0.1),
 				tv = new lime.Sprite().setFill(imagePath + "tv.png").setPosition(sceneCenterX,sceneCenterY-30),
-				bless = new lime.Label().setText("เก่งมากจ้ะ").setFontSize(32).setPosition(sceneCenterX - 50, sceneCenterY - 50).setFontColor("#8B2323"),
+				bless = new lime.Label().setText("เก่งมากจ้ะ").setSize(500, 50).setFontSize(32).setPosition(sceneCenterX - 50, sceneCenterY - 50).setFontColor("#8B2323"),
 				timeoutSound = new lime.audio.Audio(soundPath + "timeout.wav"),
 				getScore = new lime.Label().setText(score).setFontSize(32).setPosition(sceneCenterX - 30, sceneCenterY).setFontColor("#00EEEE"),
-				getScoreLabel = new lime.Label().setText("หนูทำได้").setFontSize(32).setPosition(sceneCenterX - 120, sceneCenterY).setFontColor("#8B2323"),
-				getScoreLabel2 = new lime.Label().setText("คะแนน").setFontSize(32).setPosition(sceneCenterX + 50, sceneCenterY).setFontColor("#8B2323"),
+				getScoreLabel = new lime.Label().setText("หนูทำได้").setSize(500, 50).setFontSize(32).setPosition(sceneCenterX - 120, sceneCenterY).setFontColor("#8B2323"),
+				getScoreLabel2 = new lime.Label().setText("คะแนน").setSize(500, 50).setFontSize(32).setPosition(sceneCenterX + 50, sceneCenterY).setFontColor("#8B2323"),
 				starLayer = new lime.Layer().setSize(200, 50);
 				
 				var beginPosX = sceneCenterX - 120;
@@ -762,4 +776,8 @@ shadow.start = function() {
 
 
 //this is required for outside access after code is compiled in ADVANCED_COMPILATIONS mode
-goog.exportSymbol('shadow.start', shadow.start);
+goog.exportSymbol('game.start', game.start);
+
+return game;
+
+}

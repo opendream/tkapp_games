@@ -1,3 +1,5 @@
+var game_func = function () {
+
 // Flood Fill ================================================================
 function getPixelEasy(pixelData, x, y) {
     if (x < 0 || y < 0 || x >= pixelData.width || y >= pixelData.height) {
@@ -147,7 +149,7 @@ var boardLeft = sceneCenterX - (boardHeight/2);
 // entrypoint
 game.start = function(){
     
-    director = new lime.Director(document.body, sceneWidth, sceneHeight);    
+    director = new lime.Director(document.getElementById('game5'), sceneWidth, sceneHeight);    
 	
 	var board = new lime.Sprite()
         .setSize(boardWidth, boardHeight)
@@ -444,8 +446,14 @@ game.start = function(){
     }
     lime.scheduleManager.scheduleWithDelay(scope.timer, scope, 1000);
     
-    var clickSound = new lime.audio.Audio('assets/sounds/click.mp3');
-    
+    var isFirefox = navigator.userAgent.toLowerCase().match('firefox');
+    if (isFirefox) {
+        var clickSound = new lime.audio.Audio('assets/sounds/click.ogg');
+    }
+    else {
+        var clickSound = new lime.audio.Audio('assets/sounds/click.mp3');
+    }
+        
     var moveLeft = new lime.animation.MoveBy(-140, 0);
     var moveRight = new lime.animation.MoveBy(140, 0);
     var moveUp = new lime.animation.MoveBy(0, -120);
@@ -681,3 +689,6 @@ game.start = function(){
 
 //this is required for outside access after code is compiled in ADVANCED_COMPILATIONS mode
 goog.exportSymbol('game.start', game.start);
+
+return game;
+}

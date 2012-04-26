@@ -1,3 +1,5 @@
+var atype = navigator.userAgent.toLowerCase().match('firefox')? 'ogg': 'mp3';
+
 //set main namespace
 goog.provide('shadow');
 
