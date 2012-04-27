@@ -19,8 +19,7 @@ goog.require('lime.animation.Easing');
 goog.require('lime.animation.KeyframeAnimation');
 goog.require('lime.audio.Audio');
 
-var callbackFactory, correctCount = 0, score = 0,
- balanceProperty = ["0L","0R","1L","1R","2L","2R"];
+var callbackFactory, correctCount = 0, score = 0;
 
 //path 
 imagePath = "assets/images/";
@@ -256,8 +255,8 @@ spawnAnimationWithString = function (scene,s){
   scene.appendChild(spawnImage);
 }
 
-setCorrectBalance = function(balanceItem){
-  balanceItem.setPosition(balanceItem.getPosition().x,balanceItem.getPosition().y+30);
+setCorrectBalance = function(balanceItem, height){
+  balanceItem.setPosition(balanceItem.getPosition().x,balanceItem.getPosition().y+height);
 }
 
 generateQuestion = function(gamePlayLayer,scene){
@@ -265,11 +264,10 @@ generateQuestion = function(gamePlayLayer,scene){
   if(correctCount<5){//level 1
     // prepare
     var randItemMng = new randomItemManager();
-    var generatedAnswer = {};
+    var generatedAnswer = [];
     var itemCount = 0, index =0;
-    for(; index < 1; index++){
-      generatedAnswer[balanceProperty[itemCount++]] = randItemMng.getItem();
-      generatedAnswer[balanceProperty[itemCount++]] = randItemMng.getItem();
+    for(; index < 2; index++){
+      generatedAnswer[itemCount++] = randItemMng.getItem();
     }
     var answer = Math.floor(Math.random()*itemCount);
     // question
@@ -278,14 +276,22 @@ generateQuestion = function(gamePlayLayer,scene){
     var rightBalance = new lime.Sprite().setFill(imagePath+"on_balance.png").setPosition(sceneCenterX+balanceBg.getSize().width - 10,sceneCenterY-30);
 
     if(answer==0){
-      setCorrectBalance(leftBalance);
+      setCorrectBalance(leftBalance,30);
     }else if(answer==1){
-      setCorrectBalance(rightBalance);
+      setCorrectBalance(rightBalance,30);
     }
 
     gamePlayLayer.appendChild(balanceBg);
     gamePlayLayer.appendChild(leftBalance);
     gamePlayLayer.appendChild(rightBalance);
+
+    // draw problem
+    var problem1 = new lime.Sprite().setFill(imagePath+generatedAnswer[0].onBalance);
+    problem1.setPosition(leftBalance.getPosition().x,leftBalance.getPosition().y-problem1.getSize().height/2);
+    var problem2 = new lime.Sprite().setFill(imagePath+generatedAnswer[1].onBalance);
+    problem2.setPosition(rightBalance.getPosition().x,rightBalance.getPosition().y-problem2.getSize().height/2);
+    gamePlayLayer.appendChild(problem1);
+    gamePlayLayer.appendChild(problem2);
 
     // answer
     var answerBar = new lime.Sprite().setFill(imagePath+"answer1.png")
@@ -294,7 +300,7 @@ generateQuestion = function(gamePlayLayer,scene){
 
     for(var answerCount = 0; answerCount < itemCount; answerCount++){
       var answerBtn = new lime.Sprite().setFill(imagePath + 
-        generatedAnswer[balanceProperty[answerCount]].onAnswer)
+        generatedAnswer[answerCount].onAnswer)
       .setPosition(sceneCenterX + (((answerCount<itemCount/2)?-1:1) * 70 )
         ,sceneCenterY+170);
       answerBtn.domClassName = goog.getCssName('lime-button');
@@ -322,7 +328,132 @@ generateQuestion = function(gamePlayLayer,scene){
     }
 
   }else if(correctCount<10){//level 2
+    // prepare
+    var randItemMng = new randomItemManager();
+    var generatedAnswer = [];
+    var itemCount = 0, index =0;
+    for(; index < 3; index++){
+      generatedAnswer[itemCount++] = randItemMng.getItem();
+    }
 
+    // question
+    var balanceBg1 = new lime.Sprite().setFill(imagePath+"balance2.png").setPosition(sceneCenterX - sceneCenterX/3 - 40,sceneCenterY + 10).setScale(0.6);
+    var leftBalance1 = new lime.Sprite().setFill(imagePath+"on_balance.png").setPosition(balanceBg1.getPosition().x-balanceBg1.getSize().width/2 + 85,sceneCenterY - 30).setScale(0.6);
+    var rightBalance1 = new lime.Sprite().setFill(imagePath+"on_balance.png").setPosition(balanceBg1.getPosition().x+balanceBg1.getSize().width/2 - 85,sceneCenterY - 30).setScale(0.6);
+    var balanceBg2 = new lime.Sprite().setFill(imagePath+"balance2.png").setPosition(sceneCenterX + sceneCenterX/3 + 40,sceneCenterY + 10).setScale(0.6);
+    var leftBalance2 = new lime.Sprite().setFill(imagePath+"on_balance.png").setPosition(balanceBg2.getPosition().x-balanceBg1.getSize().width/2 + 85,sceneCenterY - 30).setScale(0.6);
+    var rightBalance2 = new lime.Sprite().setFill(imagePath+"on_balance.png").setPosition(balanceBg2.getPosition().x+balanceBg1.getSize().width/2 - 85,sceneCenterY - 30).setScale(0.6);
+    
+    //0 = answer, 1 = normal, 2 = connector
+    var itemPosition = [
+      {"pos":0, "item":leftBalance1, "type":1},
+      {"pos":1, "item":rightBalance1, "type":1},
+      {"pos":2, "item":leftBalance2, "type":1},
+      {"pos":3, "item":rightBalance2, "type":1}
+    ];
+    goog.array.shuffle(itemPosition);
+    // set answer
+    setCorrectBalance(itemPosition[0].item,20);
+    itemPosition[0].type = 0;
+    var answer = -1;
+    // set conntector
+    if((itemPosition[1].pos==0 && itemPosition[2].pos==1)
+      || (itemPosition[1].pos==1 && itemPosition[2].pos==0)
+      || (itemPosition[1].pos==2 && itemPosition[2].pos==3)
+      || (itemPosition[1].pos==3 && itemPosition[2].pos==2)){
+      console.log("swap");
+      var tmp = itemPosition[2];
+      itemPosition[2] = itemPosition[3];
+      itemPosition[3] = tmp;
+    }
+    if((itemPosition[0].pos==0 && itemPosition[1].pos==1)
+      || (itemPosition[0].pos==1 && itemPosition[1].pos==0)
+      || (itemPosition[0].pos==2 && itemPosition[1].pos==3)
+      || (itemPosition[0].pos==3 && itemPosition[1].pos==2)){
+      setCorrectBalance(itemPosition[2].item,20);
+      itemPosition[2].type = 2;
+    }else{
+      setCorrectBalance(itemPosition[1].item,20);
+      itemPosition[1].type = 2;
+    }
+    
+    console.log(itemPosition);
+
+    gamePlayLayer.appendChild(balanceBg1);
+    gamePlayLayer.appendChild(leftBalance1);
+    gamePlayLayer.appendChild(rightBalance1);
+    gamePlayLayer.appendChild(balanceBg2);
+    gamePlayLayer.appendChild(leftBalance2);
+    gamePlayLayer.appendChild(rightBalance2);
+
+    for(var index = 0; index<itemPosition.length; index++){
+      var problem = new lime.Sprite();
+      var pos = itemPosition[index].pos;
+
+      if(itemPosition[index].type==0){
+        problem.setFill(imagePath+generatedAnswer[0].onBalance);
+        answer = generatedAnswer[0].id;
+        console.log(pos);
+      }else if(itemPosition[index].type==2){
+        problem.setFill(imagePath+generatedAnswer[1].onBalance);
+      }else if(itemPosition[index].type==1){
+
+        var answerPos = itemPosition[0].pos;
+        var isConnector = false;
+        if(answerPos == 0 && answerPos+1 == pos){
+          isConnector = true;
+        }else if(answerPos == 1 || answerPos == 3){
+          if(answerPos-1==pos){
+            isConnector = true;
+          }
+        }else if(answerPos == 2 && answerPos+1 == pos){
+          isConnector = true;
+        }
+
+        if(isConnector){
+          problem.setFill(imagePath+generatedAnswer[1].onBalance);
+        }else{
+          problem.setFill(imagePath+generatedAnswer[2].onBalance);
+        }
+        
+      }
+      problem.setPosition(itemPosition[index].item.getPosition().x,itemPosition[index].item.getPosition().y-problem.getSize().height/2.5);
+      problem.setScale(0.8);
+      gamePlayLayer.appendChild(problem);
+    }
+
+    // answer
+    var answerBar = new lime.Sprite().setFill(imagePath+"answer2.png")
+    .setPosition(sceneCenterX,sceneCenterY+150);
+    gamePlayLayer.appendChild(answerBar);
+
+    for(var answerCount = 0; answerCount < itemCount; answerCount++){
+      var answerBtn = new lime.Sprite().setFill(imagePath + 
+        generatedAnswer[answerCount].onAnswer)
+      .setPosition( 50 + (sceneWidth/3*(answerCount+1)) - ((sceneWidth/3*(answerCount+1))/3), sceneCenterY+170);
+      answerBtn.domClassName = goog.getCssName('lime-button');
+
+      !function(localBtn,currentIndex,id){
+        goog.events.listen(localBtn, ['click', 'touchstart'], function (e){
+          if(answer == id){
+            spawnAnimationWithString(scene,"correct");
+            correctCount++;
+            score+=5;
+            console.log("correct: "+score);
+          }else{
+            spawnAnimationWithString(scene,"incorrect");
+            console.log("incorrect: "+score);
+          }
+          gamePlayLayer.removeAllChildren();
+
+          // generate and added next question
+          generateQuestion(gamePlayLayer,scene);
+          
+        });
+      }(answerBtn,answerCount,generatedAnswer[answerCount].id);
+  
+      gamePlayLayer.appendChild(answerBtn);
+    }
   }else{//level 3
 
   }
@@ -331,6 +462,7 @@ generateQuestion = function(gamePlayLayer,scene){
 }
 
 setupEasyGame = function(scene,callbackSummaryScore){
+  correctCount = 0;
   score = 0;
   var background = new lime.Layer().setSize(sceneWidth,sceneHeight).setPosition(0,0);
   var border = new lime.Sprite().setAnchorPoint(0,0).setFill(imagePath+"border.png").setPosition(0,0);
@@ -354,7 +486,7 @@ setupEasyGame = function(scene,callbackSummaryScore){
   background.appendChild(titleTh);
 
   timerManager({
-    limit: 10,
+    limit: 99,
     delay: 1000,
     limeScope: callbackFactory,
     runningCallback: function(rt) {
