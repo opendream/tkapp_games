@@ -1,7 +1,10 @@
-(function() {
-  var clickSound, IconAudio, IconItem, IconText, addCharacter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, spawnQuestionAndAnswer, startTimer;
+var game_func = function () {
+    
+    var atype = navigator.userAgent.toLowerCase().match('firefox')? 'ogg': 'mp3';
+    
+  var clickSound, IconAudio, IconItem, IconText, addchar2acter, blockPattern, blockPatternHard, buildSetOfAnimation, callbackFactory, getIdxMap, sceneCenterX, sceneCenterY, sceneHeight, sceneWidth, spawnQuestionAndAnswer, startTimer;
 
-  goog.provide('photohunt');
+  goog.provide('game');
 
   goog.require('lime.Director');
 
@@ -55,7 +58,7 @@
 
   this.allScenes = [];
 
-  photohunt.isGameEnded = false;
+  game.isGameEnded = false;
 
   this.answerAnimationFactory = [];
 
@@ -94,10 +97,10 @@
 
 
 
-  addCharacter = function(image, opts) {
-    var character, height, posX, posY, weight, width;
-    character = new lime.Sprite;
-    character.setFill("assets/images/" + image);
+  addchar2acter = function(image, opts) {
+    var char2acter, height, posX, posY, weight, width;
+    char2acter = new lime.Sprite;
+    char2acter.setFill("assets/images/" + image);
     if ((opts.absolutePosition != null) === true || (opts.absolute != null) === true) {
       posX = opts.x;
       posY = opts.y;
@@ -108,12 +111,12 @@
     if (opts.w != null) width = opts.w;
     if (opts.h != null) height = opts.h;
     weight = weight || 100;
-    if ((opts.x != null) && (opts.y != null)) character.setPosition(posX, posY);
-    if ((opts.w != null) && (opts.h != null)) character.setSize(width, height);
-    opts.at.appendChild(character, weight);
-    if (typeof opts.callback === "function") opts.callback(character);
-    if (opts.name != null) character.name = opts.name;
-    return character;
+    if ((opts.x != null) && (opts.y != null)) char2acter.setPosition(posX, posY);
+    if ((opts.w != null) && (opts.h != null)) char2acter.setSize(width, height);
+    opts.at.appendChild(char2acter, weight);
+    if (typeof opts.callback === "function") opts.callback(char2acter);
+    if (opts.name != null) char2acter.name = opts.name;
+    return char2acter;
   };
 
   startTimer = function(opts) {
@@ -153,11 +156,11 @@
 
 
 
-  photohunt.start = function() {
+  game.start = function() {
     var scene;
-    photohunt.director = new lime.Director(document.body, sceneWidth, sceneHeight);
+    game.director = new lime.Director(document.body, sceneWidth, sceneHeight);
     try {
-      this.theme = new lime.audio.Audio("assets/sound/theme-song.mp3");
+      this.theme = new lime.audio.Audio("assets/sound/theme-song." + atype);
       this.theme.baseElement.loop = true;
 
     } catch (e) {
@@ -165,105 +168,105 @@
         if (typeof console.log === "function") console.log(e);
       }
     }
-    return scene = photohunt.intro();
+    return scene = game.intro();
   };
-  photohunt.stop = function(){
+  game.stop = function(){
     this.theme.stop();
   }
-  photohunt.intro = function() {
+  game.intro = function() {
     var background, btnStart, btnState1, btnState2, scene;
-    photohunt.isGameEnded = false;
+    game.isGameEnded = false;
     this.allScenes = [];
     scene = new lime.Scene;
     allScenes.push(scene);
     background = new lime.Layer;
-    var gameNameSound = new lime.audio.Audio("assets/sound/gamename.mp3");
+    var gameNameSound = new lime.audio.Audio("assets/sound/gamename." + atype);
     lime.scheduleManager.callAfter(function(){gameNameSound.play()}, gameNameSound, 500)
-    //this.gameNameSound = new lime.audio.Audio("assets/sound/gamename.mp3");
+    //this.gameNameSound = new lime.audio.Audio("assets/sound/gamename." + atype);
     //this.gameNameSound.play();
     scene.appendChild(background);
-    addCharacter("scene_bg.png", {
+    addchar2acter("scene_bg.png", {
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      'callback': function(char2) {
+        return char2.setScale(0.99);
       }
     });
 
-    addCharacter("grass.png", {
+    addchar2acter("grass.png", {
       x: 0,
       y: 200,
       at: background,
-      callback: function(char) {
-        return char.setScale(1);
+      'callback': function(char2) {
+        return char2.setScale(1);
       }
     });
-    addCharacter("boy.png", {
+    addchar2acter("boy.png", {
       x: -230,
       y: 170,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      'callback': function(char2) {
+        return char2.setScale(0.8);
       }
     });
-    addCharacter("girl.png", {
+    addchar2acter("girl.png", {
       x: -60,
       y: 150,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      'callback': function(char2) {
+        return char2.setScale(0.8);
       }
     });
-    addCharacter("girl2.png", {
+    addchar2acter("girl2.png", {
       absolute : true,
       x: sceneWidth*0.85,
       y: sceneHeight*0.83,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.9);
       }
     });
-    var _arrow = addCharacter("arrow.png", {
+    var _arrow = addchar2acter("arrow.png", {
       x: 200,
       y: 140,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.9);
       }
     });
     var click = new lime.Label().setFontSize(23).setFontColor("#FFF").setText("CLICK").setPosition(sceneWidth*0.73,sceneHeight*0.73);
     background.appendChild(click);
 
-    addCharacter("game_bg.png", {
+    addchar2acter("game_bg.png", {
       x: 0,
       y: 0,
       at: background,
       w: sceneWidth,
       h: sceneHeight
     });
-    addCharacter("game_frame.png", {
+    addchar2acter("game_frame.png", {
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.95, 0.9);
       }
     });
-       addCharacter("photo.png", {
+       addchar2acter("photo.png", {
       x: 35,
       y: -140,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.9);
       }
     });
-    addCharacter("title_1.png", {
+    addchar2acter("title_1.png", {
       x: 0,
       y: 0,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.9);
       }
     });
  
@@ -272,112 +275,112 @@
     btnState2 = new lime.Sprite().setFill('assets/images/btn_start_active.png');
     btnStart = new lime.Button(btnState1, btnState2).setPosition(sceneCenterX + 140, sceneCenterY + 200).setScale(0.9);
     background.appendChild(btnStart);
-    photohunt.director.replaceScene(scene);
+    game.director.replaceScene(scene);
     _arrow.domClassName = goog.getCssName('lime-button');
-    clickSound = new lime.audio.Audio("assets/sound/click.mp3");
+    clickSound = new lime.audio.Audio("assets/sound/click." + atype);
 
     goog.events.listen(_arrow, ['click', 'touchstart'], function() {
       clickSound.play();
-      return photohunt.selectLevel();
+      return game.selectLevel();
     });
     goog.events.listen(click, ['click', 'touchstart'], function() {
       clickSound.play();
-      return photohunt.selectLevel();
+      return game.selectLevel();
     });
     return goog.events.listen(btnStart, ['click', 'touchstart'], function() {
       clickSound.play();
-      return photohunt.selectLevel();
+      return game.selectLevel();
     });
   };
 
-  photohunt.selectLevel = function() {
+  game.selectLevel = function() {
     var background, boy, boyAction, btnEasyState1, btnEasyState2, btnLv2State1, btnLv2State2, buttonEasy, buttonHard, buttonLayer, fadeIn, girl, girlAction, moveTitleUp, arrow, fadeAndHide, scene, title1, title2;
     scene = new lime.Scene;
     allScenes.push(scene);
     background = new lime.Layer;
     scene.appendChild(background);
-    addCharacter("scene_bg.png", {
+    addchar2acter("scene_bg.png", {
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      'callback': function(char2) {
+        return char2.setScale(0.99);
       }
     });
-    addCharacter("grass.png", {
+    addchar2acter("grass.png", {
       x: 0,
       y: 200,
       at: background,
-      callback: function(char) {
-        return char.setScale(1);
+      'callback': function(char2) {
+        return char2.setScale(1);
       }
     });
-    boy = addCharacter("boy.png", {
+    boy = addchar2acter("boy.png", {
       x: -230,
       y: 170,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      'callback': function(char2) {
+        return char2.setScale(0.8);
       }
     });
-    girl = addCharacter("girl.png", {
+    girl = addchar2acter("girl.png", {
       x: -60,
       y: 150,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      'callback': function(char2) {
+        return char2.setScale(0.8);
       }
     });
-    addCharacter("girl2.png", {
+    addchar2acter("girl2.png", {
       absolute : true,
       x: sceneWidth*0.85,
       y: sceneHeight*0.83,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.9);
       }
     });
-    arrow = addCharacter("arrow.png", {
+    arrow = addchar2acter("arrow.png", {
       x: 200,
       y: 140,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.9);
       }
     });
     var clickLabel = new lime.Label().setFontSize(23).setFontColor("#FFF").setText("CLICK").setPosition(sceneWidth*0.73,sceneHeight*0.73);
     background.appendChild(clickLabel);
-    addCharacter("game_bg.png", {
+    addchar2acter("game_bg.png", {
       x: 0,
       y: 0,
       at: background,
       w: sceneWidth,
       h: sceneHeight
     });
-    addCharacter("game_frame.png", {
+    addchar2acter("game_frame.png", {
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.95, 0.9);
       }
 
     });
 
-    title3 = addCharacter("photo.png", {
+    title3 = addchar2acter("photo.png", {
       x: 35,
       y: -140,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.9);
       }
     });
-    title1 = addCharacter("title_1.png", {
+    title1 = addchar2acter("title_1.png", {
       x: 0,
       y: 0,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.9);
       }
     });
 
@@ -414,24 +417,24 @@
     scene.appendChild(buttonLayer);
     goog.events.listen(buttonEasy, ['click', 'touchstart'], function() {
       score.reset();
-      photohunt.level = 'easy';
+      game.level = 'easy';
       clickSound.play()
-      return photohunt.secondScene();
+      return game.secondScene();
     });
     goog.events.listen(buttonHard, ['click', 'touchstart'], function() {
       score.reset();
-      photohunt.level = 'hard';
+      game.level = 'hard';
       clickSound.play()
-      console.log(photohunt.blockPatternIdx);
-      return photohunt.secondScene();
+      console.log(game.blockPatternIdx);
+      return game.secondScene();
     });
-    return photohunt.director.replaceScene(scene);
+    return game.director.replaceScene(scene);
   };
 
-  photohunt.secondScene = function() {
+  game.secondScene = function() {
     var background, clock, col, questionLayer, scene, helperCount,frame,wrongPicture,rightPicture,questionLength,pic1,pic2;
-    var correctSound = new lime.audio.Audio("assets/sound/correct.mp3");
-    var wrongSound = new lime.audio.Audio("assets/sound/wrong.mp3");
+    var correctSound = new lime.audio.Audio("assets/sound/correct." + atype);
+    var wrongSound = new lime.audio.Audio("assets/sound/wrong." + atype);
     
     //Question
     //No picture6 because the difference is too wide
@@ -498,49 +501,49 @@
       correct:[0,0,0,0,0,0,0],
       leftImage:"assets/images/problems/image10a.jpg",
       rightImage:"assets/images/problems/image10b.jpg"
-    },
+    }
     ];
 
-    helperCount = photohunt.level === 'easy' ? 3 : 2;
+    helperCount = game.level === 'easy' ? 3 : 2;
     scene = new lime.Scene;
     allScenes.push(scene);
     background = new lime.Layer;
     this.theme.play();
     scene.appendChild(background);
 
-    addCharacter("scene_bg.png", {
+    addchar2acter("scene_bg.png", {
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      'callback': function(char2) {
+        return char2.setScale(0.99);
       }
     });
-    addCharacter("game_bg.png", {
+    addchar2acter("game_bg.png", {
       x: 0,
       y: 0,
       at: background,
       w: sceneWidth,
       h: sceneHeight
     });
-    addCharacter("game_frame.png", {
+    addchar2acter("game_frame.png", {
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.95, 0.9);
       }
     });
 
     frame =  new lime.Sprite().setSize(sceneWidth*0.795,sceneHeight*0.795).setFill('assets/images/frame.png').setPosition(sceneCenterX,sceneCenterY);
     background.appendChild(frame);
     
-    clock = addCharacter("clock.png", {
+    clock = addchar2acter("clock.png", {
       x: sceneCenterX+25,
       y: sceneCenterY*1.5,
       absolute: true,
       at: background,
-      name: 'Clock',
+      name: 'Clock'
     });
 
    wrongPicture = new lime.Sprite().setSize(226,203).setFill('assets/images/wrong.png').setPosition(sceneCenterX/2+90,sceneCenterY/2).setAnchorPoint(0,0).setOpacity(0);
@@ -781,7 +784,7 @@
         background.appendChild(rightPicture)
     }
 
-    gameLabel = addCharacter("title_1.png",{
+    gameLabel = addchar2acter("title_1.png",{
       absolute : true,
       x: 30,
       y: 10,
@@ -790,140 +793,140 @@
       h:50
     });
     gameLabel.setAnchorPoint(0,0);
-    photohunt.lblTimer = new lime.Label();
-    photohunt.lblTimer.setSize(50, 50).setFontSize(40).setPosition(clock.position_.x - 33, clock.position_.y - 5);
-    photohunt.lblTimer.setFontColor('#000');
-    scene.appendChild(photohunt.lblTimer);
-    photohunt.director.replaceScene(scene);
+    game.lblTimer = new lime.Label();
+    game.lblTimer.setSize(50, 50).setFontSize(40).setPosition(clock.position_.x - 33, clock.position_.y - 5);
+    game.lblTimer.setFontColor('#000');
+    scene.appendChild(game.lblTimer);
+    game.director.replaceScene(scene);
     return startTimer({
-      limit: photohunt.level === 'hard' ? 60 : 80,
+      limit: game.level === 'hard' ? 60 : 80,
       delay: 1000,
       limeScope: callbackFactory,
       runningCallback: function(rt) {
-        return photohunt.lblTimer.setText(rt);
+        return game.lblTimer.setText(rt);
       },
       timeoutCallback: function(rt) {
-        photohunt.lblTimer.setText("0 ");
-        photohunt.isGameEnded = true;
+        game.lblTimer.setText("0 ");
+        game.isGameEnded = true;
         lime.scheduleManager.unschedule(callbackFactory.timer, callbackFactory);
-        scene = photohunt.timeoutScene();
-        return photohunt.director.replaceScene(scene);
+        scene = game.timeoutScene();
+        return game.director.replaceScene(scene);
       }
     });
   };
 
-  photohunt.timeoutScene = function() {
+  game.timeoutScene = function() {
     var background, changeScene, scene;
     scene = new lime.Scene;
     allScenes.push(scene);
     background = new lime.Layer;
     this.theme.stop();
-    addCharacter("scene_bg.png", {
+    addchar2acter("scene_bg.png", {
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      'callback': function(char2) {
+        return char2.setScale(0.99);
       }
     });
-    addCharacter("game_bg.png", {
+    addchar2acter("game_bg.png", {
       x: 0,
       y: 0,
       at: background,
       w: sceneWidth,
       h: sceneHeight
     });
-    addCharacter("game_frame.png", {
+    addchar2acter("game_frame.png", {
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.95, 0.9);
       }
     });
-    addCharacter("gameover.png", {
+    addchar2acter("gameover.png", {
       x: 0,
       y: 0,
       at: background,
-      callback: function(char) {
-        char.setScale(0);
-        return char.runAction(new lime.animation.ScaleTo(1.0));
+      'callback': function(char2) {
+        char2.setScale(0);
+        return char2.runAction(new lime.animation.ScaleTo(1.0));
       }
     });
     scene.appendChild(background);
     changeScene = function() {
-      return photohunt.director.replaceScene(photohunt.lastScene());
+      return game.director.replaceScene(game.lastScene());
     };
-    lime.scheduleManager.scheduleWithDelay(changeScene, photohunt, 1500, 1);
+    lime.scheduleManager.scheduleWithDelay(changeScene, game, 1500, 1);
     return scene;
   };
 
-  photohunt.lastScene = function() {
+  game.lastScene = function() {
     var background, bubble, menu, menu2, scene, scoreLabel, title1;
     scene = new lime.Scene;
     allScenes.push(scene);
     background = new lime.Layer;
     this.theme.stop();
-    addCharacter("scene_bg.png", {
+    addchar2acter("scene_bg.png", {
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.99);
+      'callback': function(char2) {
+        return char2.setScale(0.99);
       }
     });
-    addCharacter("boy.png", {
+    addchar2acter("boy.png", {
       x: -230,
       y: 170,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      'callback': function(char2) {
+        return char2.setScale(0.8);
       }
     });
-    addCharacter("girl.png", {
+    addchar2acter("girl.png", {
       x: -60,
       y: 150,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      'callback': function(char2) {
+        return char2.setScale(0.8);
       }
     });
-    addCharacter("game_bg.png", {
+    addchar2acter("game_bg.png", {
       x: 0,
       y: 0,
       at: background,
       w: sceneWidth,
       h: sceneHeight
     });
-    addCharacter("game_frame.png", {
+    addchar2acter("game_frame.png", {
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      'callback': function(char2) {
+        return char2.setScale(0.95, 0.9);
       }
     });
-    title1 = addCharacter("title_1.png", {
+    title1 = addchar2acter("title_1.png", {
       x: -225,
       y: -260,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.4);
+      'callback': function(char2) {
+        return char2.setScale(0.4);
       }
     });
-    menu2bg = addCharacter("replay.png", {
+    menu2bg = addchar2acter("replay.png", {
       absolute: true,
       x: sceneCenterX,
       y: sceneCenterY+40,
       at: background
     });
-    menu2 = addCharacter("menu-replay.png", {
+    menu2 = addchar2acter("menu-replay.png", {
       absolute: true,
       x: sceneCenterX,
       y: sceneCenterY+40,
       at: background
     });
-    bubble = addCharacter("scorebg.png", {
+    bubble = addchar2acter("scorebg.png", {
       x: sceneCenterX,
       y: sceneCenterY-100,
       at: background,
@@ -933,15 +936,17 @@
     scoreLabel.setText(score.getScore()).setPosition(bubble.position_.x + 10, bubble.position_.y + 40).setFontColor('red').setFontSize(45);
     menu2.domClassName = goog.getCssName('lime-button');
     goog.events.listen(menu2, ['click', 'touchstart'], function() {
-      return photohunt.intro();
+      return game.intro();
     });
     scene.appendChild(background);
     scene.appendChild(scoreLabel);
     return scene;
   };
 
-  this.photohunt = photohunt;
+  this.game = game;
 
-  goog.exportSymbol('photohunt.start', photohunt.start);
+  goog.exportSymbol('game.start', game.start);
 
-}).call(this);
+  return game;
+  }
+
