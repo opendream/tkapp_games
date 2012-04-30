@@ -24,6 +24,7 @@ var callbackFactory, correctCount = 0, score = 0;
 //path 
 imagePath = "assets/images/";
 soundPath = "assets/sound/";
+atype = navigator.userAgent.toLowerCase().match('firefox')? 'ogg': 'mp3';
 
 //screen attributes
 sceneWidth = 800;
@@ -220,6 +221,11 @@ setupIntro = function(scene){
     var boy = new lime.Sprite().setFill(imagePath+"boy.png").setPosition(sceneCenterX-210,sceneCenterY+230);
     var girl = new lime.Sprite().setFill(imagePath+"girl.png").setPosition(sceneCenterX+210,sceneCenterY+230);
 
+    var gameNameSound = new lime.audio.Audio(soundPath + "game_start." + atype);
+    setTimeout(function () {
+      gameNameSound.play();
+    }, 200);
+
     // add background to scene
 
     background.appendChild(gameBg);
@@ -275,11 +281,19 @@ setupLevelScene = function(scene,callbackEasy,callbackHard){
 }
 
 spawnAnimationWithString = function (scene,s){
+  var correctSound = new lime.audio.Audio(soundPath + "game_correct." + atype);
+  var incorrectSound = new lime.audio.Audio(soundPath + "game_incorrect." + atype);
   var spawnImage;
   if (s == "correct"){
     spawnImage = new lime.Sprite().setFill(imagePath + "correct.png").setScale(0.8).setPosition(sceneCenterX, sceneCenterY);
+    setTimeout(function () {
+          correctSound.play();
+        }, 100);
   }else if (s == "incorrect"){
     spawnImage = new lime.Sprite().setFill(imagePath + "incorrect.png").setScale(0.8).setPosition(sceneCenterX, sceneCenterY);
+    setTimeout(function () {
+          incorrectSound.play();
+        }, 100);
   }
   var spawnAnimation = new lime.animation.Sequence(
       new lime.animation.FadeTo(1).setDuration(0.5),
@@ -515,6 +529,9 @@ generateQuestion = function(gamePlayLayer,scene){
 }
 
 setupEasyGame = function(scene,callbackSummaryScore){
+  var themeSound = new lime.audio.Audio(soundPath + "game_play." + atype);
+  var timeoutSound = new lime.audio.Audio(soundPath + "game_timeout." + atype);
+  
   correctCount = 0;
   score = 0;
   var background = new lime.Layer().setSize(sceneWidth,sceneHeight).setPosition(0,0);
@@ -538,6 +555,11 @@ setupEasyGame = function(scene,callbackSummaryScore){
   background.appendChild(border);
   background.appendChild(titleTh);
 
+  setTimeout(function () {
+    themeSound.baseElement.loop = true;
+    themeSound.play();
+  }, 500);
+
   timerManager({
     limit: 60,
     delay: 1000,
@@ -546,6 +568,11 @@ setupEasyGame = function(scene,callbackSummaryScore){
       return timerLabel.setText(rt);
     },
     timeoutCallback: function(rt) {
+      if (themeSound.isPlaying())
+        themeSound.stop();
+
+      timeoutSound.play();
+
       timerLabel.setText("0 ");
       lime.scheduleManager.unschedule(callbackFactory.timer, callbackFactory);
       callbackSummaryScore(score);
@@ -557,6 +584,9 @@ setupEasyGame = function(scene,callbackSummaryScore){
 }
 
 setupHardGame = function(scene,callbackSummaryScore){
+  var themeSound = new lime.audio.Audio(soundPath + "game_play." + atype);
+  var timeoutSound = new lime.audio.Audio(soundPath + "game_timeout." + atype);
+
   correctCount = 5;
   score = 0;
   var background = new lime.Layer().setSize(sceneWidth,sceneHeight).setPosition(0,0);
@@ -580,6 +610,11 @@ setupHardGame = function(scene,callbackSummaryScore){
   background.appendChild(border);
   background.appendChild(titleTh);
 
+  setTimeout(function () {
+    themeSound.baseElement.loop = true;
+    themeSound.play();
+  }, 500);  
+
   timerManager({
     limit: 60,
     delay: 1000,
@@ -588,6 +623,11 @@ setupHardGame = function(scene,callbackSummaryScore){
       return timerLabel.setText(rt);
     },
     timeoutCallback: function(rt) {
+      if (themeSound.isPlaying())
+        themeSound.stop();
+
+      timeoutSound.play();
+
       timerLabel.setText("0 ");
       lime.scheduleManager.unschedule(callbackFactory.timer, callbackFactory);
       callbackSummaryScore(score);
