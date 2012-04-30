@@ -78,9 +78,9 @@
 
 
   addCharacter = function(image, opts) {
-    var character, height, posX, posY, weight, width;
-    character = new lime.Sprite;
-    character.setFill("assets/images/" + image);
+    var char2acter, height, posX, posY, weight, width;
+    char2acter = new lime.Sprite;
+    char2acter.setFill("assets/images/" + image);
     if ((opts.absolutePosition != null) === true || (opts.absolute != null) === true) {
       posX = opts.x;
       posY = opts.y;
@@ -91,12 +91,12 @@
     if (opts.w != null) width = opts.w;
     if (opts.h != null) height = opts.h;
     weight = weight || 100;
-    if ((opts.x != null) && (opts.y != null)) character.setPosition(posX, posY);
-    if ((opts.w != null) && (opts.h != null)) character.setSize(width, height);
-    opts.at.appendChild(character, weight);
-    if (typeof opts.callback === "function") opts.callback(character);
-    if (opts.name != null) character.name = opts.name;
-    return character;
+    if ((opts.x != null) && (opts.y != null)) char2acter.setPosition(posX, posY);
+    if ((opts.w != null) && (opts.h != null)) char2acter.setSize(width, height);
+    opts.at.appendChild(char2acter, weight);
+    if (typeof opts.callback === "function") opts.callback(char2acter);
+    if (opts.name != null) char2acter.name = opts.name;
+    return char2acter;
   };
 
   startTimer = function(opts) {
@@ -170,8 +170,8 @@
       x: 2,
       y: 10,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      callback: function(char2) {
+        return char2.setScale(0.8);
       }
     });
 
@@ -179,8 +179,8 @@
       x: 200,
       y: 140,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.9);
+      callback: function(char2) {
+        return char2.setScale(0.9);
       }
     });
     var click = new lime.Label().setFontSize(23).setFontColor("#FFF").setText("CLICK").setPosition(sceneWidth*0.73,sceneHeight*0.73);
@@ -197,8 +197,8 @@
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      callback: function(char2) {
+        return char2.setScale(0.95, 0.9);
       }
     });
     
@@ -254,8 +254,8 @@
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      callback: function(char2) {
+        return char2.setScale(0.95, 0.9);
       }
     });  
     clock = addCharacter("clock.png", {
@@ -263,17 +263,15 @@
       y: 100,
       absolute: true,
       at: background,
-      name: 'Clock',
+      name: 'Clock'
     });
-    gameLabel = addCharacter("title_1.png",{
+    gameLabel = addCharacter("title_2.png",{
       absolute : true,
       x: 30,
       y: 10,
-      at: background,
-      w:200,
-      h:50,
+      at: background
     });
-    //gameLabel.setScale(0.8)
+    gameLabel.setScale(0.4)
     //GAME SECTION
     //Question
     
@@ -416,7 +414,7 @@
                   ,{x:189.37823834196888,y:269.6891191709845}
                   ,{x:218.9119170984456,y:275.90673575129534}
                   ,{x:256.21761658031085,y:271.2435233160622}
-                ],
+                ]
                 // [
                 //   {x:106.84830633284241,y:334.2415316642121}
                 //   ,{x:106.84830633284241,y:345.7290132547865}
@@ -533,7 +531,7 @@
       before:"assets/images/problems/5a.png",
       after:"assets/images/problems/5c.png",
       gameLabel:['ให้ลากเส้นตามตัวอักษรภาษาอังกฤษ','ให้ลากเส้นตามสูตรคูณแม่ 2','ให้ลากเส้นตามสูตรคูณแม่ 7']
-    },
+    }
     ];
     
     function getPoint(x,y,i){
@@ -555,7 +553,7 @@
         pointLayer.appendChild(pointLabel);
         return {
             point : pointLayer
-            ,
+            
             //cover : pointCover
         }
     }
@@ -826,17 +824,17 @@
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      callback: function(char2) {
+        return char2.setScale(0.95, 0.9);
       }
     });
     addCharacter("gameover.png", {
       x: 0,
       y: 0,
       at: background,
-      callback: function(char) {
-        char.setScale(0);
-        return char.runAction(new lime.animation.ScaleTo(1.0));
+      callback: function(char2) {
+        char2.setScale(0);
+        return char2.runAction(new lime.animation.ScaleTo(1.0));
       }
     });
   
@@ -858,16 +856,16 @@
       x: -230,
       y: 170,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      callback: function(char2) {
+        return char2.setScale(0.8);
       }
     });
     addCharacter("girl.png", {
       x: -60,
       y: 150,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.8);
+      callback: function(char2) {
+        return char2.setScale(0.8);
       }
     });
  addCharacter("sky.png", {
@@ -881,16 +879,16 @@
       x: -2,
       y: 5,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.95, 0.9);
+      callback: function(char2) {
+        return char2.setScale(0.95, 0.9);
       }
     });
-    title1 = addCharacter("title_1.png", {
+    title1 = addCharacter("title_2.png", {
       x: -225,
       y: -260,
       at: background,
-      callback: function(char) {
-        return char.setScale(0.4);
+      callback: function(char2) {
+        return char2.setScale(0.4);
       }
     });
     menu2bg = addCharacter("replay.png", {
