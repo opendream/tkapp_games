@@ -1,5 +1,5 @@
 //set main namespace
-goog.provide('balance');
+goog.provide('game');
 
 
 //get requirements
@@ -173,7 +173,7 @@ timerManager = function(opts) {
 
 var sceneIntro, sceneLevel, sceneEasyPlay, sceneHardPlay, sceneScore;
 
-balance.stop = function(){
+game.stop = function(){
   isStop= true;
 
   if(typeof gameNameSound != "undefined"){
@@ -223,11 +223,11 @@ balance.stop = function(){
 }
 
 // entrypoint
-balance.start = function(){
-  balance.stop();
+game.start = function(){
+  game.stop();
 
   isStop = false;
-	balance.director = new lime.Director(document.body, sceneWidth, sceneHeight);
+	game.director = new lime.Director(document.body, sceneWidth, sceneHeight);
   sceneIntro = new lime.Scene();
   sceneLevel = new lime.Scene();
   sceneEasyPlay = new lime.Scene();
@@ -244,9 +244,9 @@ balance.start = function(){
                     correctCount = 0;
                     console.log("Score easy mode: "+score);
                     setupScoreScene(sceneScore);
-                    balance.director.replaceScene(sceneScore);
+                    game.director.replaceScene(sceneScore);
                   });
-                  balance.director.replaceScene(sceneEasyPlay);
+                  game.director.replaceScene(sceneEasyPlay);
               });
           },
           function(btn){
@@ -255,16 +255,16 @@ balance.start = function(){
                     correctCount = 0;
                     console.log("Score hard mode: "+score);
                     setupScoreScene(sceneScore);
-                    balance.director.replaceScene(sceneScore);
+                    game.director.replaceScene(sceneScore);
                   });
-                  balance.director.replaceScene(sceneHardPlay);
+                  game.director.replaceScene(sceneHardPlay);
               });
           }
       );
-      balance.director.replaceScene(sceneLevel);
+      game.director.replaceScene(sceneLevel);
   });
 
-  balance.director.replaceScene(sceneIntro);
+  game.director.replaceScene(sceneIntro);
 }
 
 setupIntro = function(scene){
@@ -391,11 +391,11 @@ generateProblem = function(layer, level, answerItems, balanceList, balanceBgs){
     // add problem
     var problem1 = new lime.Sprite();
     problem1.setFill(imagePath+answerItems[p[0]].onBalance);
-    problem1.setPosition(balanceList[i][0].getPosition().x,balanceList[i][0].getPosition().y-problem1.getSize().height/2.5);
+    problem1.setPosition(balanceList[i][0].getPosition().x,balanceList[i][0].getPosition().y-problem1.getSize().height/3);
     problem1.setScale(0.8);
     var problem2 = new lime.Sprite();
     problem2.setFill(imagePath+answerItems[p[1]].onBalance);
-    problem2.setPosition(balanceList[i][1].getPosition().x,balanceList[i][1].getPosition().y-problem2.getSize().height/2.5);
+    problem2.setPosition(balanceList[i][1].getPosition().x,balanceList[i][1].getPosition().y-problem2.getSize().height/3);
     problem2.setScale(0.8);
 
     layer.appendChild(problem1);
@@ -435,7 +435,7 @@ generateQuestion = function(gamePlayLayer,scene){
 
     for(var answerCount = 0; answerCount < itemCount; answerCount++){
       var answerBtn = new lime.Sprite().setFill(imagePath + 
-        generatedAnswer[answerCount].onAnswer)
+        generatedAnswer[answerCount].onAnswer).setScale(0.6)
       .setPosition(sceneCenterX + (((answerCount<itemCount/2)?-1:1) * 70 )
         ,sceneCenterY+170);
       answerBtn.domClassName = goog.getCssName('lime-button');
@@ -495,7 +495,7 @@ generateQuestion = function(gamePlayLayer,scene){
 
     for(var answerCount = 0; answerCount < itemCount; answerCount++){
       var answerBtn = new lime.Sprite().setFill(imagePath + 
-        generatedAnswer[answerCount].onAnswer)
+        generatedAnswer[answerCount].onAnswer).setScale(0.6)
       .setPosition( 50 + (sceneWidth/3*(answerCount+1)) - ((sceneWidth/3*(answerCount+1))/3), sceneCenterY+170);
       answerBtn.domClassName = goog.getCssName('lime-button');
 
@@ -557,7 +557,7 @@ generateQuestion = function(gamePlayLayer,scene){
 
     for(var answerCount = 0; answerCount < itemCount; answerCount++){
       var answerBtn = new lime.Sprite().setFill(imagePath + 
-        generatedAnswer[answerCount].onAnswer)
+        generatedAnswer[answerCount].onAnswer).setScale(0.6)
       .setPosition( 50 + (sceneWidth/3*(answerCount+1)) - ((sceneWidth/3*(answerCount+1))/3), sceneCenterY+170);
       answerBtn.domClassName = goog.getCssName('lime-button');
 
@@ -717,4 +717,4 @@ setupScoreScene = function(scene){
 }
 
 //this is required for outside access after code is compiled in ADVANCED_COMPILATIONS mode
-goog.exportSymbol('balance.start', balance.start);
+goog.exportSymbol('game.start', game.start);

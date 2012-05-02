@@ -1,5 +1,5 @@
 //set main namespace
-goog.provide('balance');
+goog.provide('game');
 
 
 //get requirements
@@ -173,7 +173,7 @@ timerManager = function(opts) {
 
 var sceneIntro, sceneLevel, sceneEasyPlay, sceneHardPlay, sceneScore;
 
-balance.stop = function(){
+game.stop = function(){
   isStop= true;
 
   if(typeof gameNameSound != "undefined"){
@@ -223,11 +223,11 @@ balance.stop = function(){
 }
 
 // entrypoint
-balance.start = function(){
-  balance.stop();
+game.start = function(){
+  game.stop();
 
   isStop = false;
-	balance.director = new lime.Director(document.body, sceneWidth, sceneHeight);
+	game.director = new lime.Director(document.body, sceneWidth, sceneHeight);
   sceneIntro = new lime.Scene();
   sceneLevel = new lime.Scene();
   sceneEasyPlay = new lime.Scene();
@@ -244,9 +244,9 @@ balance.start = function(){
                     correctCount = 0;
                     console.log("Score easy mode: "+score);
                     setupScoreScene(sceneScore);
-                    balance.director.replaceScene(sceneScore);
+                    game.director.replaceScene(sceneScore);
                   });
-                  balance.director.replaceScene(sceneEasyPlay);
+                  game.director.replaceScene(sceneEasyPlay);
               });
           },
           function(btn){
@@ -255,16 +255,16 @@ balance.start = function(){
                     correctCount = 0;
                     console.log("Score hard mode: "+score);
                     setupScoreScene(sceneScore);
-                    balance.director.replaceScene(sceneScore);
+                    game.director.replaceScene(sceneScore);
                   });
-                  balance.director.replaceScene(sceneHardPlay);
+                  game.director.replaceScene(sceneHardPlay);
               });
           }
       );
-      balance.director.replaceScene(sceneLevel);
+      game.director.replaceScene(sceneLevel);
   });
 
-  balance.director.replaceScene(sceneIntro);
+  game.director.replaceScene(sceneIntro);
 }
 
 setupIntro = function(scene){
@@ -717,4 +717,4 @@ setupScoreScene = function(scene){
 }
 
 //this is required for outside access after code is compiled in ADVANCED_COMPILATIONS mode
-goog.exportSymbol('balance.start', balance.start);
+goog.exportSymbol('game.start', game.start);
