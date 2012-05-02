@@ -861,6 +861,13 @@
       w: sceneWidth,
       h: sceneHeight
     });
+     addCharacter("game_bg.png", {
+      x: 0,
+      y: 0,
+      at: background,
+      w: sceneWidth,
+      h: sceneHeight
+    });
     addCharacter("game_frame.png", {
       x: -2,
       y: 5,
