@@ -68,6 +68,11 @@ problems = [
       id:"F",
       onBalance:"char6_balance.png",
       onAnswer:"char6.png"
+  },
+  {
+      id:"G",
+      onBalance:"char7_balance.png",
+      onAnswer:"char7.png"
   }
 ];
 
